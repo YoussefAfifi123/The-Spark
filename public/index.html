@@ -18,17 +18,17 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
 </head>
 <body>
 <button id="menu-btn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
-<div id="sidebar-backdrop" class="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
+<div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 <aside id="sidebar" aria-label="Main Navigation">
   <div class="logo">
-    <div class="logo-brand" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">
+    <div class="logo-brand" title="Spark - Learn & Focus">
       <div class="flame"><i class="fas fa-fire" style="color:#fff"></i></div>
       <div class="logo-text">
         <div class="logo-title">Spark</div>
         <div class="logo-subtitle">Learn & Focus</div>
       </div>
     </div>
-    <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse sidebar (Ctrl+B)" aria-label="Collapse sidebar">
+    <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" title="Collapse sidebar (Ctrl+B)" aria-label="Collapse sidebar">
       <i class="fas fa-chevron-left" id="sidebar-collapse-icon"></i>
     </button>
   </div>
@@ -47,7 +47,7 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
   </nav>
   <div class="user-panel" id="user-panel"></div>
   <div class="sidebar-footer">
-    <button id="sidebar-footer-toggle" class="sidebar-footer-toggle-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Ctrl+B)">
+    <button id="sidebar-footer-toggle" class="sidebar-footer-toggle-btn" title="Collapse sidebar (Ctrl+B)" aria-label="Toggle sidebar collapse">
       <i class="fas fa-angles-left" id="sidebar-footer-icon"></i>
       <span class="footer-btn-text">Collapse</span>
     </button>
@@ -56,7 +56,7 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
 <div id="main">
   <header id="app-topbar" class="app-topbar">
     <div class="topbar-left">
-      <button id="topbar-toggle-btn" class="topbar-toggle-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar">
+      <button id="topbar-toggle-btn" class="topbar-toggle-btn" title="Toggle sidebar (Ctrl+B)" aria-label="Toggle sidebar">
         <i class="fas fa-bars"></i>
       </button>
       <div class="topbar-view-info">
