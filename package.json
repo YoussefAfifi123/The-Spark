@@ -3,12 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-   "dev": "node server.js",
-   "start": "node server.js"
- }
- ,
+    "build": "mkdir -p public && cp index.html public/ 2>/dev/null || true"
+  },
   "dependencies": {
-    "express": "^4.19.2",
     "tone": "^15.1.22"
   }
 }
