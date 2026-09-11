@@ -710,13 +710,138 @@ function breakDownTask(task){
   return[...m[k]];
 }
 
-// ======================== ROUTER ========================
-let currentView='dashboard';const VN=['dashboard','focus','planner','schedule','wellness','learn','flashcards','store','resources','progress','settings'];
-function navigate(v){if(!VN.includes(v))return;currentView=v;document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');renderView(v);document.getElementById('sidebar').classList.remove('open');if(v!=='focus')cleanupFocus();if(v!=='learn')stopGame();if(v!=='flashcards')cleanupFlash();if(v!=='wellness')cleanupBreathing();}
-function renderView(v){({dashboard:renderDashboard,focus:renderFocus,planner:renderPlanner,schedule:renderSchedule,wellness:renderWellness,learn:renderLearn,flashcards:renderFlashcards,store:renderStore,resources:renderResources,progress:renderProgress,settings:renderSettings})[v]?.();}
+// ======================== ROUTER & SIDEBAR ========================
+let currentView = 'dashboard';
+const VN = ['dashboard','focus','planner','schedule','wellness','learn','flashcards','store','resources','progress','settings'];
+
+const VIEW_INFO = {
+  dashboard: { title: 'Dashboard', icon: 'fa-home' },
+  focus: { title: 'Focus Lab', icon: 'fa-bullseye' },
+  planner: { title: 'Task Planner', icon: 'fa-list-check' },
+  schedule: { title: 'Schedule & Timetable', icon: 'fa-calendar-days' },
+  wellness: { title: 'Mind & Mood', icon: 'fa-heart-pulse' },
+  learn: { title: 'Learn & Play', icon: 'fa-gamepad' },
+  flashcards: { title: 'Flashcards', icon: 'fa-clone' },
+  store: { title: 'Store', icon: 'fa-store' },
+  resources: { title: 'Resources', icon: 'fa-book-open' },
+  progress: { title: 'Progress', icon: 'fa-chart-line' },
+  settings: { title: 'Settings', icon: 'fa-cog' }
+};
+
+function updateTopBar() {
+  const info = VIEW_INFO[currentView] || { title: 'Spark', icon: 'fa-fire' };
+  const iconEl = document.getElementById('topbar-view-icon');
+  const titleEl = document.getElementById('topbar-view-title');
+  if (iconEl) iconEl.innerHTML = `<i class="fas ${info.icon}"></i>`;
+  if (titleEl) titleEl.textContent = info.title;
+
+  const dateEl = document.getElementById('topbar-date');
+  if (dateEl) {
+    const now = new Date();
+    dateEl.textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  const streakEl = document.getElementById('topbar-streak');
+  if (streakEl) {
+    const s = (typeof Store !== 'undefined' && Store.get('streak')) || 0;
+    streakEl.innerHTML = `<i class="fas fa-fire" style="color:var(--accent)"></i> <span>${s}d streak</span>`;
+  }
+}
+
+function toggleSidebarCollapse() {
+  if (window.innerWidth <= 768) {
+    const sb = document.getElementById('sidebar');
+    const bd = document.getElementById('sidebar-backdrop');
+    if (sb) {
+      const isOpen = sb.classList.toggle('open');
+      if (bd) bd.classList.toggle('active', isOpen);
+    }
+  } else {
+    const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('spark_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    updateCollapseIcons(isCollapsed);
+  }
+  if (window.SFX && SFX.click) SFX.click();
+}
+
+function closeSidebarMobile() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (sb) sb.classList.remove('open');
+  if (bd) bd.classList.remove('active');
+}
+
+function updateCollapseIcons(isCollapsed) {
+  const collapseIcon = document.getElementById('sidebar-collapse-icon');
+  const footerIcon = document.getElementById('sidebar-footer-icon');
+  const footerText = document.querySelector('.footer-btn-text');
+  if (collapseIcon) {
+    collapseIcon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+  }
+  if (footerIcon) {
+    footerIcon.className = isCollapsed ? 'fas fa-angles-right' : 'fas fa-angles-left';
+  }
+  if (footerText) {
+    footerText.textContent = isCollapsed ? 'Expand' : 'Collapse';
+  }
+}
+
+function navigate(v) {
+  if (!VN.includes(v)) return;
+  currentView = v;
+  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.view === v));
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  const viewEl = document.getElementById('view-' + v);
+  if (viewEl) viewEl.classList.add('active');
+  renderView(v);
+  closeSidebarMobile();
+  updateTopBar();
+  if (v !== 'focus') cleanupFocus();
+  if (v !== 'learn') stopGame();
+  if (v !== 'flashcards') cleanupFlash();
+  if (v !== 'wellness') cleanupBreathing();
+}
+
+function renderView(v) {
+  ({
+    dashboard: renderDashboard,
+    focus: renderFocus,
+    planner: renderPlanner,
+    schedule: renderSchedule,
+    wellness: renderWellness,
+    learn: renderLearn,
+    flashcards: renderFlashcards,
+    store: renderStore,
+    resources: renderResources,
+    progress: renderProgress,
+    settings: renderSettings
+  })[v]?.();
+}
 
 // ======================== USER PANEL ========================
-function updateUserPanel(){const u=Store.get('user'),inv=Store.get('inventory'),p=document.getElementById('user-panel');if(!u){p.innerHTML='';return;}const s=Store.get('streak')||0;const av=CATALOG.avatars.find(a=>a.id===inv.equipped.avatar)||CATALOG.avatars[0];p.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:36px;height:36px;border-radius:50%;background:${u.color};display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff"><i class="fas ${av.icon}"></i></div><div><div style="font-weight:700;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--text2)">Grade ${u.grade}</div></div></div><div class="streak-badge"><i class="fas fa-fire"></i>${s} day streak</div>`;}
+function updateUserPanel() {
+  const u = Store.get('user'), inv = Store.get('inventory'), p = document.getElementById('user-panel');
+  if (!u) { if (p) p.innerHTML = ''; return; }
+  const s = Store.get('streak') || 0;
+  const av = CATALOG.avatars.find(a => a.id === inv.equipped.avatar) || CATALOG.avatars[0];
+  const safeName = String(u.name || 'Student').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (p) {
+    p.innerHTML = `<div class="user-panel-inner" style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:${u.color};display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;flex-shrink:0;">
+        <i class="fas ${av.icon}"></i>
+      </div>
+      <div class="user-info">
+        <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;">${safeName}</div>
+        <div style="font-size:12px;color:var(--text2)">Grade ${u.grade}</div>
+      </div>
+    </div>
+    <div class="streak-badge" title="${s} day streak">
+      <i class="fas fa-fire"></i>
+      <span class="streak-text">${s} day streak</span>
+    </div>`;
+  }
+  updateTopBar();
+}
 
 // ======================== QUEST SYSTEM ========================
 function getTodayQuests(){const t=new Date().toDateString();let q=Store.get('quests')[t];if(!q){q={focus:false,game:false,resource:false};const qs=Store.get('quests');qs[t]=q;Store.set('quests',qs);}return q;}
@@ -5267,12 +5392,49 @@ function init(){
 
   document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();SFX.click();navigate(a.dataset.view);}));
   window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(v&&VN.includes(v))navigate(v);});
-  document.getElementById('menu-btn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
-  document.getElementById('main').addEventListener('click',()=>{
-    document.getElementById('sidebar').classList.remove('open');
+
+  // Sidebar toggling & collapse listeners
+  const menuBtn = document.getElementById('menu-btn');
+  if (menuBtn) menuBtn.addEventListener('click', toggleSidebarCollapse);
+
+  const topbarBtn = document.getElementById('topbar-toggle-btn');
+  if (topbarBtn) topbarBtn.addEventListener('click', toggleSidebarCollapse);
+
+  const sidebarCollapseBtn = document.getElementById('sidebar-collapse-btn');
+  if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener('click', toggleSidebarCollapse);
+
+  const sidebarFooterToggle = document.getElementById('sidebar-footer-toggle');
+  if (sidebarFooterToggle) sidebarFooterToggle.addEventListener('click', toggleSidebarCollapse);
+
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (backdrop) backdrop.addEventListener('click', closeSidebarMobile);
+
+  document.getElementById('main').addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebarMobile();
     closeStickyDockMenu();
   });
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+  // Restore sidebar collapsed preference on desktop
+  try {
+    const savedCollapsed = localStorage.getItem('spark_sidebar_collapsed') === 'true';
+    if (savedCollapsed && window.innerWidth > 768) {
+      document.body.classList.add('sidebar-collapsed');
+      updateCollapseIcons(true);
+    } else {
+      updateCollapseIcons(false);
+    }
+  } catch(e) {}
+
+  updateTopBar();
+
+  // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar collapse
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+      e.preventDefault();
+      toggleSidebarCollapse();
+    }
+    if (e.key === 'Escape') closeModal();
+  });
   
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && focusState.running && focusState.mode === 'focus') {

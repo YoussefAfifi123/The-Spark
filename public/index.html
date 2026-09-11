@@ -18,24 +18,60 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
 </head>
 <body>
 <button id="menu-btn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
-<aside id="sidebar">
-  <div class="logo"><div class="flame"><i class="fas fa-fire" style="color:#fff"></i></div><div><div style="font-family:Fredoka;font-size:20px;font-weight:700;color:var(--text)">Spark</div><div style="font-size:11px;color:var(--text2)">Learn & Focus</div></div></div>
+<div id="sidebar-backdrop" class="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
+<aside id="sidebar" aria-label="Main Navigation">
+  <div class="logo">
+    <div class="logo-brand" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">
+      <div class="flame"><i class="fas fa-fire" style="color:#fff"></i></div>
+      <div class="logo-text">
+        <div class="logo-title">Spark</div>
+        <div class="logo-subtitle">Learn & Focus</div>
+      </div>
+    </div>
+    <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse sidebar (Ctrl+B)" aria-label="Collapse sidebar">
+      <i class="fas fa-chevron-left" id="sidebar-collapse-icon"></i>
+    </button>
+  </div>
   <nav id="nav">
-    <a href="#dashboard" data-view="dashboard" class="active"><i class="fas fa-home"></i>Dashboard</a>
-    <a href="#focus" data-view="focus"><i class="fas fa-bullseye"></i>Focus Lab</a>
-    <a href="#planner" data-view="planner"><i class="fas fa-list-check"></i>Task Planner</a>
-    <a href="#schedule" data-view="schedule"><i class="fas fa-calendar-days"></i>Schedule & Timetable</a>
-    <a href="#wellness" data-view="wellness"><i class="fas fa-heart-pulse"></i>Mind & Mood</a>
-    <a href="#learn" data-view="learn"><i class="fas fa-gamepad"></i>Learn & Play</a>
-    <a href="#flashcards" data-view="flashcards"><i class="fas fa-clone"></i>Flashcards</a>
-    <a href="#store" data-view="store"><i class="fas fa-store"></i>Store</a>
-    <a href="#resources" data-view="resources"><i class="fas fa-book-open"></i>Resources</a>
-    <a href="#progress" data-view="progress"><i class="fas fa-chart-line"></i>Progress</a>
-    <a href="#settings" data-view="settings"><i class="fas fa-cog"></i>Settings</a>
+    <a href="#dashboard" data-view="dashboard" class="active" data-tooltip="Dashboard" title="Dashboard"><i class="fas fa-home"></i><span class="nav-text">Dashboard</span></a>
+    <a href="#focus" data-view="focus" data-tooltip="Focus Lab" title="Focus Lab"><i class="fas fa-bullseye"></i><span class="nav-text">Focus Lab</span></a>
+    <a href="#planner" data-view="planner" data-tooltip="Task Planner" title="Task Planner"><i class="fas fa-list-check"></i><span class="nav-text">Task Planner</span></a>
+    <a href="#schedule" data-view="schedule" data-tooltip="Schedule & Timetable" title="Schedule & Timetable"><i class="fas fa-calendar-days"></i><span class="nav-text">Schedule & Timetable</span></a>
+    <a href="#wellness" data-view="wellness" data-tooltip="Mind & Mood" title="Mind & Mood"><i class="fas fa-heart-pulse"></i><span class="nav-text">Mind & Mood</span></a>
+    <a href="#learn" data-view="learn" data-tooltip="Learn & Play" title="Learn & Play"><i class="fas fa-gamepad"></i><span class="nav-text">Learn & Play</span></a>
+    <a href="#flashcards" data-view="flashcards" data-tooltip="Flashcards" title="Flashcards"><i class="fas fa-clone"></i><span class="nav-text">Flashcards</span></a>
+    <a href="#store" data-view="store" data-tooltip="Store" title="Store"><i class="fas fa-store"></i><span class="nav-text">Store</span></a>
+    <a href="#resources" data-view="resources" data-tooltip="Resources" title="Resources"><i class="fas fa-book-open"></i><span class="nav-text">Resources</span></a>
+    <a href="#progress" data-view="progress" data-tooltip="Progress" title="Progress"><i class="fas fa-chart-line"></i><span class="nav-text">Progress</span></a>
+    <a href="#settings" data-view="settings" data-tooltip="Settings" title="Settings"><i class="fas fa-cog"></i><span class="nav-text">Settings</span></a>
   </nav>
   <div class="user-panel" id="user-panel"></div>
+  <div class="sidebar-footer">
+    <button id="sidebar-footer-toggle" class="sidebar-footer-toggle-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Ctrl+B)">
+      <i class="fas fa-angles-left" id="sidebar-footer-icon"></i>
+      <span class="footer-btn-text">Collapse</span>
+    </button>
+  </div>
 </aside>
 <div id="main">
+  <header id="app-topbar" class="app-topbar">
+    <div class="topbar-left">
+      <button id="topbar-toggle-btn" class="topbar-toggle-btn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="topbar-view-info">
+        <span id="topbar-view-icon" class="topbar-view-icon"><i class="fas fa-home"></i></span>
+        <span id="topbar-view-title" class="topbar-view-title">Dashboard</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="topbar-date"></div>
+      <div class="topbar-streak" id="topbar-streak"></div>
+      <button class="btn btn-sm btn-ghost" id="topbar-focus-quickbtn" onclick="navigate('focus')" title="Quick Focus Session" style="border:1px solid var(--border); font-size:12px; gap:6px;">
+        <i class="fas fa-bullseye" style="color:var(--teal);"></i> <span>Focus</span>
+      </button>
+    </div>
+  </header>
   <div id="view-dashboard" class="view active"></div>
   <div id="view-focus" class="view"></div>
   <div id="view-planner" class="view"></div>
