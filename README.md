@@ -15,7 +15,14 @@ Spark is an all-in-one, high-performance study dashboard, focus workspace, and s
   * Multiple vibrant color themes (Yellow, Green, Pink, Blue, Purple, Dark).
   * Minimize, resize, stack in cascade, or scatter across your screen with saved layouts.
   * Pin affirmations, study notes, and journal entries directly onto your workspace.
-* **Task & Homework Planner**: Categorized task manager with priority tags, estimated completion times, difficulty scoring, and XP rewards upon completion.
+* **Task & Homework Planner**: Categorized task manager with priority tags, estimated completion times, micro-step breakdown, and XP rewards upon completion.
+* **Weekly Timetable & Schedule System**: Comprehensive academic timetable and routine manager:
+  * **Week-by-Week Navigation**: Browse any week with live "Today" jump markers, quick date selection, and day headers.
+  * **Interactive Timetable Grid**: Visual time-block grid (7:00 AM – 9:00 PM) mapping recurring school subjects, lectures, study blocks, and extracurriculars.
+  * **Automatic Task Synchronization**: Automatically sync and slot pending study tasks onto your weekly schedule into open study slots with 1 click.
+  * **Daily Routines & Habit Tracker**: Morning kickoff, afternoon reset, and evening wind-down routines with recurring day selectors, check-off progress, and XP rewards.
+  * **Agenda View & Schedule Presets**: Switch between Timetable Grid and chronological Agenda list, with one-click presets (Standard School Week, Exam Crunch, ADHD Structured).
+  * **Printable Timetable**: Ready-to-print clean weekly schedule layout.
 
 ---
 

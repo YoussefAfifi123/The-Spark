@@ -411,6 +411,13 @@ const Ambient = {
 };
 
 // ======================== DATA STORE ========================
+function getLocalDateStr(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 const Store={
   _d:{user:null,sessions:[],games:[],quests:{},thoughts:[],totalXP:0,streak:0,lastActive:null,settings:{focusDuration:10,breakDuration:3,sounds:true,whitelist:['khanacademy.org','docs.google.com','classroom.google.com','ekb.eg','nafham.com'],strictMode:false},inventory:{avatars:['default'],companions:['default'],timers:['classic'],themes:['default'],equipped:{avatar:'default',companion:'default',timer:'classic',theme:'default'}}},
   load(){
@@ -502,6 +509,132 @@ const Store={
           }
         ];
       }
+      if(!this._d.scheduleEvents){
+        this._d.scheduleEvents = [
+          {
+            id: 'evt_math',
+            title: 'Mathematics (Algebra & Sets)',
+            category: 'Class',
+            color: '#3B82F6',
+            days: [1, 3, 5],
+            startTime: '09:00',
+            endTime: '10:00',
+            location: 'Room 204',
+            notes: 'Bring formulas, calculator & notebook'
+          },
+          {
+            id: 'evt_eng',
+            title: 'English Language & Reading',
+            category: 'Class',
+            color: '#A855F7',
+            days: [1, 3],
+            startTime: '10:30',
+            endTime: '11:45',
+            location: 'Room 102',
+            notes: 'Vocabulary & comprehension analysis'
+          },
+          {
+            id: 'evt_sci',
+            title: 'Science & Physics Lab',
+            category: 'Class',
+            color: '#10B981',
+            days: [2, 4],
+            startTime: '09:30',
+            endTime: '11:00',
+            location: 'Science Lab B',
+            notes: 'Lab workbook & safety procedures'
+          },
+          {
+            id: 'evt_hist',
+            title: 'Social Studies & History',
+            category: 'Class',
+            color: '#F59E0B',
+            days: [2, 4],
+            startTime: '11:30',
+            endTime: '12:30',
+            location: 'Hall 3',
+            notes: 'Civilization timelines'
+          },
+          {
+            id: 'evt_focus',
+            title: 'Daily Deep Focus & Study Sprint',
+            category: 'Study',
+            color: '#FF8C42',
+            days: [1, 2, 3, 4, 5],
+            startTime: '16:00',
+            endTime: '17:00',
+            location: 'Study Desk',
+            notes: 'ADHD focus block: lo-fi noise & Spark timer'
+          },
+          {
+            id: 'evt_sports',
+            title: 'Sports & PE Activity',
+            category: 'Activity',
+            color: '#EC4899',
+            days: [2, 5],
+            startTime: '14:30',
+            endTime: '15:30',
+            location: 'Sports Field',
+            notes: 'Movement break & hydration'
+          }
+        ];
+      }
+      if(!this._d.routines){
+        this._d.routines = [
+          {
+            id: 'rt_morning',
+            title: 'Morning Focus Kickoff',
+            slot: 'morning',
+            targetTime: '07:30',
+            icon: 'fa-sun',
+            color: '#FF8C42',
+            days: [1, 2, 3, 4, 5],
+            steps: [
+              'Drink a full glass of water',
+              'Check backpack & materials for today',
+              'Review today’s timetable on Spark'
+            ]
+          },
+          {
+            id: 'rt_afternoon',
+            title: 'Afternoon Brain Reset',
+            slot: 'afternoon',
+            targetTime: '15:15',
+            icon: 'fa-bolt',
+            color: '#4ECDC4',
+            days: [1, 2, 3, 4, 5],
+            steps: [
+              '10-minute stretch & healthy snack',
+              'Check off school classes completed',
+              'Launch 25-minute Pomodoro focus block'
+            ]
+          },
+          {
+            id: 'rt_evening',
+            title: 'Evening Wind Down & Prep',
+            slot: 'evening',
+            targetTime: '20:30',
+            icon: 'fa-moon',
+            color: '#8B5CF6',
+            days: [1, 2, 3, 4, 5, 6, 0],
+            steps: [
+              'Review 10 flashcards on Spark',
+              'Check tomorrow’s schedule & prep clothes',
+              'Disconnect screens 30m before sleep'
+            ]
+          }
+        ];
+      }
+      if(!this._d.routineLogs) this._d.routineLogs = {};
+      if(this._d.tasks){
+        const curDate = getLocalDateStr(new Date());
+        this._d.tasks.forEach((t, i) => {
+          if (!t.scheduledDate) {
+            t.scheduledDate = curDate;
+            t.scheduledTime = i === 0 ? '16:00' : '17:00';
+          }
+        });
+      }
     }catch(e){this._d={...this._d};}
   },
   save(){
@@ -574,9 +707,9 @@ function breakDownTask(task){
 }
 
 // ======================== ROUTER ========================
-let currentView='dashboard';const VN=['dashboard','focus','planner','wellness','learn','flashcards','store','resources','progress','settings'];
+let currentView='dashboard';const VN=['dashboard','focus','planner','schedule','wellness','learn','flashcards','store','resources','progress','settings'];
 function navigate(v){if(!VN.includes(v))return;currentView=v;document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');renderView(v);document.getElementById('sidebar').classList.remove('open');if(v!=='focus')cleanupFocus();if(v!=='learn')stopGame();if(v!=='flashcards')cleanupFlash();if(v!=='wellness')cleanupBreathing();}
-function renderView(v){({dashboard:renderDashboard,focus:renderFocus,planner:renderPlanner,wellness:renderWellness,learn:renderLearn,flashcards:renderFlashcards,store:renderStore,resources:renderResources,progress:renderProgress,settings:renderSettings})[v]?.();}
+function renderView(v){({dashboard:renderDashboard,focus:renderFocus,planner:renderPlanner,schedule:renderSchedule,wellness:renderWellness,learn:renderLearn,flashcards:renderFlashcards,store:renderStore,resources:renderResources,progress:renderProgress,settings:renderSettings})[v]?.();}
 
 // ======================== USER PANEL ========================
 function updateUserPanel(){const u=Store.get('user'),inv=Store.get('inventory'),p=document.getElementById('user-panel');if(!u){p.innerHTML='';return;}const s=Store.get('streak')||0;const av=CATALOG.avatars.find(a=>a.id===inv.equipped.avatar)||CATALOG.avatars[0];p.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:36px;height:36px;border-radius:50%;background:${u.color};display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff"><i class="fas ${av.icon}"></i></div><div><div style="font-weight:700;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--text2)">Grade ${u.grade}</div></div></div><div class="streak-badge"><i class="fas fa-fire"></i>${s} day streak</div>`;}
@@ -599,6 +732,12 @@ function renderDashboard(){
   const dailyGoal=s.dailyGoalMin||30;
   const goalPct=Math.min(100,Math.round((ttf/dailyGoal)*100));
   const activeTasks=(Store.get('tasks')||[]).filter(t=>!t.completed);
+
+  const todayDateStr = getLocalDateStr(new Date());
+  const todayDayIdx = new Date().getDay();
+  const allEvents = Store.get('scheduleEvents') || [];
+  const todayEvents = allEvents.filter(e => (e.days && e.days.includes(todayDayIdx)) || e.specificDate === todayDateStr);
+  const todayScheduledTasks = (Store.get('tasks') || []).filter(t => t.scheduledDate === todayDateStr && !t.completed);
 
   document.getElementById('view-dashboard').innerHTML=`<div style="max-width:960px;margin:0 auto">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px"><div><h1 style="font-size:28px;font-weight:700;margin-bottom:4px">Welcome back, ${u.name}</h1><p style="color:var(--text2);font-size:15px">Here's what's on your plate today. Just pick one thing to start.</p></div><div class="tag" style="background:rgba(255,140,66,.12);color:var(--accent);font-size:14px;padding:6px 14px"><i class="fas fa-bolt"></i> ${Store.get('totalXP')} XP total</div></div>
@@ -637,6 +776,49 @@ function renderDashboard(){
               <div style="flex:1;min-width:0;">
                 <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(t.title)}</div>
                 <div style="font-size:12px;color:var(--text2);">${t.category||'Personal'} &middot; ~${t.estMin}m &middot; ${t.steps?t.steps.filter(st=>st.done).length:0}/${t.steps?t.steps.length:0} steps</div>
+              </div>
+              <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> Focus</button>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </div>
+
+    <!-- Today's Schedule & Timetable Card -->
+    <div class="card" style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <h3 style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-calendar-day" style="color:var(--accent);"></i> Today's Timetable & Classes
+        </h3>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-teal" onclick="navigate('schedule')" style="font-size:12px;">
+            Full Timetable <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      ${(todayEvents.length === 0 && todayScheduledTasks.length === 0) ? `
+        <div style="text-align:center;padding:12px;color:var(--text2);font-size:13px;">
+          No classes or scheduled study tasks today.
+          <button class="btn btn-sm btn-teal" onclick="navigate('schedule')" style="margin-left:8px;"><i class="fas fa-calendar-plus"></i> Open Schedule</button>
+        </div>
+      ` : `
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${todayEvents.map(e => `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--bg);border-radius:10px;border-left:3px solid ${e.color || '#3B82F6'};">
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:14px;">${escHtml(e.title)}</div>
+                <div style="font-size:12px;color:var(--text2);"><i class="fas fa-clock"></i> ${e.startTime} - ${e.endTime} ${e.location ? `&middot; <i class="fas fa-location-dot"></i> ${escHtml(e.location)}` : ''}</div>
+              </div>
+              <span class="tag" style="background:${e.color || '#3B82F6'}22; color:${e.color || '#3B82F6'}; font-size:11px;">${e.category || 'Class'}</span>
+            </div>
+          `).join('')}
+
+          ${todayScheduledTasks.slice(0, 2).map(t => `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--bg);border-radius:10px;border-left:3px solid var(--teal);">
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:14px;"><i class="fas fa-list-check" style="color:var(--teal); margin-right:6px;"></i> ${escHtml(t.title)}</div>
+                <div style="font-size:12px;color:var(--text2);"><i class="fas fa-clock"></i> ${t.scheduledTime || '16:00'} (~${t.estMin || 15}m)</div>
               </div>
               <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> Focus</button>
             </div>
@@ -1962,6 +2144,8 @@ function renderPlanner() {
           <p style="color:var(--text2); font-size:15px;">Break down your goals into bite-sized micro-steps. Built for ADHD clarity.</p>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-teal btn-sm" onclick="navigate('schedule')"><i class="fas fa-calendar-week"></i> Timetable & Routines</button>
+          <button class="btn btn-ghost btn-sm" onclick="autoSyncTasksToSchedule()" style="border:1px solid var(--border);" title="Auto-distribute pending tasks onto your week timetable"><i class="fas fa-bolt"></i> Auto-Sync to Week</button>
           <button class="btn btn-secondary btn-sm" onclick="showEditDailyGoalModal()"><i class="fas fa-bullseye"></i> Goal: ${dailyGoal}m</button>
           <button class="btn btn-primary btn-sm" onclick="showAddTaskModal()"><i class="fas fa-plus"></i> New Task</button>
         </div>
@@ -2039,15 +2223,25 @@ function renderTaskCard(t) {
     <div class="task-card ${t.completed ? 'completed' : ''}">
       <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
         <div>
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
             <span class="tag" style="background:${catColor}22; color:${catColor}; font-size:11px; font-weight:700;">${t.category || 'Personal'}</span>
             <span style="font-size:12px; color:var(--text2);"><i class="fas fa-clock"></i> ~${t.estMin || 15} min</span>
+            ${t.scheduledDate ? `
+              <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px; cursor:pointer;" onclick="navigate('schedule')" title="Click to view on Timetable">
+                <i class="fas fa-calendar-day"></i> ${t.scheduledDate} ${t.scheduledTime ? `at ${t.scheduledTime}` : ''}
+              </span>
+            ` : `
+              <span class="tag" style="background:var(--bg); border:1px solid var(--border); color:var(--text2); font-size:11px; cursor:pointer;" onclick="showTaskScheduleDetails('${t.id}')" title="Assign to Timetable">
+                <i class="fas fa-calendar-plus"></i> Unscheduled
+              </span>
+            `}
             ${t.completed ? `<span class="tag" style="background:rgba(126,231,135,0.15); color:var(--green); font-size:11px;"><i class="fas fa-check"></i> Completed</span>` : ''}
           </div>
           <h3 style="font-size:17px; font-weight:700; ${t.completed ? 'text-decoration:line-through; opacity:0.8;' : ''}">${escHtml(t.title)}</h3>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           ${!t.completed ? `
+            <button class="btn btn-sm btn-ghost" style="border:1px solid var(--border);" onclick="showTaskScheduleDetails('${t.id}')" title="Schedule / Move on Timetable"><i class="fas fa-calendar-alt"></i></button>
             <button class="btn btn-teal btn-sm" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-bullseye"></i> Focus on Task</button>
           ` : ''}
           <button class="btn btn-sm btn-ghost" style="color:var(--red);" onclick="deleteTask('${t.id}')" title="Delete Task"><i class="fas fa-trash"></i></button>
@@ -2104,6 +2298,7 @@ function toggleTaskStep(taskId, stepIndex) {
 
   Store.set('tasks', tasks);
   if (currentView === 'planner') renderPlanner();
+  else if (currentView === 'schedule') renderSchedule();
   else if (currentView === 'dashboard') renderDashboard();
   else if (currentView === 'focus') renderFocus();
 }
@@ -2139,7 +2334,9 @@ function launchFocusForTask(taskId) {
   }, 50);
 }
 
-function showAddTaskModal() {
+function showAddTaskModal(defaultDate, defaultTime) {
+  const curDate = defaultDate || getLocalDateStr(new Date());
+  const curTime = defaultTime || '16:00';
   showModal(`
     <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">New Task & Micro-Steps</h2>
     <div style="margin-bottom:12px;">
@@ -2169,6 +2366,20 @@ function showAddTaskModal() {
         </select>
       </div>
     </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Scheduled Date</label>
+        <input type="date" class="input" id="task-date-inp" value="${curDate}" style="font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Timetable Slot</label>
+        <select class="input" id="task-time-inp" style="font-size:13px;">
+          ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(tm => `
+            <option value="${tm}" ${curTime === tm ? 'selected' : ''}>${tm}</option>
+          `).join('')}
+        </select>
+      </div>
+    </div>
     <div style="margin-bottom:16px;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
         <label style="font-size:13px; color:var(--text2);">Micro-Steps</label>
@@ -2185,7 +2396,7 @@ function showAddTaskModal() {
     </div>
     <div style="display:flex; gap:10px; justify-content:flex-end;">
       <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewTask()"><i class="fas fa-check"></i> Create Task</button>
+      <button class="btn btn-primary" onclick="saveNewTask()"><i class="fas fa-check"></i> Create & Sync Task</button>
     </div>
   `);
 }
@@ -2222,6 +2433,8 @@ function saveNewTask() {
   const titleEl = document.getElementById('task-title-inp');
   const catEl = document.getElementById('task-cat-inp');
   const minEl = document.getElementById('task-min-inp');
+  const dateEl = document.getElementById('task-date-inp');
+  const timeEl = document.getElementById('task-time-inp');
 
   const title = titleEl ? titleEl.value.trim() : '';
   if (!title) {
@@ -2231,6 +2444,8 @@ function saveNewTask() {
 
   const category = catEl ? catEl.value : 'Personal';
   const estMin = minEl ? parseInt(minEl.value, 10) : 15;
+  const scheduledDate = dateEl && dateEl.value ? dateEl.value : getLocalDateStr(new Date());
+  const scheduledTime = timeEl && timeEl.value ? timeEl.value : '16:00';
 
   const stepInputs = document.querySelectorAll('.task-step-input');
   const steps = [];
@@ -2245,6 +2460,8 @@ function saveNewTask() {
     title,
     category,
     estMin,
+    scheduledDate,
+    scheduledTime,
     completed: false,
     created: Date.now(),
     steps
@@ -2253,8 +2470,9 @@ function saveNewTask() {
   Store.set('tasks', tasks);
   closeModal();
   SFX.click();
-  toast(`Task "${title}" created!`, 'success');
+  toast(`Task "${title}" created & synced to schedule!`, 'success');
   if (currentView === 'planner') renderPlanner();
+  else if (currentView === 'schedule') renderSchedule();
   else if (currentView === 'dashboard') renderDashboard();
 }
 
@@ -2265,6 +2483,7 @@ function deleteTask(taskId) {
   SFX.click();
   toast('Task deleted', 'info');
   if (currentView === 'planner') renderPlanner();
+  else if (currentView === 'schedule') renderSchedule();
   else if (currentView === 'dashboard') renderDashboard();
 }
 
@@ -2283,6 +2502,977 @@ function showEditDailyGoalModal() {
       <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
     </div>
   `);
+}
+
+// ======================== SCHEDULE & TIMETABLE SYSTEM ========================
+let scheduleWeekOffset = 0;
+let scheduleViewMode = 'timetable'; // 'timetable', 'agenda', 'routine'
+let scheduleFilter = 'all'; // 'all', 'classes', 'tasks', 'routine'
+
+function getWeekDays(offset = 0) {
+  const now = new Date();
+  const todayStr = getLocalDateStr(now);
+  const currentDay = now.getDay(); // 0 is Sunday, 1 is Monday...
+  const distToMonday = (currentDay + 6) % 7; // Monday = 0, Tuesday = 1...
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - distToMonday + (offset * 7));
+
+  const days = [];
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const fullNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const dayIndexes = [1, 2, 3, 4, 5, 6, 0]; // 1=Mon, 2=Tue... 0=Sun
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    const dateStr = getLocalDateStr(d);
+    days.push({
+      name: dayNames[i],
+      fullName: fullNames[i],
+      dayIndex: dayIndexes[i],
+      date: d,
+      dateStr: dateStr,
+      dayNum: d.getDate(),
+      monthName: d.toLocaleDateString('en-US', { month: 'short' }),
+      isToday: dateStr === todayStr
+    });
+  }
+  return days;
+}
+
+function renderSchedule() {
+  updateUserPanel();
+  const el = document.getElementById('view-schedule');
+  if (!el) return;
+
+  const days = getWeekDays(scheduleWeekOffset);
+  const weekStart = `${days[0].monthName} ${days[0].dayNum}`;
+  const weekEnd = `${days[6].monthName} ${days[6].dayNum}, ${days[6].date.getFullYear()}`;
+  const isCurrentWeek = scheduleWeekOffset === 0;
+
+  const tasks = Store.get('tasks') || [];
+  const pendingTasks = tasks.filter(t => !t.completed);
+  const unscheduledTasks = pendingTasks.filter(t => !t.scheduledDate);
+  const events = Store.get('scheduleEvents') || [];
+  const routines = Store.get('routines') || [];
+
+  el.innerHTML = `
+    <div style="max-width:1100px; margin:0 auto;">
+      <!-- Schedule Header -->
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+        <div>
+          <h1 style="font-size:26px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-calendar-days" style="color:var(--teal);"></i> Schedule & Timetable
+          </h1>
+          <p style="color:var(--text2); font-size:15px;">Week-by-week timetable, daily routines, and automatically synced tasks.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-teal btn-sm" onclick="autoSyncTasksToSchedule()" title="Automatically distribute pending tasks into open study slots this week">
+            <i class="fas fa-bolt"></i> Auto-Sync Tasks ${unscheduledTasks.length ? `(${unscheduledTasks.length})` : ''}
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="showAddScheduleEventModal()"><i class="fas fa-plus"></i> Add Event / Class</button>
+          <button class="btn btn-secondary btn-sm" onclick="showAddTaskModal()"><i class="fas fa-list-check"></i> New Task</button>
+          <button class="btn btn-ghost btn-sm" onclick="printSchedule()" title="Print or export timetable summary" style="border:1px solid var(--border);">
+            <i class="fas fa-print"></i> Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Week Navigator Bar -->
+      <div class="card" style="margin-bottom:20px; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn btn-sm btn-secondary" onclick="scheduleWeekOffset--; SFX.click(); renderSchedule();" title="Previous Week">
+            <i class="fas fa-chevron-left"></i> Prev Week
+          </button>
+          <button class="btn btn-sm ${isCurrentWeek ? 'btn-teal' : 'btn-secondary'}" onclick="scheduleWeekOffset=0; SFX.click(); renderSchedule();">
+            <i class="fas fa-calendar-check"></i> ${isCurrentWeek ? 'Current Week' : 'Jump to Today'}
+          </button>
+          <button class="btn btn-sm btn-secondary" onclick="scheduleWeekOffset++; SFX.click(); renderSchedule();" title="Next Week">
+            Next Week <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <div style="font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="far fa-calendar-alt" style="color:var(--accent);"></i>
+          <span>${weekStart} – ${weekEnd}</span>
+          ${isCurrentWeek ? `<span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:12px; font-family:'Nunito';">This Week</span>` : ''}
+        </div>
+
+        <!-- View Switcher -->
+        <div style="display:flex; gap:6px; background:var(--bg); padding:4px; border-radius:10px; border:1px solid var(--border);">
+          <button class="schedule-nav-pill ${scheduleViewMode === 'timetable' ? 'active' : ''}" style="padding:5px 12px; font-size:12px;" onclick="scheduleViewMode='timetable'; SFX.click(); renderSchedule();">
+            <i class="fas fa-table-cells"></i> Timetable
+          </button>
+          <button class="schedule-nav-pill ${scheduleViewMode === 'agenda' ? 'active' : ''}" style="padding:5px 12px; font-size:12px;" onclick="scheduleViewMode='agenda'; SFX.click(); renderSchedule();">
+            <i class="fas fa-bars-staggered"></i> Day Agenda
+          </button>
+          <button class="schedule-nav-pill ${scheduleViewMode === 'routine' ? 'active' : ''}" style="padding:5px 12px; font-size:12px;" onclick="scheduleViewMode='routine'; SFX.click(); renderSchedule();">
+            <i class="fas fa-repeat"></i> Daily Routines
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters & Unscheduled Tasks Notice -->
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+        <div style="display:flex; gap:8px; overflow-x:auto;" class="no-scrollbar">
+          ${[
+            { id: 'all', label: 'All Items', icon: 'fa-layer-group' },
+            { id: 'classes', label: 'Classes & Timetable', icon: 'fa-graduation-cap' },
+            { id: 'tasks', label: 'Synced Tasks', icon: 'fa-list-check' },
+            { id: 'routine', label: 'Daily Routines', icon: 'fa-clock-rotate-left' }
+          ].map(f => `
+            <button class="grade-pill ${scheduleFilter === f.id ? 'selected' : ''}" style="font-size:12px; padding:6px 14px;" onclick="scheduleFilter='${f.id}'; SFX.click(); renderSchedule();">
+              <i class="fas ${f.icon}"></i> ${f.label}
+            </button>
+          `).join('')}
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn btn-sm btn-ghost" onclick="showRoutineTemplateModal()" style="font-size:12px; border:1px solid var(--border);">
+            <i class="fas fa-wand-magic-sparkles"></i> Timetable Presets
+          </button>
+        </div>
+      </div>
+
+      ${unscheduledTasks.length > 0 ? `
+        <div class="card card-glow" style="margin-bottom:20px; padding:14px 18px; background:linear-gradient(135deg, rgba(78,205,196,0.08) 0%, var(--card) 100%); border-color:rgba(78,205,196,0.3); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:var(--teal-g); display:flex; align-items:center; justify-content:center; color:var(--teal);">
+              <i class="fas fa-sparkles"></i>
+            </div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">You have ${unscheduledTasks.length} pending unscheduled task${unscheduledTasks.length > 1 ? 's' : ''}</div>
+              <div style="font-size:12px; color:var(--text2);">Automatically schedule them into optimal study blocks across your week with 1 click.</div>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-teal" onclick="autoSyncTasksToSchedule()">
+            <i class="fas fa-bolt"></i> Auto-Sync All to Schedule
+          </button>
+        </div>
+      ` : ''}
+
+      <!-- Main Schedule Content based on view mode -->
+      ${scheduleViewMode === 'timetable'
+        ? renderWeeklyTimetableGrid(days)
+        : scheduleViewMode === 'agenda'
+          ? renderScheduleAgenda(days)
+          : renderDailyRoutinesTab(days)
+      }
+    </div>
+  `;
+}
+
+// ---------------- Timetable Grid View ----------------
+function renderWeeklyTimetableGrid(days) {
+  const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+  const events = Store.get('scheduleEvents') || [];
+  const tasks = Store.get('tasks') || [];
+  const routines = Store.get('routines') || [];
+
+  return `
+    <div class="timetable-wrapper">
+      <div class="timetable-grid">
+        <!-- Top Left Corner -->
+        <div class="timetable-header-cell" style="color:var(--text2); font-size:12px; display:flex; align-items:center; justify-content:center;">
+          Time
+        </div>
+
+        <!-- Day Headers -->
+        ${days.map(d => `
+          <div class="timetable-header-cell ${d.isToday ? 'today-col' : ''}">
+            <div style="font-size:13px; font-weight:700; color:${d.isToday ? 'var(--teal)' : 'var(--text)'};">${d.name}</div>
+            <div style="font-size:16px; font-weight:800; font-family:'Fredoka'; margin-top:2px; color:${d.isToday ? 'var(--teal)' : 'var(--text)'};">
+              ${d.dayNum} ${d.monthName}
+            </div>
+            ${d.isToday ? `<span class="tag" style="background:var(--teal); color:#0F0F14; font-size:10px; padding:2px 8px; margin-top:4px;">TODAY</span>` : ''}
+          </div>
+        `).join('')}
+
+        <!-- Time Rows -->
+        ${hours.map(h => {
+          const hourNum = parseInt(h.split(':')[0], 10);
+          const h12 = (hourNum % 12 || 12) + (hourNum >= 12 ? ' PM' : ' AM');
+
+          return `
+            <!-- Time label -->
+            <div class="timetable-time-label">
+              <span>${h12}</span>
+            </div>
+
+            <!-- 7 Day cells for this hour -->
+            ${days.map(d => {
+              // 1. Classes & Events
+              const cellEvents = (scheduleFilter === 'tasks') ? [] : events.filter(e => {
+                const dayMatch = (e.days && e.days.includes(d.dayIndex)) || (e.specificDate === d.dateStr);
+                if (!dayMatch) return false;
+                const startHour = parseInt((e.startTime || '09:00').split(':')[0], 10);
+                return startHour === hourNum;
+              });
+
+              // 2. Synced Tasks
+              const cellTasks = (scheduleFilter === 'classes') ? [] : tasks.filter(t => {
+                if (t.scheduledDate !== d.dateStr) return false;
+                const taskHour = parseInt((t.scheduledTime || '16:00').split(':')[0], 10);
+                return taskHour === hourNum;
+              });
+
+              // 3. Routines
+              const cellRoutines = (scheduleFilter === 'classes' || scheduleFilter === 'tasks') ? [] : routines.filter(r => {
+                const dayMatch = !r.days || r.days.includes(d.dayIndex);
+                if (!dayMatch) return false;
+                const rtHour = parseInt((r.targetTime || '07:30').split(':')[0], 10);
+                return rtHour === hourNum;
+              });
+
+              return `
+                <div class="timetable-cell ${d.isToday ? 'is-today-cell' : ''}" onclick="showAddScheduleEventModal(${d.dayIndex}, '${h}')" title="Click to add event/task on ${d.name} at ${h}">
+                  <!-- Render Events -->
+                  ${cellEvents.map(e => `
+                    <div class="schedule-item" style="background:${e.color || '#3B82F6'}22; border-left:3px solid ${e.color || '#3B82F6'}; color:var(--text);" onclick="event.stopPropagation(); showEditEventModal('${e.id}')">
+                      <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                        <span style="font-size:10px; font-weight:800; color:${e.color || '#3B82F6'}; text-transform:uppercase;">${e.category || 'Class'}</span>
+                        <span style="font-size:10px; color:var(--text2);">${e.startTime || ''}</span>
+                      </div>
+                      <div style="font-weight:700; font-size:12px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(e.title)}</div>
+                      ${e.location ? `<div style="font-size:10px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class="fas fa-location-dot" style="font-size:9px;"></i> ${escHtml(e.location)}</div>` : ''}
+                    </div>
+                  `).join('')}
+
+                  <!-- Render Synced Tasks -->
+                  ${cellTasks.map(t => {
+                    const steps = t.steps || [];
+                    const doneCount = steps.filter(s => s.done).length;
+                    return `
+                      <div class="schedule-item schedule-task-item ${t.completed ? 'completed' : ''}" onclick="event.stopPropagation(); showTaskScheduleDetails('${t.id}')">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                          <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} style="accent-color:var(--teal); width:13px; height:13px; cursor:pointer;" onclick="event.stopPropagation(); toggleTaskStep('${t.id}', 0);">
+                            <span style="font-size:10px; font-weight:700; color:var(--teal);"><i class="fas fa-list-check"></i> Task</span>
+                          </div>
+                          <span style="font-size:10px; color:var(--text2);">~${t.estMin || 15}m</span>
+                        </div>
+                        <div style="font-weight:700; font-size:12px; line-height:1.2; ${t.completed ? 'text-decoration:line-through;' : ''} white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                          ${escHtml(t.title)}
+                        </div>
+                        ${steps.length > 0 ? `
+                          <div style="font-size:10px; color:var(--text2);"><i class="fas fa-bars-progress"></i> ${doneCount}/${steps.length} steps</div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+
+                  <!-- Render Routine Indicator -->
+                  ${cellRoutines.map(r => `
+                    <div class="schedule-item" style="background:${r.color || '#FF8C42'}18; border-left:3px solid ${r.color || '#FF8C42'}; color:var(--text); padding:4px 6px;" onclick="event.stopPropagation(); scheduleViewMode='routine'; renderSchedule();">
+                      <div style="display:flex; align-items:center; gap:6px; font-size:11px;">
+                        <i class="fas ${r.icon || 'fa-sun'}" style="color:${r.color || '#FF8C42'}; font-size:11px;"></i>
+                        <span style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(r.title)}</span>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              `;
+            }).join('')}
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ---------------- Day Agenda View ----------------
+function renderScheduleAgenda(days) {
+  const events = Store.get('scheduleEvents') || [];
+  const tasks = Store.get('tasks') || [];
+  const routines = Store.get('routines') || [];
+  const routineLogs = Store.get('routineLogs') || {};
+
+  return `
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      ${days.map(d => {
+        const dayEvents = (scheduleFilter === 'tasks') ? [] : events.filter(e => (e.days && e.days.includes(d.dayIndex)) || (e.specificDate === d.dateStr));
+        const dayTasks = (scheduleFilter === 'classes') ? [] : tasks.filter(t => t.scheduledDate === d.dateStr);
+        const dayRoutines = (scheduleFilter === 'classes' || scheduleFilter === 'tasks') ? [] : routines.filter(r => !r.days || r.days.includes(d.dayIndex));
+
+        const totalItems = dayEvents.length + dayTasks.length + dayRoutines.length;
+
+        return `
+          <div class="agenda-day-card ${d.isToday ? 'today' : ''}">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:44px; height:44px; border-radius:12px; background:${d.isToday ? 'var(--teal)' : 'var(--bg)'}; color:${d.isToday ? '#0F0F14' : 'var(--text)'}; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Fredoka'; font-weight:700;">
+                  <span style="font-size:11px; text-transform:uppercase; line-height:1;">${d.name}</span>
+                  <span style="font-size:18px; line-height:1;">${d.dayNum}</span>
+                </div>
+                <div>
+                  <h3 style="font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px;">
+                    ${d.fullName}, ${d.monthName} ${d.dayNum}
+                    ${d.isToday ? `<span class="tag" style="background:var(--teal); color:#0F0F14; font-size:11px;">TODAY</span>` : ''}
+                  </h3>
+                  <div style="font-size:12px; color:var(--text2);">${totalItems} item${totalItems === 1 ? '' : 's'} scheduled (${dayEvents.length} classes, ${dayTasks.length} tasks, ${dayRoutines.length} routines)</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-sm btn-ghost" onclick="showAddScheduleEventModal(${d.dayIndex})" style="border:1px solid var(--border); font-size:12px;"><i class="fas fa-plus"></i> Add Event</button>
+                <button class="btn btn-sm btn-teal" onclick="showAddTaskModal('${d.dateStr}')" style="font-size:12px;"><i class="fas fa-list-check"></i> Add Task</button>
+              </div>
+            </div>
+
+            <!-- Items Container -->
+            ${totalItems === 0 ? `
+              <div style="text-align:center; padding:20px; color:var(--text2); font-size:13px;">
+                No schedule items or tasks for this day. <button class="btn btn-sm btn-ghost" onclick="showAddTaskModal('${d.dateStr}')" style="color:var(--teal);"><i class="fas fa-plus"></i> Schedule something</button>
+              </div>
+            ` : `
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <!-- Routines -->
+                ${dayRoutines.map(r => {
+                  const isDone = routineLogs[d.dateStr] && routineLogs[d.dateStr][r.id];
+                  return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg); border-radius:10px; border-left:3px solid ${r.color || '#FF8C42'}; gap:12px;">
+                      <div style="display:flex; align-items:center; gap:12px;">
+                        <input type="checkbox" ${isDone ? 'checked' : ''} style="accent-color:var(--accent); width:16px; height:16px; cursor:pointer;" onclick="toggleRoutineForDay('${r.id}', '${d.dateStr}')">
+                        <div>
+                          <div style="font-weight:700; font-size:14px; ${isDone ? 'text-decoration:line-through; color:var(--text2);' : ''}">${escHtml(r.title)}</div>
+                          <div style="font-size:12px; color:var(--text2);"><i class="fas fa-clock"></i> ${r.targetTime || 'Routine'} &middot; ${r.steps ? r.steps.length : 0} habit steps</div>
+                        </div>
+                      </div>
+                      <span class="tag" style="background:${r.color || '#FF8C42'}22; color:${r.color || '#FF8C42'}; font-size:11px;">${r.slot || 'Routine'}</span>
+                    </div>
+                  `;
+                }).join('')}
+
+                <!-- Classes & Events -->
+                ${dayEvents.map(e => `
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg); border-radius:10px; border-left:3px solid ${e.color || '#3B82F6'}; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <div style="width:36px; height:36px; border-radius:8px; background:${e.color || '#3B82F6'}22; color:${e.color || '#3B82F6'}; display:flex; align-items:center; justify-content:center; font-size:15px;">
+                        <i class="fas fa-graduation-cap"></i>
+                      </div>
+                      <div>
+                        <div style="font-weight:700; font-size:14px;">${escHtml(e.title)}</div>
+                        <div style="font-size:12px; color:var(--text2);">
+                          <i class="fas fa-clock"></i> ${e.startTime} - ${e.endTime} ${e.location ? `&middot; <i class="fas fa-location-dot"></i> ${escHtml(e.location)}` : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span class="tag" style="background:${e.color || '#3B82F6'}22; color:${e.color || '#3B82F6'}; font-size:11px;">${e.category || 'Class'}</span>
+                      <button class="btn btn-sm btn-ghost" onclick="showEditEventModal('${e.id}')" title="Edit Event"><i class="fas fa-pen"></i></button>
+                    </div>
+                  </div>
+                `).join('')}
+
+                <!-- Synced Tasks -->
+                ${dayTasks.map(t => {
+                  const steps = t.steps || [];
+                  const doneCount = steps.filter(s => s.done).length;
+                  return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg); border-radius:10px; border-left:3px solid var(--teal); gap:12px;">
+                      <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} style="accent-color:var(--teal); width:16px; height:16px; cursor:pointer;" onclick="toggleTaskStep('${t.id}', 0)">
+                        <div style="flex:1; min-width:0;">
+                          <div style="font-weight:700; font-size:14px; ${t.completed ? 'text-decoration:line-through; opacity:0.7;' : ''} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${escHtml(t.title)}
+                          </div>
+                          <div style="font-size:12px; color:var(--text2);">
+                            <span class="tag" style="background:rgba(78,205,196,0.1); color:var(--teal); font-size:11px;">${t.category || 'Task'}</span>
+                            &middot; <i class="fas fa-clock"></i> ${t.scheduledTime || '16:00'} (~${t.estMin || 15}m)
+                            ${steps.length ? `&middot; ${doneCount}/${steps.length} micro-steps` : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> Focus</button>
+                        <button class="btn btn-sm btn-ghost" onclick="showTaskScheduleDetails('${t.id}')" title="Task details"><i class="fas fa-ellipsis-v"></i></button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ---------------- Daily Routines View ----------------
+function renderDailyRoutinesTab(days) {
+  const routines = Store.get('routines') || [];
+  const routineLogs = Store.get('routineLogs') || {};
+  const todayStr = getLocalDateStr(new Date());
+
+  const slots = [
+    { key: 'morning', title: 'Morning Kickoff Routine', icon: 'fa-sun', color: '#FF8C42', desc: 'Prime your brain and environment before classes begin.' },
+    { key: 'afternoon', title: 'Afternoon Brain Reset', icon: 'fa-bolt', color: '#4ECDC4', desc: 'Decompress from classes and transition smoothly into study mode.' },
+    { key: 'evening', title: 'Evening Wind Down & Prep', icon: 'fa-moon', color: '#8B5CF6', desc: 'Solidify memories, review flashcards, and prep for tomorrow.' }
+  ];
+
+  return `
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <!-- Banner -->
+      <div class="card card-glow" style="padding:20px; background:linear-gradient(135deg, var(--card) 0%, rgba(255,140,66,0.08) 100%);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h2 style="font-size:20px; font-weight:700; margin-bottom:4px;">Daily Routines & ADHD Habit Loops</h2>
+            <p style="font-size:14px; color:var(--text2);">Anchor habits around existing daily triggers. Small consistent routines reduce executive dysfunction.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showRoutineModal()"><i class="fas fa-plus"></i> Create Routine</button>
+        </div>
+      </div>
+
+      <!-- Routines by Slot -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:18px;">
+        ${slots.map(slot => {
+          const slotRoutines = routines.filter(r => (r.slot || 'morning') === slot.key);
+          return `
+            <div class="card" style="display:flex; flex-direction:column; gap:14px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:38px; height:38px; border-radius:10px; background:${slot.color}22; color:${slot.color}; display:flex; align-items:center; justify-content:center; font-size:18px;">
+                    <i class="fas ${slot.icon}"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-size:16px; font-weight:700;">${slot.title}</h3>
+                    <div style="font-size:12px; color:var(--text2);">${slot.desc}</div>
+                  </div>
+                </div>
+              </div>
+
+              ${slotRoutines.length === 0 ? `
+                <div style="text-align:center; padding:24px 12px; color:var(--text2); font-size:13px; background:var(--bg); border-radius:10px;">
+                  No ${slot.key} routine configured. <br>
+                  <button class="btn btn-sm btn-ghost" onclick="showRoutineModal('${slot.key}')" style="color:var(--teal); margin-top:6px;">
+                    <i class="fas fa-plus"></i> Add ${slot.key} habit
+                  </button>
+                </div>
+              ` : slotRoutines.map(r => {
+                const isTodayDone = routineLogs[todayStr] && routineLogs[todayStr][r.id];
+                const steps = r.steps || [];
+
+                return `
+                  <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" ${isTodayDone ? 'checked' : ''} style="accent-color:${slot.color}; width:18px; height:18px; cursor:pointer;" onclick="toggleRoutineForDay('${r.id}', '${todayStr}')">
+                        <span style="font-weight:700; font-size:14px; ${isTodayDone ? 'text-decoration:line-through; color:var(--text2);' : ''}">${escHtml(r.title)}</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:6px;">
+                        <span class="tag" style="background:rgba(255,255,255,0.06); font-size:11px;"><i class="fas fa-clock"></i> ${r.targetTime || 'Anytime'}</span>
+                        <button class="btn btn-sm btn-ghost" style="color:var(--red); padding:4px;" onclick="deleteRoutine('${r.id}')"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+
+                    <!-- Steps Checklist -->
+                    ${steps.length > 0 ? `
+                      <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+                        ${steps.map((st, sIdx) => `
+                          <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2); padding:4px 6px; background:var(--card); border-radius:6px;">
+                            <i class="fas fa-check-circle" style="color:${slot.color}; font-size:11px;"></i>
+                            <span>${escHtml(st)}</span>
+                          </div>
+                        `).join('')}
+                      </div>
+                    ` : ''}
+
+                    <!-- 7-day mini progress dots for this week -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px; padding-top:8px; border-top:1px solid var(--border); font-size:11px; color:var(--text2);">
+                      <span>This Week Progress:</span>
+                      <div style="display:flex; gap:6px;">
+                        ${days.map(d => {
+                          const doneOnDay = routineLogs[d.dateStr] && routineLogs[d.dateStr][r.id];
+                          return `
+                            <div title="${d.name} (${d.dateStr}): ${doneOnDay ? 'Completed' : 'Pending'}" style="width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; background:${doneOnDay ? slot.color : 'var(--border)'}; color:${doneOnDay ? '#0F0F14' : 'var(--text2)'}; cursor:pointer;" onclick="toggleRoutineForDay('${r.id}', '${d.dateStr}')">
+                              ${d.name[0]}
+                            </div>
+                          `;
+                        }).join('')}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ---------------- Auto-Sync Tasks Engine ----------------
+function autoSyncTasksToSchedule() {
+  const tasks = Store.get('tasks') || [];
+  const pendingTasks = tasks.filter(t => !t.completed);
+  if (!pendingTasks.length) {
+    toast('No pending tasks to schedule!', 'info');
+    return;
+  }
+
+  const days = getWeekDays(scheduleWeekOffset);
+  const events = Store.get('scheduleEvents') || [];
+  let syncedCount = 0;
+
+  // Study hours on weekdays: 15:00, 16:00, 17:00, 18:00, 19:00
+  const studyHours = ['16:00', '17:00', '15:00', '18:00', '19:00'];
+
+  // Distribute tasks across week days
+  pendingTasks.forEach((t, i) => {
+    // Pick day (Monday to Friday prioritized)
+    const dayObj = days[i % 5]; // cycles Mon(0), Tue(1), Wed(2), Thu(3), Fri(4)
+    const hourSlot = studyHours[Math.floor(i / 5) % studyHours.length];
+
+    t.scheduledDate = dayObj.dateStr;
+    t.scheduledTime = hourSlot;
+    syncedCount++;
+  });
+
+  Store.set('tasks', tasks);
+  SFX.bonus();
+  toast(`Auto-synced ${syncedCount} task${syncedCount === 1 ? '' : 's'} across your weekly timetable!`, 'success');
+  renderSchedule();
+}
+
+// ---------------- Modals & Event Management ----------------
+function showAddScheduleEventModal(defaultDay, defaultHour) {
+  const dayIndex = defaultDay !== undefined ? defaultDay : 1;
+  const startTime = defaultHour || '09:00';
+  const hourNum = parseInt(startTime.split(':')[0], 10);
+  const endHour = String(hourNum + 1).padStart(2, '0') + ':00';
+
+  showModal(`
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">Add Timetable Event / Class</h2>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Title / Subject</label>
+      <input class="input" id="evt-title-inp" placeholder="e.g. Mathematics, Chemistry, or Study Session" autofocus>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Category</label>
+        <select class="input" id="evt-cat-inp">
+          <option value="Class">Class / Lecture</option>
+          <option value="Study">Deep Work / Study</option>
+          <option value="Activity">Sports / Activity</option>
+          <option value="Exam">Exam / Quiz</option>
+          <option value="Personal">Personal Routine</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Color Accent</label>
+        <select class="input" id="evt-color-inp">
+          <option value="#3B82F6">Blue (Math/Science)</option>
+          <option value="#A855F7">Purple (Languages)</option>
+          <option value="#10B981">Green (Biology/Lab)</option>
+          <option value="#F59E0B">Amber (History/Social)</option>
+          <option value="#FF8C42">Orange (Focus Sprint)</option>
+          <option value="#EC4899">Pink (Arts/Sports)</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Start Time</label>
+        <select class="input" id="evt-start-inp">
+          ${['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(t => `
+            <option value="${t}" ${t === startTime ? 'selected' : ''}>${t}</option>
+          `).join('')}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">End Time</label>
+        <select class="input" id="evt-end-inp">
+          ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(t => `
+            <option value="${t}" ${t === endHour ? 'selected' : ''}>${t}</option>
+          `).join('')}
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:6px;">Recurring Days of Week</label>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        ${[
+          { d: 1, n: 'Mon' }, { d: 2, n: 'Tue' }, { d: 3, n: 'Wed' },
+          { d: 4, n: 'Thu' }, { d: 5, n: 'Fri' }, { d: 6, n: 'Sat' }, { d: 0, n: 'Sun' }
+        ].map(item => `
+          <label style="display:flex; align-items:center; gap:4px; font-size:12px; background:var(--bg); padding:6px 10px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
+            <input type="checkbox" class="evt-day-check" value="${item.d}" ${item.d === dayIndex ? 'checked' : ''} style="accent-color:var(--teal);">
+            <span>${item.n}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Room / Location / Notes (optional)</label>
+      <input class="input" id="evt-loc-inp" placeholder="e.g. Room 204 or Online Zoom link">
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveScheduleEvent()"><i class="fas fa-check"></i> Save to Timetable</button>
+    </div>
+  `);
+}
+
+function saveScheduleEvent() {
+  const titleEl = document.getElementById('evt-title-inp');
+  const catEl = document.getElementById('evt-cat-inp');
+  const colorEl = document.getElementById('evt-color-inp');
+  const startEl = document.getElementById('evt-start-inp');
+  const endEl = document.getElementById('evt-end-inp');
+  const locEl = document.getElementById('evt-loc-inp');
+
+  const title = titleEl ? titleEl.value.trim() : '';
+  if (!title) {
+    toast('Please enter a title or subject', 'warn');
+    return;
+  }
+
+  const selectedDays = [];
+  document.querySelectorAll('.evt-day-check:checked').forEach(cb => {
+    selectedDays.push(parseInt(cb.value, 10));
+  });
+
+  const events = Store.get('scheduleEvents') || [];
+  events.push({
+    id: 'evt_' + Date.now(),
+    title,
+    category: catEl ? catEl.value : 'Class',
+    color: colorEl ? colorEl.value : '#3B82F6',
+    startTime: startEl ? startEl.value : '09:00',
+    endTime: endEl ? endEl.value : '10:00',
+    days: selectedDays.length ? selectedDays : [1, 3, 5],
+    location: locEl ? locEl.value.trim() : ''
+  });
+
+  Store.set('scheduleEvents', events);
+  closeModal();
+  SFX.click();
+  toast(`Added "${title}" to your timetable!`, 'success');
+  renderSchedule();
+}
+
+function showEditEventModal(eventId) {
+  const events = Store.get('scheduleEvents') || [];
+  const evt = events.find(e => e.id === eventId);
+  if (!evt) return;
+
+  showModal(`
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">Edit Event: ${escHtml(evt.title)}</h2>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Title</label>
+      <input class="input" id="edit-evt-title" value="${escHtml(evt.title)}">
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Start Time</label>
+        <select class="input" id="edit-evt-start">
+          ${['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(t => `
+            <option value="${t}" ${t === evt.startTime ? 'selected' : ''}>${t}</option>
+          `).join('')}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">End Time</label>
+        <select class="input" id="edit-evt-end">
+          ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(t => `
+            <option value="${t}" ${t === evt.endTime ? 'selected' : ''}>${t}</option>
+          `).join('')}
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Location / Notes</label>
+      <input class="input" id="edit-evt-loc" value="${escHtml(evt.location || '')}">
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <button class="btn btn-sm btn-ghost" style="color:var(--red);" onclick="deleteScheduleEvent('${evt.id}')"><i class="fas fa-trash"></i> Delete Event</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="updateScheduleEvent('${evt.id}')"><i class="fas fa-check"></i> Save Changes</button>
+      </div>
+    </div>
+  `);
+}
+
+function updateScheduleEvent(eventId) {
+  const events = Store.get('scheduleEvents') || [];
+  const evt = events.find(e => e.id === eventId);
+  if (!evt) return;
+
+  const titleEl = document.getElementById('edit-evt-title');
+  const startEl = document.getElementById('edit-evt-start');
+  const endEl = document.getElementById('edit-evt-end');
+  const locEl = document.getElementById('edit-evt-loc');
+
+  if (titleEl && titleEl.value.trim()) evt.title = titleEl.value.trim();
+  if (startEl) evt.startTime = startEl.value;
+  if (endEl) evt.endTime = endEl.value;
+  if (locEl) evt.location = locEl.value.trim();
+
+  Store.set('scheduleEvents', events);
+  closeModal();
+  SFX.click();
+  toast('Event updated!', 'success');
+  renderSchedule();
+}
+
+function deleteScheduleEvent(id) {
+  let events = Store.get('scheduleEvents') || [];
+  events = events.filter(e => e.id !== id);
+  Store.set('scheduleEvents', events);
+  closeModal();
+  SFX.click();
+  toast('Event removed from timetable', 'info');
+  renderSchedule();
+}
+
+// ---------------- Task Detail & Reschedule Modal ----------------
+function showTaskScheduleDetails(taskId) {
+  const tasks = Store.get('tasks') || [];
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const steps = task.steps || [];
+
+  showModal(`
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-list-check" style="color:var(--teal);"></i> ${escHtml(task.title)}
+    </h2>
+    <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+      <span class="tag" style="background:rgba(78,205,196,0.1); color:var(--teal); font-weight:700;">${task.category || 'Personal'}</span>
+      <span class="tag" style="background:var(--bg); border:1px solid var(--border);"><i class="fas fa-clock"></i> ~${task.estMin || 15}m</span>
+      ${task.completed ? `<span class="tag" style="background:rgba(126,231,135,0.15); color:var(--green);"><i class="fas fa-check"></i> Completed</span>` : ''}
+    </div>
+
+    <!-- Date & Time Slot Changer -->
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;">
+      <div style="font-weight:700; font-size:13px; margin-bottom:8px;">Schedule Assignment</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label style="font-size:12px; color:var(--text2); display:block; margin-bottom:3px;">Date</label>
+          <input type="date" class="input" id="sched-task-date" value="${task.scheduledDate || getLocalDateStr(new Date())}" style="font-size:13px; padding:6px 10px;">
+        </div>
+        <div>
+          <label style="font-size:12px; color:var(--text2); display:block; margin-bottom:3px;">Time Slot</label>
+          <select class="input" id="sched-task-time" style="font-size:13px; padding:6px 10px;">
+            ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(tm => `
+              <option value="${tm}" ${(task.scheduledTime || '16:00') === tm ? 'selected' : ''}>${tm}</option>
+            `).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Micro-steps checklist -->
+    ${steps.length > 0 ? `
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px; font-weight:700; display:block; margin-bottom:8px;">Micro-Steps</label>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          ${steps.map((st, idx) => `
+            <div class="task-step-check" onclick="toggleTaskStep('${task.id}', ${idx}); showTaskScheduleDetails('${task.id}');">
+              <input type="checkbox" ${st.done ? 'checked' : ''} style="accent-color:var(--teal); width:16px; height:16px; cursor:pointer;" onclick="event.stopPropagation(); toggleTaskStep('${task.id}', ${idx}); showTaskScheduleDetails('${task.id}');">
+              <span style="font-size:13px; ${st.done ? 'text-decoration:line-through; color:var(--text2);' : ''}">${escHtml(st.text)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+      <button class="btn btn-teal btn-sm" onclick="closeModal(); launchFocusForTask('${task.id}')">
+        <i class="fas fa-play"></i> Focus on Task
+      </button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="applyTaskScheduleChange('${task.id}')">
+          <i class="fas fa-check"></i> Save Schedule
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+function applyTaskScheduleChange(taskId) {
+  const tasks = Store.get('tasks') || [];
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const dateEl = document.getElementById('sched-task-date');
+  const timeEl = document.getElementById('sched-task-time');
+
+  if (dateEl) task.scheduledDate = dateEl.value;
+  if (timeEl) task.scheduledTime = timeEl.value;
+
+  Store.set('tasks', tasks);
+  closeModal();
+  SFX.click();
+  toast(`Task rescheduled to ${task.scheduledDate} at ${task.scheduledTime}!`, 'success');
+  renderSchedule();
+}
+
+// ---------------- Routine Habit Management ----------------
+function toggleRoutineForDay(routineId, dateStr) {
+  const routineLogs = Store.get('routineLogs') || {};
+  if (!routineLogs[dateStr]) routineLogs[dateStr] = {};
+
+  const current = !!routineLogs[dateStr][routineId];
+  routineLogs[dateStr][routineId] = !current;
+  Store.set('routineLogs', routineLogs);
+
+  if (!current) {
+    Store.addXP(10);
+    SFX.click();
+    toast('Routine completed! +10 XP', 'bonus');
+  } else {
+    SFX.click();
+  }
+
+  renderSchedule();
+}
+
+function showRoutineModal(defaultSlot) {
+  showModal(`
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">New Daily Routine</h2>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Routine Title</label>
+      <input class="input" id="rt-title-inp" placeholder="e.g. Afternoon Study Power Hour" autofocus>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Time of Day</label>
+        <select class="input" id="rt-slot-inp">
+          <option value="morning" ${defaultSlot === 'morning' ? 'selected' : ''}>Morning</option>
+          <option value="afternoon" ${defaultSlot === 'afternoon' ? 'selected' : ''}>Afternoon</option>
+          <option value="evening" ${defaultSlot === 'evening' ? 'selected' : ''}>Evening</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Target Time</label>
+        <input type="time" class="input" id="rt-time-inp" value="16:00">
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Habit Steps (one per line)</label>
+      <textarea class="input" id="rt-steps-inp" rows="3" placeholder="Step 1: Drink water&#10;Step 2: Clear desk&#10;Step 3: Turn on brown noise"></textarea>
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomRoutine()"><i class="fas fa-check"></i> Create Routine</button>
+    </div>
+  `);
+}
+
+function saveCustomRoutine() {
+  const titleEl = document.getElementById('rt-title-inp');
+  const slotEl = document.getElementById('rt-slot-inp');
+  const timeEl = document.getElementById('rt-time-inp');
+  const stepsEl = document.getElementById('rt-steps-inp');
+
+  const title = titleEl ? titleEl.value.trim() : '';
+  if (!title) {
+    toast('Please enter a routine title', 'warn');
+    return;
+  }
+
+  const slot = slotEl ? slotEl.value : 'morning';
+  const targetTime = timeEl ? timeEl.value : '08:00';
+  const rawSteps = stepsEl ? stepsEl.value.split('\n').map(s => s.trim()).filter(Boolean) : [];
+
+  const icons = { morning: 'fa-sun', afternoon: 'fa-bolt', evening: 'fa-moon' };
+  const colors = { morning: '#FF8C42', afternoon: '#4ECDC4', evening: '#8B5CF6' };
+
+  const routines = Store.get('routines') || [];
+  routines.push({
+    id: 'rt_' + Date.now(),
+    title,
+    slot,
+    targetTime,
+    icon: icons[slot] || 'fa-star',
+    color: colors[slot] || '#FF8C42',
+    days: [1, 2, 3, 4, 5],
+    steps: rawSteps
+  });
+
+  Store.set('routines', routines);
+  closeModal();
+  SFX.click();
+  toast(`Routine "${title}" saved!`, 'success');
+  renderSchedule();
+}
+
+function deleteRoutine(id) {
+  let routines = Store.get('routines') || [];
+  routines = routines.filter(r => r.id !== id);
+  Store.set('routines', routines);
+  SFX.click();
+  toast('Routine removed', 'info');
+  renderSchedule();
+}
+
+function showRoutineTemplateModal() {
+  showModal(`
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:14px;">Timetable & Routine Presets</h2>
+    <p style="color:var(--text2); font-size:14px; margin-bottom:16px;">Quickly load a structured weekly timetable template tailored to your schedule:</p>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      <div class="card" style="cursor:pointer; padding:14px;" onclick="applySchedulePreset('school')">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="font-weight:700; font-size:15px;"><i class="fas fa-school" style="color:var(--teal); margin-right:8px;"></i> Standard School Week</div>
+          <span class="btn btn-sm btn-teal">Apply</span>
+        </div>
+        <div style="font-size:12px; color:var(--text2); margin-top:4px;">Mon-Fri 9AM-2PM classes (Math, Science, English, History) + 4PM daily deep focus blocks.</div>
+      </div>
+      <div class="card" style="cursor:pointer; padding:14px;" onclick="applySchedulePreset('exam')">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="font-weight:700; font-size:15px;"><i class="fas fa-bolt" style="color:var(--accent); margin-right:8px;"></i> Exam Prep Sprint</div>
+          <span class="btn btn-sm btn-primary">Apply</span>
+        </div>
+        <div style="font-size:12px; color:var(--text2); margin-top:4px;">High-intensity review blocks: Morning flashcards, afternoon past exam tests, evening relaxation.</div>
+      </div>
+      <div class="card" style="cursor:pointer; padding:14px;" onclick="applySchedulePreset('adhd')">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="font-weight:700; font-size:15px;"><i class="fas fa-brain" style="color:#A855F7; margin-right:8px;"></i> ADHD Low-Friction Routine</div>
+          <span class="btn btn-sm btn-secondary">Apply</span>
+        </div>
+        <div style="font-size:12px; color:var(--text2); margin-top:4px;">25-minute short bursts with mandatory 10-minute stretch & sensory resets.</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  `);
+}
+
+function applySchedulePreset(type) {
+  if (type === 'exam') {
+    Store.set('scheduleEvents', [
+      { id: 'evt_rev1', title: 'Subject 1 Practice Exam', category: 'Exam', color: '#FF8C42', days: [1, 3, 5], startTime: '09:00', endTime: '11:00', location: 'Quiet Room' },
+      { id: 'evt_rev2', title: 'Flashcards & Memory Review', category: 'Study', color: '#A855F7', days: [1, 2, 3, 4, 5], startTime: '14:00', endTime: '15:00', location: 'Spark Desk' },
+      { id: 'evt_rev3', title: 'Problem Sets & Formula Practice', category: 'Study', color: '#3B82F6', days: [2, 4], startTime: '16:00', endTime: '17:30', location: 'Desk' }
+    ]);
+  } else if (type === 'adhd') {
+    Store.set('scheduleEvents', [
+      { id: 'evt_adhd1', title: 'Sprint 1: Most Urgent Homework', category: 'Study', color: '#4ECDC4', days: [1, 2, 3, 4, 5], startTime: '15:30', endTime: '16:00', location: 'Study Space' },
+      { id: 'evt_adhd2', title: 'Sensory Walk & Snack', category: 'Activity', color: '#10B981', days: [1, 2, 3, 4, 5], startTime: '16:00', endTime: '16:30', location: 'Home' },
+      { id: 'evt_adhd3', title: 'Sprint 2: Reading or Project', category: 'Study', color: '#FF8C42', days: [1, 2, 3, 4, 5], startTime: '16:30', endTime: '17:00', location: 'Study Space' }
+    ]);
+  } else {
+    // Default School
+    Store.set('scheduleEvents', [
+      { id: 'evt_m', title: 'Mathematics', category: 'Class', color: '#3B82F6', days: [1, 3, 5], startTime: '09:00', endTime: '10:00', location: 'Room 204' },
+      { id: 'evt_e', title: 'English Literature', category: 'Class', color: '#A855F7', days: [1, 3], startTime: '10:30', endTime: '11:30', location: 'Room 102' },
+      { id: 'evt_s', title: 'Science & Chemistry Lab', category: 'Class', color: '#10B981', days: [2, 4], startTime: '09:30', endTime: '11:00', location: 'Lab B' },
+      { id: 'evt_h', title: 'History & Social Studies', category: 'Class', color: '#F59E0B', days: [2, 4], startTime: '11:30', endTime: '12:30', location: 'Room 210' },
+      { id: 'evt_f', title: 'Daily Deep Focus & Homework Hour', category: 'Study', color: '#FF8C42', days: [1, 2, 3, 4, 5], startTime: '16:00', endTime: '17:00', location: 'Home Study Desk' }
+    ]);
+  }
+
+  closeModal();
+  SFX.bonus();
+  toast('Timetable preset applied!', 'success');
+  renderSchedule();
+}
+
+function printSchedule() {
+  window.print();
 }
 
 // ======================== MIND & MOOD WELLNESS SYSTEM ========================
