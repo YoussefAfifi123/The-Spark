@@ -419,11 +419,15 @@ function getLocalDateStr(d = new Date()) {
 }
 
 const Store={
-  _d:{user:null,sessions:[],games:[],quests:{},thoughts:[],totalXP:0,streak:0,lastActive:null,settings:{focusDuration:10,breakDuration:3,sounds:true,whitelist:['khanacademy.org','docs.google.com','classroom.google.com','ekb.eg','nafham.com'],strictMode:false},inventory:{avatars:['default'],companions:['default'],timers:['classic'],themes:['default'],equipped:{avatar:'default',companion:'default',timer:'classic',theme:'default'}}},
+  _d:{user:null,sessions:[],games:[],quests:{},thoughts:[],totalXP:0,streak:0,lastActive:null,settings:{focusDuration:10,breakDuration:3,sounds:true,whitelist:['khanacademy.org','docs.google.com','classroom.google.com','ekb.eg','nafham.com'],strictMode:false,schedule:{weekStartDay:6,dayStartHour:8,dayEndHour:20}},inventory:{avatars:['default'],companions:['default'],timers:['classic'],themes:['default'],equipped:{avatar:'default',companion:'default',timer:'classic',theme:'default'}}},
   load(){
     try{
       const r=localStorage.getItem('spark_data');
       this._d=r?{...this._d,...JSON.parse(r)}:{...this._d};
+      if(!this._d.settings) this._d.settings = {};
+      if(!this._d.settings.schedule) {
+        this._d.settings.schedule = { weekStartDay: 6, dayStartHour: 8, dayEndHour: 20 };
+      }
       if(!this._d.inventory){
         this._d.inventory={avatars:['default'],companions:['default'],timers:['classic'],colors:['#FF8C42'],themes:['default'],equipped:{avatar:'default',companion:'default',timer:'classic',color:'#FF8C42',theme:'default'}};
       }
@@ -1578,7 +1582,7 @@ let progressChart=null;
 function renderProgress(){updateUserPanel();const el=document.getElementById('view-progress'),ts=Store.get('sessions').length,tg=Store.get('games').length,tfm=Store.get('sessions').reduce((s,x)=>s+x.duration,0),txp=Store.get('totalXP'),ad=ts>0?(Store.get('sessions').reduce((s,x)=>s+x.distractions,0)/ts).toFixed(1):'0';const labels=[],fd=[],xd=[];for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*86400000);labels.push(d.toLocaleDateString('en',{weekday:'short'}));const ds=d.toDateString();fd.push(Store.get('sessions').filter(s=>new Date(s.date).toDateString()===ds).reduce((s,x)=>s+x.duration,0));xd.push(Store.get('games').filter(g=>new Date(g.date).toDateString()===ds).reduce((s,g)=>s+g.xp,0));}const games=Store.get('games').filter(g=>new Date(g.date).getTime()>Date.now()-7*86400000);const sessions=Store.get('sessions');el.innerHTML=`<div style="max-width:900px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Your Progress</h1><p style="color:var(--text2);margin-bottom:28px">Every minute counts.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:28px"><div class="card stat-card"><div class="stat-num" style="color:var(--teal)">${tfm}m</div><div class="stat-label">Total focus</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--accent)">${txp}</div><div class="stat-label">Total XP</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--green)">${ts}</div><div class="stat-label">Sessions</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--blue)">${tg}</div><div class="stat-label">Games played</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--text)">${ad}</div><div class="stat-label">Avg distractions</div></div></div><div class="card" style="margin-bottom:28px"><h3 style="font-size:16px;margin-bottom:16px">Last 7 Days</h3><div style="position:relative;height:260px"><canvas id="progress-chart"></canvas></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px"><div class="card"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-bullseye" style="color:var(--teal)"></i> Recent Focus Sessions</h3>${!sessions.length?'<p style="color:var(--text2);font-size:14px">No focus sessions yet.</p>':`<div style="display:flex;flex-direction:column;gap:8px">${sessions.slice(-8).reverse().map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:10px"><div style="width:36px;height:36px;border-radius:8px;background:var(--teal-g);display:flex;align-items:center;justify-content:center"><i class="fas fa-clock" style="color:var(--teal);font-size:14px"></i></div><div style="flex:1"><div style="font-weight:700;font-size:14px">${escHtml(s.task)}</div><div style="font-size:12px;color:var(--text2)">${new Date(s.date).toLocaleDateString()} &middot; ${s.distractions} distraction${s.distractions!==1?'s':''}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:var(--teal)">${s.duration}m</div><div style="font-size:12px;color:var(--green)">+${s.duration*2} XP</div></div></div>`).join('')}</div>`}</div><div class="card"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-gamepad" style="color:var(--accent)"></i> Recent Games</h3>${!games.length?'<p style="color:var(--text2);font-size:14px">No games played recently.</p>':`<div style="display:flex;flex-direction:column;gap:8px">${games.slice(-8).reverse().map(g=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:10px"><div style="width:36px;height:36px;border-radius:8px;background:rgba(255,140,66,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-gamepad" style="color:var(--accent);font-size:14px"></i></div><div style="flex:1"><div style="font-weight:700;font-size:14px">Grade ${g.grade} Math</div><div style="font-size:12px;color:var(--text2)">${new Date(g.date).toLocaleDateString()}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:var(--green)">${g.score}/${g.total}</div><div style="font-size:12px;color:var(--accent)">+${g.xp} XP</div></div></div>`).join('')}</div>`}</div></div></div>`;if(progressChart)progressChart.destroy();const ctx=document.getElementById('progress-chart');if(ctx){progressChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Focus (min)',data:fd,backgroundColor:'rgba(78,205,196,0.6)',borderColor:'#4ECDC4',borderWidth:1,borderRadius:6,barPercentage:.5},{label:'XP Earned',data:xd,backgroundColor:'rgba(255,140,66,0.6)',borderColor:'#FF8C42',borderWidth:1,borderRadius:6,barPercentage:.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9B97A0',font:{family:'Nunito',weight:'600'}}}},scales:{x:{grid:{color:'rgba(42,42,61,0.5)'},ticks:{color:'#9B97A0',font:{family:'Nunito'}}},y:{grid:{color:'rgba(42,42,61,0.5)'},ticks:{color:'#9B97A0',font:{family:'Nunito'}},beginAtZero:true}}}});}}
 
 // ======================== SETTINGS ========================
-function renderSettings(){updateUserPanel();const el=document.getElementById('view-settings'),u=Store.get('user')||{name:'',grade:2,color:'#FF8C42'},s=Store.get('settings'),thoughts=Store.get('thoughts')||[];
+function renderSettings(){updateUserPanel();const el=document.getElementById('view-settings'),u=Store.get('user')||{name:'',grade:2,color:'#FF8C42'},s=Store.get('settings'),thoughts=Store.get('thoughts')||[],sched=getScheduleSettings();
 const gradeSections=(sel)=>`<div style="margin-bottom:6px"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Primary</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}</div></div><div style="margin-bottom:6px"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Preparatory</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[7,8,9].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}</div></div><div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Secondary (Thanawya Amma)</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[10,11,12].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}</div></div>`;
   el.innerHTML=`<div style="max-width:700px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Settings</h1><p style="color:var(--text2);margin-bottom:28px">Customize Spark.</p>
     <div class="card" style="margin-bottom:20px"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-user" style="color:var(--accent);margin-right:8px"></i>Profile</h3><div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Name</label><input class="input" id="set-name" value="${u.name}" placeholder="Your name"></div><div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Grade</label>${gradeSections(u.grade)}</div><div><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Color</label>
@@ -1598,6 +1602,63 @@ const gradeSections=(sel)=>`<div style="margin-bottom:6px"><div style="font-size
   })()}
 </div></div><button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="saveProfile()">Save Profile</button></div>
 <div><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Default focus duration</label><div style="display:flex;gap:6px">${[5,10,15,20,25,30,45,60].map(m=>`<button class="grade-pill ${m===s.focusDuration?'selected':''}" onclick="Store.get('settings').focusDuration=${m};Store.save();SFX.click();renderSettings()">${m} min</button>`).join('')}</div></div><div style="margin-top:12px;"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Default break duration</label><div style="display:flex;gap:6px">${[3, 5, 10].map(m => `<button class="grade-pill ${m === s.breakDuration ? 'selected' : ''}" onclick="Store.get('settings').breakDuration=${m};Store.save();SFX.click();renderSettings()">${m} min</button>`).join('')}</div></div></div>
+
+    <!-- Schedule & Timetable Customization -->
+    <div class="card" style="margin-bottom:20px;border-color:rgba(78,205,196,.25)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <h3 style="font-size:16px;margin:0;display:flex;align-items:center;gap:8px">
+          <i class="fas fa-calendar-days" style="color:var(--teal)"></i> Schedule & Timetable Settings
+        </h3>
+        <button class="btn btn-sm btn-ghost" onclick="showScheduleSettingsModal()" style="border:1px solid var(--border); font-size:12px;">
+          <i class="fas fa-sliders"></i> Open Customizer
+        </button>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Week Starts On</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${[
+            { val: 6, label: 'Saturday', note: 'Egypt & Middle East' },
+            { val: 0, label: 'Sunday', note: 'North America / Japan' },
+            { val: 1, label: 'Monday', note: 'International ISO / Europe' }
+          ].map(opt => `
+            <button class="grade-pill ${sched.weekStartDay === opt.val ? 'selected' : ''}" 
+                    onclick="saveScheduleSettings(${opt.val}, ${sched.dayStartHour}, ${sched.dayEndHour})" 
+                    style="padding:8px 14px; display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
+              <span style="font-weight:700;">${opt.label}</span>
+              <span style="font-size:10px; opacity:0.75;">${opt.note}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Day Starts At (Earliest Timetable Hour)</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${[4, 5, 6, 7, 8, 9, 10].map(h => `
+              <button class="grade-pill ${sched.dayStartHour === h ? 'selected' : ''}" 
+                      onclick="saveScheduleSettings(${sched.weekStartDay}, ${h}, ${sched.dayEndHour})">
+                ${formatHour12(h)}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Day Ends At (Latest Timetable Hour)</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${[17, 18, 19, 20, 21, 22, 23].map(h => `
+              <button class="grade-pill ${sched.dayEndHour === h ? 'selected' : ''}" 
+                      onclick="saveScheduleSettings(${sched.weekStartDay}, ${sched.dayStartHour}, ${h})">
+                ${formatHour12(h)}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);background:var(--bg);padding:8px 12px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-info-circle" style="color:var(--teal)"></i>
+        <span>Currently showing <strong>${{6:'Saturday',0:'Sunday',1:'Monday'}[sched.weekStartDay] || 'Custom'}</strong> as week start &middot; <strong>${formatHour12(sched.dayStartHour)} to ${formatHour12(sched.dayEndHour)}</strong> (${Math.max(1, sched.dayEndHour - sched.dayStartHour + 1)} hours/day).</span>
+      </div>
+    </div>
 <div class="card" style="margin-bottom:20px;border-color:rgba(255,140,66,.2)"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-shield-alt" style="color:var(--accent);margin-right:8px"></i>Focus Mode</h3>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div><div style="font-weight:700;font-size:14px">Strict Focus Mode</div><div style="font-size:12px;color:var(--text2)">Adds a 5-second delay to stop timer and warns on tab close.</div></div><button class="btn ${s.strictMode?'btn-primary':'btn-secondary'} btn-sm" onclick="toggleStrict()">${s.strictMode?'Strict ON':'Strict OFF'}</button></div></div>
 <div class="card" style="margin-bottom:20px;border-color:rgba(78,205,196,.15)"><h3 style="font-size:16px;margin-bottom:6px;display:flex;align-items:center;gap:8px"><i class="fas fa-cloud" style="color:var(--teal)"></i> Thought Journal</h3><p style="font-size:13px;color:var(--text2);margin-bottom:14px">Ideas you parked during focus sessions. Safe here for later.</p>${!thoughts.length?'<p style="font-size:14px;color:var(--text2);padding:12px 0">No thoughts yet. Use the Thought Dump during your next focus session.</p>':`<div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">${thoughts.slice(0,50).map(t=>`<div class="thought-entry"><div class="thought-text">${t.text}</div><div class="thought-time">${new Date(t.date).toLocaleDateString()} ${new Date(t.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>`).join('')}</div>${thoughts.length>50?`<div style="font-size:12px;color:var(--text2);margin-top:8px">Showing 50 of ${thoughts.length}</div>`:''}<button class="btn btn-sm btn-ghost" style="margin-top:10px;color:var(--red);border:1px solid rgba(255,107,107,.2)" onclick="Store.set('thoughts',[]);renderSettings();toast('Journal cleared','info')"><i class="fas fa-trash"></i> Clear Journal</button>`}</div>
@@ -2374,9 +2435,7 @@ function showAddTaskModal(defaultDate, defaultTime) {
       <div>
         <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Timetable Slot</label>
         <select class="input" id="task-time-inp" style="font-size:13px;">
-          ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(tm => `
-            <option value="${tm}" ${curTime === tm ? 'selected' : ''}>${tm}</option>
-          `).join('')}
+          ${getTimeSlotOptions(curTime)}
         </select>
       </div>
     </div>
@@ -2509,25 +2568,258 @@ let scheduleWeekOffset = 0;
 let scheduleViewMode = 'timetable'; // 'timetable', 'agenda', 'routine'
 let scheduleFilter = 'all'; // 'all', 'classes', 'tasks', 'routine'
 
+function getScheduleSettings() {
+  const s = Store.get('settings') || {};
+  if (!s.schedule) {
+    s.schedule = { weekStartDay: 6, dayStartHour: 8, dayEndHour: 20 };
+  }
+  if (typeof s.schedule.weekStartDay !== 'number') s.schedule.weekStartDay = 6;
+  if (typeof s.schedule.dayStartHour !== 'number') s.schedule.dayStartHour = 8;
+  if (typeof s.schedule.dayEndHour !== 'number') s.schedule.dayEndHour = 20;
+  return s.schedule;
+}
+
+function saveScheduleSettings(weekStartDay, dayStartHour, dayEndHour) {
+  const s = Store.get('settings') || {};
+  if (!s.schedule) s.schedule = {};
+  const startDay = parseInt(weekStartDay, 10);
+  const startH = Math.max(0, Math.min(22, parseInt(dayStartHour, 10)));
+  const endH = Math.max(startH + 1, Math.min(23, parseInt(dayEndHour, 10)));
+
+  s.schedule.weekStartDay = startDay;
+  s.schedule.dayStartHour = startH;
+  s.schedule.dayEndHour = endH;
+  Store.save();
+  SFX.bonus();
+
+  const dayNames = { 6: 'Saturday', 0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday' };
+  const dName = dayNames[startDay] || 'Custom';
+  toast(`Timetable updated! Starts on ${dName}, ${formatHour12(startH)} to ${formatHour12(endH)}`, 'success');
+
+  if (currentView === 'schedule') renderSchedule();
+  else if (currentView === 'settings') renderSettings();
+}
+
+function formatHour12(h) {
+  const hourNum = parseInt(h, 10);
+  return (hourNum % 12 || 12) + (hourNum >= 12 ? ' PM' : ' AM');
+}
+
+function getScheduleHours() {
+  const s = getScheduleSettings();
+  const start = Math.max(0, Math.min(22, s.dayStartHour));
+  const end = Math.max(start + 1, Math.min(23, s.dayEndHour));
+  const hours = [];
+  for (let h = start; h <= end; h++) {
+    hours.push(String(h).padStart(2, '0') + ':00');
+  }
+  return hours;
+}
+
+function getTimeSlotOptions(selectedTime, startH = null, endH = null) {
+  const sched = getScheduleSettings();
+  const from = startH !== null ? startH : Math.min(4, sched.dayStartHour);
+  const to = endH !== null ? endH : Math.max(23, sched.dayEndHour);
+  const opts = [];
+  for (let h = from; h <= to; h++) {
+    const val = String(h).padStart(2, '0') + ':00';
+    const h12 = (h % 12 || 12) + (h >= 12 ? ' PM' : ' AM');
+    opts.push(`<option value="${val}" ${val === selectedTime ? 'selected' : ''}>${val} (${h12})</option>`);
+  }
+  return opts.join('');
+}
+
+function getOrderedWeekDaysList() {
+  const sched = getScheduleSettings();
+  const allDays = [
+    { d: 0, n: 'Sun', full: 'Sunday' },
+    { d: 1, n: 'Mon', full: 'Monday' },
+    { d: 2, n: 'Tue', full: 'Tuesday' },
+    { d: 3, n: 'Wed', full: 'Wednesday' },
+    { d: 4, n: 'Thu', full: 'Thursday' },
+    { d: 5, n: 'Fri', full: 'Friday' },
+    { d: 6, n: 'Sat', full: 'Saturday' }
+  ];
+  const startDay = sched.weekStartDay;
+  const ordered = [];
+  for (let i = 0; i < 7; i++) {
+    const dayIdx = (startDay + i) % 7;
+    ordered.push(allDays.find(x => x.d === dayIdx));
+  }
+  return ordered;
+}
+
+function showScheduleSettingsModal() {
+  const sched = getScheduleSettings();
+
+  const startDayOptions = [
+    { val: 6, label: 'Saturday', note: 'Egypt & Middle East' },
+    { val: 0, label: 'Sunday', note: 'North America / Japan' },
+    { val: 1, label: 'Monday', note: 'International ISO / Europe' }
+  ];
+
+  const presets = [
+    { name: 'Early Bird (5 AM – 8 PM)', start: 5, end: 20 },
+    { name: 'Dawn Scholar (6 AM – 9 PM)', start: 6, end: 21 },
+    { name: 'Standard School (8 AM – 8 PM)', start: 8, end: 20 },
+    { name: 'Night Owl (10 AM – 11 PM)', start: 10, end: 23 },
+    { name: 'Full Day (5 AM – 11 PM)', start: 5, end: 23 }
+  ];
+
+  showModal(`
+    <div style="max-width:540px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <div style="width:36px; height:36px; border-radius:10px; background:var(--teal-g); display:flex; align-items:center; justify-content:center; color:var(--teal);">
+          <i class="fas fa-sliders" style="font-size:16px;"></i>
+        </div>
+        <div>
+          <h2 style="font-size:20px; font-weight:700; margin:0;">Timetable & Week Settings</h2>
+          <p style="font-size:12px; color:var(--text2); margin:0;">Customize week start day and daily active hours</p>
+        </div>
+      </div>
+
+      <!-- Week Start Day -->
+      <div style="margin-bottom:18px;">
+        <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">Week Starts On</label>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;" id="sched-start-day-picker">
+          ${startDayOptions.map(opt => `
+            <button type="button" class="btn ${sched.weekStartDay === opt.val ? 'btn-teal' : 'btn-secondary'} sched-day-opt" 
+                    data-day="${opt.val}" 
+                    onclick="selectModalStartDay(${opt.val})"
+                    style="padding:10px 8px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:13px;">
+              <span style="font-weight:700;">${opt.label}</span>
+              <span style="font-size:10px; opacity:0.8;">${opt.note}</span>
+            </button>
+          `).join('')}
+        </div>
+        <input type="hidden" id="modal-sched-start-day" value="${sched.weekStartDay}">
+      </div>
+
+      <!-- Quick Preset Buttons -->
+      <div style="margin-bottom:18px;">
+        <label style="font-size:12px; color:var(--text2); display:block; margin-bottom:6px;">Quick Hour Presets</label>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          ${presets.map(p => `
+            <button type="button" class="btn btn-ghost btn-sm" 
+                    onclick="setModalHours(${p.start}, ${p.end})" 
+                    style="border:1px solid var(--border); font-size:11px; padding:4px 8px;">
+              ${p.name}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Daily Hour Range -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+        <div>
+          <label style="font-size:13px; font-weight:700; display:block; margin-bottom:4px;">Day Starts At (First Hour)</label>
+          <select class="input" id="modal-day-start-hour" onchange="updateModalHourPreview()">
+            ${[3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => `
+              <option value="${h}" ${h === sched.dayStartHour ? 'selected' : ''}>${String(h).padStart(2, '0')}:00 (${formatHour12(h)})</option>
+            `).join('')}
+          </select>
+          <div style="font-size:11px; color:var(--text2); margin-top:3px;">e.g. 5:00 AM for early morning sessions</div>
+        </div>
+        <div>
+          <label style="font-size:13px; font-weight:700; display:block; margin-bottom:4px;">Day Ends At (Last Hour)</label>
+          <select class="input" id="modal-day-end-hour" onchange="updateModalHourPreview()">
+            ${[17, 18, 19, 20, 21, 22, 23].map(h => `
+              <option value="${h}" ${h === sched.dayEndHour ? 'selected' : ''}>${String(h).padStart(2, '0')}:00 (${formatHour12(h)})</option>
+            `).join('')}
+          </select>
+          <div style="font-size:11px; color:var(--text2); margin-top:3px;">e.g. 8:00 PM (20:00) or 11:00 PM (23:00)</div>
+        </div>
+      </div>
+
+      <!-- Live summary pill -->
+      <div id="modal-sched-preview" style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin-bottom:18px; font-size:12px; color:var(--text2); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-check-circle" style="color:var(--teal);"></i>
+        <span>Will display hours <strong>${formatHour12(sched.dayStartHour)} to ${formatHour12(sched.dayEndHour)}</strong> (${Math.max(1, sched.dayEndHour - sched.dayStartHour + 1)} time slots/day)</span>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-teal" onclick="applyModalScheduleSettings()"><i class="fas fa-check"></i> Apply to Timetable</button>
+      </div>
+    </div>
+  `);
+}
+
+function selectModalStartDay(day) {
+  const hiddenInp = document.getElementById('modal-sched-start-day');
+  if (hiddenInp) hiddenInp.value = day;
+  document.querySelectorAll('.sched-day-opt').forEach(btn => {
+    if (parseInt(btn.dataset.day, 10) === day) {
+      btn.className = 'btn btn-teal sched-day-opt';
+    } else {
+      btn.className = 'btn btn-secondary sched-day-opt';
+    }
+  });
+  SFX.click();
+}
+
+function setModalHours(start, end) {
+  const sEl = document.getElementById('modal-day-start-hour');
+  const eEl = document.getElementById('modal-day-end-hour');
+  if (sEl) sEl.value = start;
+  if (eEl) eEl.value = end;
+  updateModalHourPreview();
+  SFX.click();
+}
+
+function updateModalHourPreview() {
+  const sEl = document.getElementById('modal-day-start-hour');
+  const eEl = document.getElementById('modal-day-end-hour');
+  const pEl = document.getElementById('modal-sched-preview');
+  if (!sEl || !eEl || !pEl) return;
+
+  let s = parseInt(sEl.value, 10);
+  let e = parseInt(eEl.value, 10);
+  if (e <= s) {
+    e = Math.min(23, s + 1);
+    eEl.value = e;
+  }
+  const total = e - s + 1;
+  pEl.innerHTML = `
+    <i class="fas fa-check-circle" style="color:var(--teal);"></i>
+    <span>Will display hours <strong>${formatHour12(s)} to ${formatHour12(e)}</strong> (${total} time slots/day)</span>
+  `;
+}
+
+function applyModalScheduleSettings() {
+  const dayInp = document.getElementById('modal-sched-start-day');
+  const sEl = document.getElementById('modal-day-start-hour');
+  const eEl = document.getElementById('modal-day-end-hour');
+
+  const startDay = dayInp ? parseInt(dayInp.value, 10) : 6;
+  const startHour = sEl ? parseInt(sEl.value, 10) : 8;
+  const endHour = eEl ? parseInt(eEl.value, 10) : 20;
+
+  closeModal();
+  saveScheduleSettings(startDay, startHour, endHour);
+}
+
 function getWeekDays(offset = 0) {
+  const sched = getScheduleSettings();
+  const startDay = sched.weekStartDay; // 6: Sat, 0: Sun, 1: Mon
   const now = new Date();
   const todayStr = getLocalDateStr(now);
-  const currentDay = now.getDay(); // 0 is Sunday, 1 is Monday...
-  const distToMonday = (currentDay + 6) % 7; // Monday = 0, Tuesday = 1...
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - distToMonday + (offset * 7));
+  const currentDay = now.getDay(); // 0 is Sunday, 1 is Monday... 6 is Saturday
+  const distToStart = (currentDay - startDay + 7) % 7;
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - distToStart + (offset * 7));
 
   const days = [];
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const fullNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const dayIndexes = [1, 2, 3, 4, 5, 6, 0]; // 1=Mon, 2=Tue... 0=Sun
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const fullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   for (let i = 0; i < 7; i++) {
-    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    const d = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i);
     const dateStr = getLocalDateStr(d);
+    const dayIndex = d.getDay();
     days.push({
-      name: dayNames[i],
-      fullName: fullNames[i],
-      dayIndex: dayIndexes[i],
+      name: dayNames[dayIndex],
+      fullName: fullNames[dayIndex],
+      dayIndex: dayIndex,
       date: d,
       dateStr: dateStr,
       dayNum: d.getDate(),
@@ -2548,6 +2840,10 @@ function renderSchedule() {
   const weekEnd = `${days[6].monthName} ${days[6].dayNum}, ${days[6].date.getFullYear()}`;
   const isCurrentWeek = scheduleWeekOffset === 0;
 
+  const schedSettings = getScheduleSettings();
+  const dayNameMap = { 6: 'Saturday', 0: 'Sunday', 1: 'Monday' };
+  const weekStartName = dayNameMap[schedSettings.weekStartDay] || 'Custom';
+
   const tasks = Store.get('tasks') || [];
   const pendingTasks = tasks.filter(t => !t.completed);
   const unscheduledTasks = pendingTasks.filter(t => !t.scheduledDate);
@@ -2565,6 +2861,9 @@ function renderSchedule() {
           <p style="color:var(--text2); font-size:15px;">Week-by-week timetable, daily routines, and automatically synced tasks.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="showScheduleSettingsModal()" title="Customize week start day and hours" style="border:1px solid var(--border);">
+            <i class="fas fa-sliders"></i> Timetable Settings
+          </button>
           <button class="btn btn-teal btn-sm" onclick="autoSyncTasksToSchedule()" title="Automatically distribute pending tasks into open study slots this week">
             <i class="fas fa-bolt"></i> Auto-Sync Tasks ${unscheduledTasks.length ? `(${unscheduledTasks.length})` : ''}
           </button>
@@ -2590,10 +2889,17 @@ function renderSchedule() {
           </button>
         </div>
 
-        <div style="font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px;">
-          <i class="far fa-calendar-alt" style="color:var(--accent);"></i>
-          <span>${weekStart} – ${weekEnd}</span>
-          ${isCurrentWeek ? `<span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:12px; font-family:'Nunito';">This Week</span>` : ''}
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <div style="font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px;">
+            <i class="far fa-calendar-alt" style="color:var(--accent);"></i>
+            <span>${weekStart} – ${weekEnd}</span>
+            ${isCurrentWeek ? `<span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:12px; font-family:'Nunito';">This Week</span>` : ''}
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="tag" style="background:var(--bg); border:1px solid var(--border); font-size:11px; cursor:pointer; font-family:'Nunito'; font-weight:600;" onclick="showScheduleSettingsModal()" title="Click to customize schedule hours and start day">
+              <i class="fas fa-clock" style="color:var(--teal); margin-right:4px;"></i>${formatHour12(schedSettings.dayStartHour)} – ${formatHour12(schedSettings.dayEndHour)} &middot; Starts ${weekStartName} <i class="fas fa-pen" style="font-size:9px; margin-left:3px; opacity:0.6;"></i>
+            </span>
+          </div>
         </div>
 
         <!-- View Switcher -->
@@ -2662,7 +2968,7 @@ function renderSchedule() {
 
 // ---------------- Timetable Grid View ----------------
 function renderWeeklyTimetableGrid(days) {
-  const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+  const hours = getScheduleHours();
   const events = Store.get('scheduleEvents') || [];
   const tasks = Store.get('tasks') || [];
   const routines = Store.get('routines') || [];
@@ -3010,16 +3316,17 @@ function autoSyncTasksToSchedule() {
   }
 
   const days = getWeekDays(scheduleWeekOffset);
-  const events = Store.get('scheduleEvents') || [];
+  const availableHours = getScheduleHours();
   let syncedCount = 0;
 
-  // Study hours on weekdays: 15:00, 16:00, 17:00, 18:00, 19:00
-  const studyHours = ['16:00', '17:00', '15:00', '18:00', '19:00'];
+  // Study hours prioritized, falling back to available timetable hours
+  const preferred = ['16:00', '17:00', '15:00', '18:00', '14:00', '19:00', '10:00', '11:00', '09:00'];
+  let studyHours = preferred.filter(h => availableHours.includes(h));
+  if (!studyHours.length) studyHours = availableHours;
 
-  // Distribute tasks across week days
+  // Distribute tasks across week days (first 5 active days of configured week)
   pendingTasks.forEach((t, i) => {
-    // Pick day (Monday to Friday prioritized)
-    const dayObj = days[i % 5]; // cycles Mon(0), Tue(1), Wed(2), Thu(3), Fri(4)
+    const dayObj = days[i % 5];
     const hourSlot = studyHours[Math.floor(i / 5) % studyHours.length];
 
     t.scheduledDate = dayObj.dateStr;
@@ -3035,10 +3342,11 @@ function autoSyncTasksToSchedule() {
 
 // ---------------- Modals & Event Management ----------------
 function showAddScheduleEventModal(defaultDay, defaultHour) {
-  const dayIndex = defaultDay !== undefined ? defaultDay : 1;
-  const startTime = defaultHour || '09:00';
+  const sched = getScheduleSettings();
+  const dayIndex = defaultDay !== undefined ? defaultDay : sched.weekStartDay;
+  const startTime = defaultHour || (String(sched.dayStartHour).padStart(2, '0') + ':00');
   const hourNum = parseInt(startTime.split(':')[0], 10);
-  const endHour = String(hourNum + 1).padStart(2, '0') + ':00';
+  const endHour = String(Math.min(23, hourNum + 1)).padStart(2, '0') + ':00';
 
   showModal(`
     <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">Add Timetable Event / Class</h2>
@@ -3073,27 +3381,20 @@ function showAddScheduleEventModal(defaultDay, defaultHour) {
       <div>
         <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Start Time</label>
         <select class="input" id="evt-start-inp">
-          ${['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(t => `
-            <option value="${t}" ${t === startTime ? 'selected' : ''}>${t}</option>
-          `).join('')}
+          ${getTimeSlotOptions(startTime)}
         </select>
       </div>
       <div>
         <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">End Time</label>
         <select class="input" id="evt-end-inp">
-          ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(t => `
-            <option value="${t}" ${t === endHour ? 'selected' : ''}>${t}</option>
-          `).join('')}
+          ${getTimeSlotOptions(endHour)}
         </select>
       </div>
     </div>
     <div style="margin-bottom:12px;">
       <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:6px;">Recurring Days of Week</label>
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        ${[
-          { d: 1, n: 'Mon' }, { d: 2, n: 'Tue' }, { d: 3, n: 'Wed' },
-          { d: 4, n: 'Thu' }, { d: 5, n: 'Fri' }, { d: 6, n: 'Sat' }, { d: 0, n: 'Sun' }
-        ].map(item => `
+        ${getOrderedWeekDaysList().map(item => `
           <label style="display:flex; align-items:center; gap:4px; font-size:12px; background:var(--bg); padding:6px 10px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
             <input type="checkbox" class="evt-day-check" value="${item.d}" ${item.d === dayIndex ? 'checked' : ''} style="accent-color:var(--teal);">
             <span>${item.n}</span>
@@ -3165,17 +3466,13 @@ function showEditEventModal(eventId) {
       <div>
         <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Start Time</label>
         <select class="input" id="edit-evt-start">
-          ${['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(t => `
-            <option value="${t}" ${t === evt.startTime ? 'selected' : ''}>${t}</option>
-          `).join('')}
+          ${getTimeSlotOptions(evt.startTime)}
         </select>
       </div>
       <div>
         <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">End Time</label>
         <select class="input" id="edit-evt-end">
-          ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(t => `
-            <option value="${t}" ${t === evt.endTime ? 'selected' : ''}>${t}</option>
-          `).join('')}
+          ${getTimeSlotOptions(evt.endTime)}
         </select>
       </div>
     </div>
@@ -3254,9 +3551,7 @@ function showTaskScheduleDetails(taskId) {
         <div>
           <label style="font-size:12px; color:var(--text2); display:block; margin-bottom:3px;">Time Slot</label>
           <select class="input" id="sched-task-time" style="font-size:13px; padding:6px 10px;">
-            ${['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'].map(tm => `
-              <option value="${tm}" ${(task.scheduledTime || '16:00') === tm ? 'selected' : ''}>${tm}</option>
-            `).join('')}
+            ${getTimeSlotOptions(task.scheduledTime || '16:00')}
           </select>
         </div>
       </div>
