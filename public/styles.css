@@ -1101,4 +1101,215 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   background: var(--card-h);
 }
 
+/* ==================== CBT REFRAMING JOURNAL & WORKSHEET ==================== */
+.cbt-wizard-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+  margin-bottom: 24px;
+}
+.cbt-wizard-steps::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 36px;
+  right: 36px;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.cbt-step-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0 4px;
+}
+.cbt-step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.cbt-step-node.active .cbt-step-circle {
+  background: var(--teal);
+  color: #0F0F14;
+  border-color: var(--teal);
+  box-shadow: 0 0 16px var(--teal-g);
+}
+.cbt-step-node.completed .cbt-step-circle {
+  background: var(--green);
+  color: #0F0F14;
+  border-color: var(--green);
+}
+.cbt-step-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-align: center;
+  white-space: nowrap;
+}
+.cbt-step-node.active .cbt-step-label {
+  color: var(--text);
+}
+
+.cbt-distortion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+.cbt-distortion-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
+  text-align: left;
+}
+.cbt-distortion-item:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+.cbt-distortion-item.selected {
+  border-color: var(--teal);
+  background: rgba(78, 205, 196, 0.09);
+  box-shadow: 0 0 0 2px var(--teal);
+}
+.cbt-distortion-item.selected .cbt-dist-icon {
+  color: #fff !important;
+}
+
+.cbt-preset-card {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+}
+.cbt-preset-card:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--card-h);
+  transform: translateY(-1px);
+}
+
+.cbt-stumble-box {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-left: 4px solid var(--red);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.cbt-step-box {
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-left: 4px solid var(--green);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.cbt-belief-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+}
+.cbt-belief-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--teal);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.cbt-template-chip {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1.4;
+  text-align: left;
+}
+.cbt-template-chip:hover {
+  background: var(--card-h);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.cbt-journal-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+.cbt-journal-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.cbt-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cbt-belief-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
 

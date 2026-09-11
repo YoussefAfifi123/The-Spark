@@ -1,6 +1,6 @@
 {
   "name": "Spark",
-  "description": "Learning & Focus Platform",
+  "description": "Learning, Focus, and Cognitive Reframing Platform",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

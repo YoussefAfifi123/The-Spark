@@ -459,6 +459,44 @@ const Store={
       if(!this._d.settings.dailyGoalMin) this._d.settings.dailyGoalMin = 30;
       if(!this._d.moodLogs) this._d.moodLogs = [];
       if(!this._d.journalLogs) this._d.journalLogs = [];
+      if(!this._d.cbtReframes || !Array.isArray(this._d.cbtReframes)) {
+        this._d.cbtReframes = [
+          {
+            id: 'cbt_seed_1',
+            date: new Date(Date.now() - 86400000).toISOString(),
+            trigger: 'Scored low on the surprise chemistry pop quiz',
+            stumble: 'I failed this quiz, so I will bomb the final exam and destroy my GPA for college.',
+            initialBelief: 85,
+            emotion: 'Anxious & Overwhelmed',
+            distortions: ['catastrophizing', 'all-or-nothing'],
+            evidenceFor: 'I struggled with two problem sets on molecular bonds.',
+            evidenceAgainst: 'This was a 5-point pop quiz, not the final. I scored 88% on the previous lab. There are still 6 weeks and office hours to ask for help.',
+            friendAdvice: 'I would tell them: one rough quiz does not define your ability. It just highlights what to review this Thursday.',
+            stepReframe: 'One difficult pop quiz is helpful diagnostic data, not a forecast of my future. I have plenty of time to review molecular bonds and recover.',
+            finalBelief: 20,
+            microAction: 'Review 3 incorrectly answered quiz questions with my study partner tomorrow',
+            actionDone: true,
+            helpful: true
+          },
+          {
+            id: 'cbt_seed_2',
+            date: new Date(Date.now() - 259200000).toISOString(),
+            trigger: 'Selected as group project leader in History',
+            stumble: 'Everyone thinks I know what I am doing, but I just got lucky and they will realize I am an imposter.',
+            initialBelief: 90,
+            emotion: 'Inadequate & Insecure',
+            distortions: ['imposter-syndrome', 'mind-reading'],
+            evidenceFor: 'I feel nervous about speaking up and organizing others.',
+            evidenceAgainst: 'The teacher praised my research outline last semester. My classmates voted for me because I am reliable and take organized notes. Being nervous is normal, not proof of fraud.',
+            friendAdvice: 'You earned this spot through your hard work and kindness. Nobody expects perfection—just clear communication.',
+            stepReframe: 'Feeling nervous does not mean I am unqualified. I have demonstrated solid organizational skills in the past, and leadership is a skill I can develop step-by-step.',
+            finalBelief: 25,
+            microAction: 'Create a shared document with bulleted milestone dates',
+            actionDone: true,
+            helpful: true
+          }
+        ];
+      }
       let storedNotes = null;
       try {
         const raw = localStorage.getItem('spark_sticky_notes') || localStorage.getItem('sticky_notes') || localStorage.getItem('stickyNotes');
@@ -995,9 +1033,14 @@ function renderDashboard(){
         <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
           <i class="fas fa-heart-pulse" style="color:var(--teal);"></i> Mind & Emotional Health Check-In
         </h3>
-        <button class="btn btn-sm btn-teal" onclick="navigate('wellness')" style="font-size:12px;">
-          Wellness Hub <i class="fas fa-arrow-right"></i>
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-ghost" onclick="wellnessTab='reframes'; setCbtSubTab('worksheet'); navigate('wellness');" style="border:1px solid var(--border); font-size:12px;">
+            <i class="fas fa-brain" style="color:var(--teal);"></i> CBT Reframing
+          </button>
+          <button class="btn btn-sm btn-teal" onclick="navigate('wellness')" style="font-size:12px;">
+            Wellness Hub <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
       </div>
       <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">How are you feeling right now? Taking 30 seconds to check in helps reduce task anxiety.</p>
       <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
@@ -4165,6 +4208,176 @@ function dissolveWorryThought() {
   }
 }
 
+// ==================== COGNITIVE REFRAMING (CBT) DATA ====================
+const COGNITIVE_DISTORTIONS = [
+  {
+    id: 'catastrophizing',
+    name: 'Catastrophizing',
+    subtitle: 'Fortune Telling / Worst-Case Bias',
+    icon: 'fa-meteor',
+    color: '#EF4444',
+    bg: 'rgba(239, 68, 68, 0.12)',
+    summary: 'Assuming the absolute worst-case scenario will definitely happen and that you will be totally unable to cope.',
+    trapPrompt: 'If I mess this up, my entire grade and future will be completely ruined.',
+    counterQuestion: 'What is the most probable, realistic outcome? Even in a worst case, what practical steps would I take?',
+    starterTemplate: 'Even though I fear [worst-case], the realistic probability is much lower, and I can handle it step-by-step by [concrete action].'
+  },
+  {
+    id: 'all-or-nothing',
+    name: 'All-or-Nothing Thinking',
+    subtitle: 'Black-and-White / Perfectionist Split',
+    icon: 'fa-circle-half-stroke',
+    color: '#F59E0B',
+    bg: 'rgba(245, 158, 11, 0.12)',
+    summary: 'Viewing situations in polarized absolutes: either 100% flawless or a total failure. No middle ground or gray area.',
+    trapPrompt: 'If I can’t study for the full 2 hours, my whole day is wasted and there is no point.',
+    counterQuestion: 'What exists in the gray area between 0% and 100%? How is partial progress still valuable?',
+    starterTemplate: 'Progress is not all-or-nothing. Completing [partial amount] is still real progress that moves me forward.'
+  },
+  {
+    id: 'imposter-syndrome',
+    name: 'Imposter Syndrome',
+    subtitle: 'Discounting Positive / Fear of Exposure',
+    icon: 'fa-mask',
+    color: '#8B5CF6',
+    bg: 'rgba(139, 92, 246, 0.12)',
+    summary: 'Attributing your achievements to luck, flukes, or mistakes, while secretly fearing you will be exposed as inadequate.',
+    trapPrompt: 'I only got a good mark because the test was easy. I don’t truly belong in this class.',
+    counterQuestion: 'What genuine effort, practice, knowledge, or persistence did I put in? Would I judge a friend this harshly?',
+    starterTemplate: 'My achievements are the result of my actual effort and learning, not an accident. I belong in this space.'
+  },
+  {
+    id: 'overgeneralization',
+    name: 'Overgeneralization',
+    subtitle: 'The "Always / Never" Trap',
+    icon: 'fa-infinity',
+    color: '#3B82F6',
+    bg: 'rgba(59, 130, 246, 0.12)',
+    summary: 'Taking a single isolated negative experience and projecting it as a permanent, inevitable rule across your entire life.',
+    trapPrompt: 'I forgot my notes today. I always mess up; I will never be an organized student.',
+    counterQuestion: 'Is this truly happening "always" without exception? When has something gone well?',
+    starterTemplate: 'This is one specific setback on one day, not a permanent pattern. In the past, I have [counter-example].'
+  },
+  {
+    id: 'mind-reading',
+    name: 'Mind Reading',
+    subtitle: 'Jumping to Critical Conclusions',
+    icon: 'fa-eye',
+    color: '#EC4899',
+    bg: 'rgba(236, 72, 153, 0.12)',
+    summary: 'Assuming you know what classmates or teachers think about you, usually assuming disapproval or contempt.',
+    trapPrompt: 'The teacher answered my question abruptly. They must think I am annoying and incapable.',
+    counterQuestion: 'What verifiable facts do I have? Could other explanations (teacher fatigue, busy schedule) explain their tone?',
+    starterTemplate: 'I cannot read minds. Their reaction could easily be due to [alternative reason], and I have no proof they think poorly of me.'
+  },
+  {
+    id: 'emotional-reasoning',
+    name: 'Emotional Reasoning',
+    subtitle: 'Feelings Mistaken for Facts',
+    icon: 'fa-heart-crack',
+    color: '#10B981',
+    bg: 'rgba(16, 185, 129, 0.12)',
+    summary: 'Believing that because you feel intense anxiety, dread, or inadequacy, the objective reality must match that feeling.',
+    trapPrompt: 'I feel completely overwhelmed and stupid, which proves that I am unable to learn this subject.',
+    counterQuestion: 'Feelings are biological sensations, not court-admissible facts. What does the objective evidence say?',
+    starterTemplate: 'I am experiencing intense feelings of [emotion], but feelings are not facts. The objective reality is [fact].'
+  },
+  {
+    id: 'should-statements',
+    name: '"Should" / "Must" Tyranny',
+    subtitle: 'Rigid Guilt Demands',
+    icon: 'fa-scale-unbalanced',
+    color: '#6366F1',
+    bg: 'rgba(99, 102, 241, 0.12)',
+    summary: 'Imposing rigid, unforgiving moralistic rules on yourself or others, leading to chronic guilt, shame, and burnout.',
+    trapPrompt: 'I should be able to focus for 4 hours straight without getting distracted like normal people.',
+    counterQuestion: 'Says who? What happens if I replace "I should" with "I prefer" or "It is normal for humans to need breaks"?',
+    starterTemplate: 'It is natural that my brain needs breaks. Instead of demanding perfection, I choose to work with my needs.'
+  },
+  {
+    id: 'labeling',
+    name: 'Labeling & Personalization',
+    subtitle: 'Error Turned Into Identity',
+    icon: 'fa-tag',
+    color: '#14B8A6',
+    bg: 'rgba(20, 184, 166, 0.12)',
+    summary: 'Taking a specific mistake and turning it into a total character verdict ("I am a failure" instead of "I made an error").',
+    trapPrompt: 'I made a mistake on that math calculation. I am just hopeless at math.',
+    counterQuestion: 'Am I a mistake, or a person who made a mistake? What is the distinction between my behavior and my worth?',
+    starterTemplate: 'A mistake is something I did, not who I am. Making mistakes is an essential part of learning.'
+  }
+];
+
+const CBT_PRESETS = [
+  {
+    id: 'exam-panic',
+    name: 'Pre-Exam Catastrophizing',
+    icon: 'fa-graduation-cap',
+    trigger: 'Upcoming midterm in 2 days with 4 chapters left to review',
+    stumble: 'I haven’t memorized all the formulas yet. I am going to bomb this exam, ruin my GPA, and disappoint everyone.',
+    belief: 90,
+    emotion: 'Panic & Overwhelm',
+    distortions: ['catastrophizing', 'all-or-nothing'],
+    evidenceFor: 'I have 4 chapters left and feel stressed when looking at the formula sheet.',
+    evidenceAgainst: 'I still have 48 hours. I attended the lectures and have homework solutions. Even if I get a B or C, one exam does not ruin my life or GPA.',
+    friendAdvice: 'You don’t need 100% to pass and do well. Pick the high-yield topics, do practice problems, and get good sleep.',
+    reframe: 'I don’t need to know every detail to succeed. Prioritizing the top 3 high-yield concepts today gives me plenty of points to pass comfortably.',
+    finalBelief: 25,
+    microAction: 'Pick chapter 3 and do 5 practice problems with a 15-minute timer'
+  },
+  {
+    id: 'broken-streak',
+    name: 'Streak Break All-or-Nothing',
+    icon: 'fa-fire-flame-curved',
+    trigger: 'Missed yesterday’s scheduled study block due to family dinner',
+    stumble: 'I ruined my 6-day study streak. My momentum is gone, so this whole week is wasted and I might as well give up.',
+    belief: 85,
+    emotion: 'Frustrated & Defeated',
+    distortions: ['all-or-nothing', 'overgeneralization'],
+    evidenceFor: 'I did not study yesterday.',
+    evidenceAgainst: 'I studied 6 days in a row! That knowledge didn’t vanish overnight. A streak is just an arbitrary counter, not my brain’s actual learning.',
+    friendAdvice: 'One rest day doesn’t erase 6 days of hard work. The strongest people take breaks and get right back on track.',
+    reframe: 'One missed day is just life happening, not a ruined week. My 6 days of learning are banked, and starting today proves my resilience.',
+    finalBelief: 15,
+    microAction: 'Do a quick 10-minute flashcard review right now to reset momentum'
+  },
+  {
+    id: 'imposter-syndrome-doubt',
+    name: 'Advanced Class Imposter Doubt',
+    icon: 'fa-brain',
+    trigger: 'Sitting in AP/Advanced Physics while classmates seem to answer instantly',
+    stumble: 'Everyone else here gets it naturally. I was only placed here by mistake and soon the teacher will realize I don’t belong.',
+    belief: 80,
+    emotion: 'Inadequate & Isolated',
+    distortions: ['imposter-syndrome', 'mind-reading'],
+    evidenceFor: 'Two classmates raised their hands before I finished reading the problem.',
+    evidenceAgainst: 'I passed the prerequisite with high marks. Fast hand-raising isn’t deep understanding. Most people are also too shy to admit when they’re confused.',
+    friendAdvice: 'You worked hard to earn your seat in this class. Asking questions is a sign of bravery and curiosity, not stupidity.',
+    reframe: 'Classmates answering quickly doesn’t mean I am behind. My brain processes methodically, and I earned my spot in this room through demonstrated ability.',
+    finalBelief: 20,
+    microAction: 'Write down one question to ask the teacher at the end of class'
+  }
+];
+
+let cbtSubTab = 'worksheet';
+let cbtWizardStep = 1;
+let cbtJournalFilter = 'all';
+let cbtJournalSearch = '';
+
+let cbtDraft = {
+  trigger: '',
+  stumble: '',
+  initialBelief: 80,
+  emotion: 'Anxious & Overwhelmed',
+  distortions: ['catastrophizing'],
+  evidenceFor: '',
+  evidenceAgainst: '',
+  friendAdvice: '',
+  stepReframe: '',
+  finalBelief: 25,
+  microAction: ''
+};
+
 // ADHD Reframes Data
 const ADHD_REFRAMES = [
   {
@@ -4252,7 +4465,7 @@ function renderWellness() {
           <i class="fas fa-cloud-moon"></i> Worry Dissolver
         </button>
         <button class="grade-pill ${wellnessTab==='reframes'?'selected':''}" onclick="wellnessTab='reframes'; SFX.click(); renderWellness();">
-          <i class="fas fa-brain"></i> ADHD Reframes
+          <i class="fas fa-brain"></i> CBT Reframing Journal
         </button>
         <button class="grade-pill ${wellnessTab==='analytics'?'selected':''}" onclick="wellnessTab='analytics'; SFX.click(); renderWellness();">
           <i class="fas fa-chart-line"></i> Mood Insights
@@ -4879,27 +5092,880 @@ function renderWellnessDissolverSection() {
   `;
 }
 
+// ======================== COGNITIVE REFRAMING JOURNAL & CBT WORKSHEET ========================
+
+function setCbtSubTab(tab) {
+  cbtSubTab = tab;
+  SFX.click();
+  renderWellness();
+}
+
+function setCbtWizardStep(step) {
+  // Sync current form fields before moving
+  syncCbtDraftInputs();
+  cbtWizardStep = step;
+  SFX.click();
+  renderWellness();
+  const target = document.getElementById('cbt-worksheet-card');
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function syncCbtDraftInputs() {
+  const triggerEl = document.getElementById('cbt-trigger-input');
+  const stumbleEl = document.getElementById('cbt-stumble-input');
+  const initialBeliefEl = document.getElementById('cbt-initial-belief');
+  const evForEl = document.getElementById('cbt-ev-for');
+  const evAgainstEl = document.getElementById('cbt-ev-against');
+  const friendEl = document.getElementById('cbt-friend-advice');
+  const reframeEl = document.getElementById('cbt-step-reframe-input');
+  const finalBeliefEl = document.getElementById('cbt-final-belief');
+  const actionEl = document.getElementById('cbt-micro-action-input');
+
+  if (triggerEl) cbtDraft.trigger = triggerEl.value;
+  if (stumbleEl) cbtDraft.stumble = stumbleEl.value;
+  if (initialBeliefEl) cbtDraft.initialBelief = parseInt(initialBeliefEl.value, 10) || 75;
+  if (evForEl) cbtDraft.evidenceFor = evForEl.value;
+  if (evAgainstEl) cbtDraft.evidenceAgainst = evAgainstEl.value;
+  if (friendEl) cbtDraft.friendAdvice = friendEl.value;
+  if (reframeEl) cbtDraft.stepReframe = reframeEl.value;
+  if (finalBeliefEl) cbtDraft.finalBelief = parseInt(finalBeliefEl.value, 10) || 25;
+  if (actionEl) cbtDraft.microAction = actionEl.value;
+}
+
+function loadCbtPreset(presetId) {
+  const p = CBT_PRESETS.find(x => x.id === presetId);
+  if (!p) return;
+  cbtDraft = {
+    trigger: p.trigger,
+    stumble: p.stumble,
+    initialBelief: p.belief,
+    emotion: p.emotion,
+    distortions: [...p.distortions],
+    evidenceFor: p.evidenceFor,
+    evidenceAgainst: p.evidenceAgainst,
+    friendAdvice: p.friendAdvice,
+    stepReframe: p.reframe,
+    finalBelief: p.finalBelief,
+    microAction: p.microAction
+  };
+  cbtWizardStep = 1;
+  cbtSubTab = 'worksheet';
+  SFX.click();
+  toast(`Loaded scenario: "${p.name}". Follow each step!`, 'info');
+  renderWellness();
+}
+
+function toggleCbtDistortion(id) {
+  syncCbtDraftInputs();
+  const idx = cbtDraft.distortions.indexOf(id);
+  if (idx >= 0) {
+    cbtDraft.distortions.splice(idx, 1);
+  } else {
+    cbtDraft.distortions.push(id);
+  }
+  SFX.click();
+  renderWellness();
+}
+
+function selectCbtEmotion(emotion) {
+  syncCbtDraftInputs();
+  cbtDraft.emotion = emotion;
+  SFX.click();
+  renderWellness();
+}
+
+function applyCbtTemplate(text) {
+  const el = document.getElementById('cbt-step-reframe-input');
+  if (el) {
+    el.value = text;
+    cbtDraft.stepReframe = text;
+    el.focus();
+  } else {
+    cbtDraft.stepReframe = text;
+  }
+  toast('Template starter applied to your reframe!', 'info');
+}
+
+function saveCbtReframe() {
+  syncCbtDraftInputs();
+
+  if (!cbtDraft.stumble || !cbtDraft.stumble.trim()) {
+    toast('Please describe the negative thought (The Stumble)', 'warn');
+    setCbtWizardStep(1);
+    return;
+  }
+  if (!cbtDraft.stepReframe || !cbtDraft.stepReframe.trim()) {
+    toast('Please write your realistic reframing alternative (The Step)', 'warn');
+    setCbtWizardStep(4);
+    return;
+  }
+
+  const logs = Store.get('cbtReframes') || [];
+  const entry = {
+    id: 'cbt_' + Date.now(),
+    date: new Date().toISOString(),
+    trigger: cbtDraft.trigger.trim() || 'Study or school situation',
+    stumble: cbtDraft.stumble.trim(),
+    initialBelief: parseInt(cbtDraft.initialBelief, 10) || 75,
+    emotion: cbtDraft.emotion || 'Overwhelmed',
+    distortions: cbtDraft.distortions.length ? [...cbtDraft.distortions] : ['catastrophizing'],
+    evidenceFor: cbtDraft.evidenceFor.trim(),
+    evidenceAgainst: cbtDraft.evidenceAgainst.trim(),
+    friendAdvice: cbtDraft.friendAdvice.trim(),
+    stepReframe: cbtDraft.stepReframe.trim(),
+    finalBelief: parseInt(cbtDraft.finalBelief, 10) || 25,
+    microAction: cbtDraft.microAction.trim() || 'Take a 2-minute reset breath and continue with next step',
+    actionDone: false,
+    helpful: true
+  };
+
+  logs.unshift(entry);
+  Store.set('cbtReframes', logs);
+  Store.addXP(25);
+  if (window.SFX && SFX.complete) SFX.complete();
+
+  const drop = entry.initialBelief - entry.finalBelief;
+  toast(`Reframe saved to Journal! Belief shift: ${drop > 0 ? '-' + drop + '%' : 're-anchored'}. +25 XP!`, 'bonus');
+
+  // Reset draft
+  cbtDraft = {
+    trigger: '',
+    stumble: '',
+    initialBelief: 80,
+    emotion: 'Anxious & Overwhelmed',
+    distortions: ['catastrophizing'],
+    evidenceFor: '',
+    evidenceAgainst: '',
+    friendAdvice: '',
+    stepReframe: '',
+    finalBelief: 25,
+    microAction: ''
+  };
+  cbtWizardStep = 1;
+  cbtSubTab = 'journal';
+  renderWellness();
+}
+
+function toggleCbtHelpful(id) {
+  const logs = Store.get('cbtReframes') || [];
+  const item = logs.find(x => x.id === id);
+  if (item) {
+    item.helpful = !item.helpful;
+    Store.set('cbtReframes', logs);
+    SFX.click();
+    renderWellness();
+  }
+}
+
+function toggleCbtAction(id) {
+  const logs = Store.get('cbtReframes') || [];
+  const item = logs.find(x => x.id === id);
+  if (item) {
+    item.actionDone = !item.actionDone;
+    Store.set('cbtReframes', logs);
+    if (item.actionDone) {
+      Store.addXP(10);
+      toast('Micro-action completed! +10 XP', 'success');
+      if (window.SFX && SFX.complete) SFX.complete();
+    } else {
+      SFX.click();
+    }
+    renderWellness();
+  }
+}
+
+function deleteCbtReframe(id) {
+  if (!confirm('Are you sure you want to delete this reframe entry?')) return;
+  let logs = Store.get('cbtReframes') || [];
+  logs = logs.filter(x => x.id !== id);
+  Store.set('cbtReframes', logs);
+  SFX.click();
+  toast('Reframe removed from journal', 'info');
+  renderWellness();
+}
+
+function practiceDistortionInWorksheet(distId) {
+  const d = COGNITIVE_DISTORTIONS.find(x => x.id === distId);
+  cbtDraft.distortions = [distId];
+  if (d) {
+    cbtDraft.stumble = d.trapPrompt;
+  }
+  cbtWizardStep = 1;
+  cbtSubTab = 'worksheet';
+  SFX.click();
+  toast(`Practicing distortion: ${d ? d.name : distId}. Start reframing!`, 'info');
+  renderWellness();
+}
+
+// Window bindings
+window.setCbtSubTab = setCbtSubTab;
+window.setCbtWizardStep = setCbtWizardStep;
+window.loadCbtPreset = loadCbtPreset;
+window.toggleCbtDistortion = toggleCbtDistortion;
+window.selectCbtEmotion = selectCbtEmotion;
+window.applyCbtTemplate = applyCbtTemplate;
+window.saveCbtReframe = saveCbtReframe;
+window.toggleCbtHelpful = toggleCbtHelpful;
+window.toggleCbtAction = toggleCbtAction;
+window.deleteCbtReframe = deleteCbtReframe;
+window.practiceDistortionInWorksheet = practiceDistortionInWorksheet;
+
 function renderWellnessReframesSection() {
+  const entries = Store.get('cbtReframes') || [];
+  const totalEntries = entries.length;
+  const totalCompletedActions = entries.filter(e => e.actionDone).length;
+  const avgShift = totalEntries > 0
+    ? Math.round(entries.reduce((acc, e) => acc + (e.initialBelief - e.finalBelief), 0) / totalEntries)
+    : 0;
+
+  return `
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <!-- Hero Header & Subnavigation -->
+      <div class="card" style="background:var(--card); border-left:4px solid var(--teal); padding:20px 24px;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span class="badge" style="background:var(--teal-g); color:var(--teal); font-weight:700;">CBT Cognitive Reframing</span>
+              <span style="font-size:12px; color:var(--text2);"><i class="fas fa-shield-heart" style="color:var(--green);"></i> Evidence-Based Practice</span>
+            </div>
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">Stumble-to-Step Interactive Worksheet & Journal</h2>
+            <p style="color:var(--text2); font-size:14px; max-width:680px; line-height:1.5;">
+              Identify cognitive distortions (catastrophizing, all-or-nothing thinking, imposter syndrome) and disarm automatic negative thoughts into realistic, compassionate action steps.
+            </p>
+          </div>
+
+          <!-- Section Tabs -->
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-sm ${cbtSubTab === 'worksheet' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('worksheet')" style="border:1px solid var(--border);">
+              <i class="fas fa-pen-to-square"></i> Stumble-to-Step Worksheet
+            </button>
+            <button class="btn btn-sm ${cbtSubTab === 'journal' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('journal')" style="border:1px solid var(--border);">
+              <i class="fas fa-book-bookmark"></i> Reframe Journal (${totalEntries})
+            </button>
+            <button class="btn btn-sm ${cbtSubTab === 'guide' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('guide')" style="border:1px solid var(--border);">
+              <i class="fas fa-compass"></i> Distortions Field Guide
+            </button>
+            <button class="btn btn-sm ${cbtSubTab === 'adhd' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('adhd')" style="border:1px solid var(--border);">
+              <i class="fas fa-bolt"></i> ADHD Anti-Paralysis
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: INTERACTIVE WORKSHEET -->
+      ${cbtSubTab === 'worksheet' ? renderCbtWorksheetTab() : ''}
+
+      <!-- TAB 2: JOURNAL LOG -->
+      ${cbtSubTab === 'journal' ? renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActions) : ''}
+
+      <!-- TAB 3: FIELD GUIDE -->
+      ${cbtSubTab === 'guide' ? renderCbtFieldGuideTab() : ''}
+
+      <!-- TAB 4: ADHD COMPASSION CARDS -->
+      ${cbtSubTab === 'adhd' ? renderCbtAdhdCardsTab() : ''}
+    </div>
+  `;
+}
+
+function renderCbtWorksheetTab() {
+  const selectedDistortions = COGNITIVE_DISTORTIONS.filter(d => cbtDraft.distortions.includes(d.id));
+  const beliefShift = (cbtDraft.initialBelief || 80) - (cbtDraft.finalBelief || 25);
+
+  const emotionsList = [
+    'Anxious & Overwhelmed',
+    'Frustrated & Defeated',
+    'Inadequate & Insecure',
+    'Ashamed & Guilty',
+    'Hopeless',
+    'Stressed'
+  ];
+
+  return `
+    <div class="card" id="cbt-worksheet-card" style="padding:24px;">
+      <!-- Presets quick-picker -->
+      <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+          <span style="font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px;">
+            <i class="fas fa-sparkles" style="color:var(--accent);"></i> Quick Scenario Presets (1-Click Test & Practice)
+          </span>
+          <span style="font-size:11px; color:var(--text2);">Click a preset to see how CBT reframes realistic student traps</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          ${CBT_PRESETS.map(p => `
+            <button class="cbt-preset-card" onclick="loadCbtPreset('${p.id}')">
+              <i class="fas ${p.icon}" style="color:var(--accent);"></i>
+              <span>${p.name}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Step Wizard Indicator -->
+      <div class="cbt-wizard-steps">
+        <button class="cbt-step-node ${cbtWizardStep === 1 ? 'active' : ''} ${cbtWizardStep > 1 ? 'completed' : ''}" onclick="setCbtWizardStep(1)">
+          <div class="cbt-step-circle">${cbtWizardStep > 1 ? '<i class="fas fa-check"></i>' : '1'}</div>
+          <span class="cbt-step-label">1. The Stumble</span>
+        </button>
+        <button class="cbt-step-node ${cbtWizardStep === 2 ? 'active' : ''} ${cbtWizardStep > 2 ? 'completed' : ''}" onclick="setCbtWizardStep(2)">
+          <div class="cbt-step-circle">${cbtWizardStep > 2 ? '<i class="fas fa-check"></i>' : '2'}</div>
+          <span class="cbt-step-label">2. Unmask Distortions</span>
+        </button>
+        <button class="cbt-step-node ${cbtWizardStep === 3 ? 'active' : ''} ${cbtWizardStep > 3 ? 'completed' : ''}" onclick="setCbtWizardStep(3)">
+          <div class="cbt-step-circle">${cbtWizardStep > 3 ? '<i class="fas fa-check"></i>' : '3'}</div>
+          <span class="cbt-step-label">3. Reality Check</span>
+        </button>
+        <button class="cbt-step-node ${cbtWizardStep === 4 ? 'active' : ''}" onclick="setCbtWizardStep(4)">
+          <div class="cbt-step-circle">4</div>
+          <span class="cbt-step-label">4. The Step Reframe</span>
+        </button>
+      </div>
+
+      <!-- STEP 1: THE STUMBLE -->
+      ${cbtWizardStep === 1 ? `
+        <div style="display:flex; flex-direction:column; gap:18px;">
+          <div class="cbt-stumble-box">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+              <i class="fas fa-triangle-exclamation" style="color:var(--red);"></i>
+              <h3 style="font-size:16px; font-weight:700; color:var(--red);">Step 1: Capture the "Stumble" (Automatic Negative Thought)</h3>
+            </div>
+            <p style="font-size:13px; color:var(--text2); line-height:1.5;">
+              When something triggers stress, our brain instinctively jumps to unhelpful, exaggerated conclusions. Write down exactly what happened and what your brain told you.
+            </p>
+          </div>
+
+          <div>
+            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+              Triggering Situation / Event <span style="font-weight:400; color:var(--text2);">(What happened?)</span>
+            </label>
+            <input class="input" id="cbt-trigger-input" placeholder="e.g. Scored 65% on math quiz, or saw friends studying together without me" value="${escHtml(cbtDraft.trigger)}" oninput="cbtDraft.trigger=this.value;">
+          </div>
+
+          <div>
+            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+              The Automatic Negative Thought (The Stumble) <span style="color:var(--red);">*</span>
+            </label>
+            <textarea class="input" id="cbt-stumble-input" rows="3" placeholder="e.g. I failed this quiz, so I will fail the entire class, drop out of school, and ruin everything." oninput="cbtDraft.stumble=this.value;">${escHtml(cbtDraft.stumble)}</textarea>
+          </div>
+
+          <!-- Emotion selector -->
+          <div>
+            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:8px;">
+              Primary Emotion Felt:
+            </label>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              ${emotionsList.map(emo => `
+                <button type="button" class="grade-pill ${cbtDraft.emotion === emo ? 'selected' : ''}" onclick="selectCbtEmotion('${emo}')">
+                  ${emo}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Initial Belief Rating Slider -->
+          <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label style="font-size:13px; font-weight:700;">
+                Initial Belief Intensity: How strongly do you believe this thought right now?
+              </label>
+              <span class="cbt-belief-badge" style="color:var(--red); font-size:14px;">
+                <span id="cbt-initial-belief-val">${cbtDraft.initialBelief}%</span>
+              </span>
+            </div>
+            <input type="range" min="0" max="100" step="5" class="cbt-belief-slider" id="cbt-initial-belief" value="${cbtDraft.initialBelief}" oninput="cbtDraft.initialBelief=parseInt(this.value,10); document.getElementById('cbt-initial-belief-val').innerText=this.value+'%';">
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text2); margin-top:6px;">
+              <span>0% (Barely)</span>
+              <span>50% (Somewhat)</span>
+              <span>100% (Absolute certainty)</span>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
+            <button class="btn btn-teal" onclick="if(!cbtDraft.stumble.trim()){toast('Please enter your thought before continuing','warn');}else{setCbtWizardStep(2);}">
+              Next: Identify Distortions <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- STEP 2: UNMASK COGNITIVE DISTORTIONS -->
+      ${cbtWizardStep === 2 ? `
+        <div style="display:flex; flex-direction:column; gap:18px;">
+          <!-- Review of stumble -->
+          <div class="cbt-stumble-box" style="margin-bottom:4px;">
+            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; margin-bottom:4px;">The Stumble (Automatic Thought)</div>
+            <div style="font-size:14px; font-weight:600; font-style:italic;">"${escHtml(cbtDraft.stumble || 'No thought entered yet')}"</div>
+          </div>
+
+          <div>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+              <div>
+                <h3 style="font-size:16px; font-weight:700;">Step 2: Unmask the Thinking Traps (Cognitive Distortions)</h3>
+                <p style="font-size:13px; color:var(--text2);">Select all distortion patterns that match this automatic thought.</p>
+              </div>
+              <span class="badge" style="background:var(--teal-g); color:var(--teal); font-weight:700;">
+                ${cbtDraft.distortions.length} Selected
+              </span>
+            </div>
+
+            <!-- Distortion Cards Grid -->
+            <div class="cbt-distortion-grid">
+              ${COGNITIVE_DISTORTIONS.map(d => {
+                const isSelected = cbtDraft.distortions.includes(d.id);
+                return `
+                  <div class="cbt-distortion-item ${isSelected ? 'selected' : ''}" onclick="toggleCbtDistortion('${d.id}')">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:28px; height:28px; border-radius:8px; background:${d.bg}; display:flex; align-items:center; justify-content:center;">
+                          <i class="fas ${d.icon} cbt-dist-icon" style="color:${d.color}; font-size:12px;"></i>
+                        </div>
+                        <span style="font-weight:700; font-size:13px;">${d.name}</span>
+                      </div>
+                      ${isSelected ? '<i class="fas fa-check-circle" style="color:var(--teal);"></i>' : '<i class="far fa-circle" style="color:var(--text2);"></i>'}
+                    </div>
+                    <div style="font-size:11px; color:var(--text2); line-height:1.4;">${d.summary}</div>
+                    <div style="font-size:11px; color:${d.color}; font-style:italic; margin-top:2px;">"${d.trapPrompt}"</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Dynamic Counter-Question Helper for selected distortions -->
+          ${selectedDistortions.length > 0 ? `
+            <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <div style="font-size:12px; font-weight:700; color:var(--teal); text-transform:uppercase; margin-bottom:8px;">
+                <i class="fas fa-magnifying-glass"></i> Reality-Check Detective Questions for Your Distortions:
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                ${selectedDistortions.map(d => `
+                  <div style="font-size:13px; line-height:1.4; display:flex; gap:8px;">
+                    <strong style="color:${d.color}; min-width:130px;">${d.name}:</strong>
+                    <span style="color:var(--text2);">${d.counterQuestion}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:8px;">
+            <button class="btn btn-ghost" onclick="setCbtWizardStep(1)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button class="btn btn-teal" onclick="if(cbtDraft.distortions.length===0){toast('Please select at least 1 distortion pattern','warn');}else{setCbtWizardStep(3);}">
+              Next: Reality Check <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- STEP 3: REALITY CHECK INVESTIGATION -->
+      ${cbtWizardStep === 3 ? `
+        <div style="display:flex; flex-direction:column; gap:18px;">
+          <!-- Header Context -->
+          <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px 16px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+              <span style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase;">The Stumble</span>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                ${selectedDistortions.map(d => `<span class="cbt-tag" style="background:${d.bg}; color:${d.color};"><i class="fas ${d.icon}"></i> ${d.name}</span>`).join('')}
+              </div>
+            </div>
+            <div style="font-size:14px; font-weight:600; font-style:italic; color:var(--text);">"${escHtml(cbtDraft.stumble)}"</div>
+          </div>
+
+          <div>
+            <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">Step 3: Conduct a Reality Check (Courtroom of the Mind)</h3>
+            <p style="font-size:13px; color:var(--text2); line-height:1.5;">
+              Distortions trick us into confusing feelings with facts. Put your negative thought on trial:
+            </p>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+            <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+                <i class="fas fa-clipboard-check" style="color:var(--text2);"></i> Facts Supporting the Thought
+              </label>
+              <p style="font-size:11px; color:var(--text2); margin-bottom:8px;">What actual, verifiable facts exist? (No assumptions or feelings).</p>
+              <textarea class="input" id="cbt-ev-for" rows="3" placeholder="e.g. I got a low score on this 5-point quiz." oninput="cbtDraft.evidenceFor=this.value;">${escHtml(cbtDraft.evidenceFor)}</textarea>
+            </div>
+
+            <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+                <i class="fas fa-scale-balanced" style="color:var(--teal);"></i> Facts Contradicting the Thought
+              </label>
+              <p style="font-size:11px; color:var(--text2); margin-bottom:8px;">What evidence proves this thought is exaggerated? Past wins, context, resources.</p>
+              <textarea class="input" id="cbt-ev-against" rows="3" placeholder="e.g. It was only 1 quiz, worth 2% of my grade. I scored 88% on the lab and have 6 weeks left to study." oninput="cbtDraft.evidenceAgainst=this.value;">${escHtml(cbtDraft.evidenceAgainst)}</textarea>
+            </div>
+          </div>
+
+          <!-- Best Friend Check -->
+          <div style="background:rgba(168, 85, 247, 0.06); border:1px solid rgba(168, 85, 247, 0.2); border-radius:12px; padding:16px;">
+            <label style="font-size:13px; font-weight:700; color:var(--purple); display:block; margin-bottom:6px;">
+              <i class="fas fa-heart"></i> The "Best Friend" Compassion Test
+            </label>
+            <p style="font-size:12px; color:var(--text2); margin-bottom:8px;">
+              If your best friend came to you with this exact thought, what compassionate, grounded wisdom would you gently tell them?
+            </p>
+            <textarea class="input" id="cbt-friend-advice" rows="2" placeholder="e.g. I would tell them: One bad quiz does not erase your intelligence or hard work. Let's study the hard parts together." oninput="cbtDraft.friendAdvice=this.value;">${escHtml(cbtDraft.friendAdvice)}</textarea>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:8px;">
+            <button class="btn btn-ghost" onclick="setCbtWizardStep(2)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button class="btn btn-teal" onclick="setCbtWizardStep(4)">
+              Next: The Step Reframe <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- STEP 4: THE STEP REFRAME -->
+      ${cbtWizardStep === 4 ? `
+        <div style="display:flex; flex-direction:column; gap:18px;">
+          <!-- Transformation Preview Box -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+            <div class="cbt-stumble-box">
+              <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; margin-bottom:4px;">
+                <i class="fas fa-xmark"></i> The Stumble (Automatic Trap)
+              </div>
+              <div style="font-size:13px; font-style:italic;">"${escHtml(cbtDraft.stumble)}"</div>
+              <div style="font-size:11px; color:var(--text2); margin-top:6px;">Initial Belief: <strong>${cbtDraft.initialBelief}%</strong></div>
+            </div>
+
+            <div class="cbt-step-box">
+              <div style="font-size:11px; font-weight:700; color:var(--green); text-transform:uppercase; margin-bottom:4px;">
+                <i class="fas fa-lightbulb"></i> The Step (Realistic Reframe Goal)
+              </div>
+              <div style="font-size:12px; color:var(--text2); line-height:1.4;">
+                A balanced thought grounded in truth, self-compassion, and practical action.
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Starter Templates -->
+          <div>
+            <div style="font-size:12px; font-weight:700; color:var(--text2); margin-bottom:6px;">
+              <i class="fas fa-wand-magic-sparkles" style="color:var(--accent);"></i> Click a Starter Framework to help craft your reframe:
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('Even though I am worried about this, the objective reality is that one setback does not define my future, and I can take it one small step at a time.')">
+                💡 <strong>The Objective Reality:</strong> "Even though I am worried about this, the objective reality is that one setback does not define my future, and I can take it one small step at a time."
+              </button>
+              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('Progress over perfection: doing 20% today is infinitely better than doing nothing, and I still deserve credit for showing up.')">
+                🌱 <strong>Progress Over Perfection:</strong> "Progress over perfection: doing 20% today is infinitely better than doing nothing, and I still deserve credit for showing up."
+              </button>
+              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('Feelings are biological sensations, not objective facts. Just because I feel overwhelmed does not mean I am incapable of learning this.')">
+                🧠 <strong>Feelings Are Not Facts:</strong> "Feelings are biological sensations, not objective facts. Just because I feel overwhelmed does not mean I am incapable of learning this."
+              </button>
+            </div>
+          </div>
+
+          <!-- Realistic Reframe Input -->
+          <div>
+            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
+              Your Realistic Reframing Alternative (The Step) <span style="color:var(--green);">*</span>
+            </label>
+            <textarea class="input" id="cbt-step-reframe-input" rows="3" placeholder="Write your balanced, grounded reframe here..." oninput="cbtDraft.stepReframe=this.value;">${escHtml(cbtDraft.stepReframe)}</textarea>
+          </div>
+
+          <!-- Post-Reframe Belief Re-rating -->
+          <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label style="font-size:13px; font-weight:700;">
+                Re-rate: How strongly do you believe the original negative thought now?
+              </label>
+              <span class="cbt-belief-badge" style="color:var(--green); font-size:14px;">
+                <span id="cbt-final-belief-val">${cbtDraft.finalBelief}%</span>
+              </span>
+            </div>
+            <input type="range" min="0" max="100" step="5" class="cbt-belief-slider" id="cbt-final-belief" value="${cbtDraft.finalBelief}" oninput="cbtDraft.finalBelief=parseInt(this.value,10); document.getElementById('cbt-final-belief-val').innerText=this.value+'%'; const shift = cbtDraft.initialBelief - cbtDraft.finalBelief; document.getElementById('cbt-live-shift').innerText = (shift > 0 ? '-'+shift+'% Relief' : 'Grounded');">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <span style="font-size:12px; color:var(--text2);">Original Belief: ${cbtDraft.initialBelief}%</span>
+              <span class="badge" id="cbt-live-shift" style="background:var(--green-g); color:var(--green); font-weight:700;">
+                ${beliefShift > 0 ? '-' + beliefShift + '% Relief' : 'Grounded'}
+              </span>
+            </div>
+          </div>
+
+          <!-- Actionable Micro-Step -->
+          <div style="background:rgba(78, 205, 196, 0.06); border:1px solid rgba(78, 205, 196, 0.2); border-radius:12px; padding:16px;">
+            <label style="font-size:13px; font-weight:700; color:var(--teal); display:block; margin-bottom:6px;">
+              <i class="fas fa-shoe-prints"></i> Concrete 5-Minute Micro-Action
+            </label>
+            <p style="font-size:12px; color:var(--text2); margin-bottom:8px;">
+              What is one small, immediate action you can take to ground this reframe in reality?
+            </p>
+            <input class="input" id="cbt-micro-action-input" placeholder="e.g. Open chapter 3 and review 2 formulas with a 5-minute timer" value="${escHtml(cbtDraft.microAction)}" oninput="cbtDraft.microAction=this.value;">
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px;">
+            <button class="btn btn-ghost" onclick="setCbtWizardStep(3)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button class="btn btn-lg btn-teal" onclick="saveCbtReframe()">
+              <i class="fas fa-floppy-disk"></i> Save to Reframe Journal (+25 XP)
+            </button>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActions) {
+  const filtered = entries.filter(e => {
+    if (cbtJournalFilter !== 'all' && !e.distortions.includes(cbtJournalFilter)) {
+      return false;
+    }
+    if (cbtJournalSearch) {
+      const q = cbtJournalSearch.toLowerCase();
+      const matchStumble = (e.stumble || '').toLowerCase().includes(q);
+      const matchReframe = (e.stepReframe || '').toLowerCase().includes(q);
+      const matchTrigger = (e.trigger || '').toLowerCase().includes(q);
+      if (!matchStumble && !matchReframe && !matchTrigger) return false;
+    }
+    return true;
+  });
+
   return `
     <div style="display:flex; flex-direction:column; gap:16px;">
-      <div class="card" style="background:var(--card); border-left:4px solid var(--accent);">
-        <h3 style="font-size:18px; font-weight:700; margin-bottom:4px;">ADHD Compassion & Anti-Paralysis Reframes</h3>
-        <p style="color:var(--text2); font-size:14px;">The ADHD brain often trips on guilt, perfectionism, and all-or-nothing thinking. Here is how to reframe them:</p>
+      <!-- Stats Row -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+        <div class="card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:var(--teal-g); display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-brain" style="color:var(--teal); font-size:18px;"></i>
+          </div>
+          <div>
+            <div style="font-size:20px; font-weight:800;">${totalEntries}</div>
+            <div style="font-size:12px; color:var(--text2);">Thoughts Reframed</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:var(--green-g); display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-arrow-trend-down" style="color:var(--green); font-size:18px;"></i>
+          </div>
+          <div>
+            <div style="font-size:20px; font-weight:800; color:var(--green);">-${avgShift}%</div>
+            <div style="font-size:12px; color:var(--text2);">Avg Belief Shift</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:var(--purple-g); display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-check-double" style="color:var(--purple); font-size:18px;"></i>
+          </div>
+          <div>
+            <div style="font-size:20px; font-weight:800;">${totalCompletedActions}</div>
+            <div style="font-size:12px; color:var(--text2);">Micro-Actions Done</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Distortion Filter Toolbar -->
+      <div class="card" style="padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:220px;">
+          <i class="fas fa-magnifying-glass" style="color:var(--text2);"></i>
+          <input class="input" style="padding:6px 10px; font-size:13px; height:34px;" placeholder="Search your reframing journal..." value="${escHtml(cbtJournalSearch)}" oninput="cbtJournalSearch=this.value; renderWellness();">
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; overflow-x:auto;" class="no-scrollbar">
+          <span style="font-size:12px; color:var(--text2); white-space:nowrap;">Filter Trap:</span>
+          <select class="input" style="padding:4px 8px; font-size:12px; height:34px; width:auto;" onchange="cbtJournalFilter=this.value; renderWellness();">
+            <option value="all" ${cbtJournalFilter === 'all' ? 'selected' : ''}>All Distortions</option>
+            ${COGNITIVE_DISTORTIONS.map(d => `
+              <option value="${d.id}" ${cbtJournalFilter === d.id ? 'selected' : ''}>${d.name}</option>
+            `).join('')}
+          </select>
+          <button class="btn btn-sm btn-teal" onclick="setCbtSubTab('worksheet')">
+            <i class="fas fa-plus"></i> New Reframe
+          </button>
+        </div>
+      </div>
+
+      <!-- Journal Entries List -->
+      ${filtered.length === 0 ? `
+        <div class="card" style="text-align:center; padding:40px 20px;">
+          <div style="width:48px; height:48px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:var(--text2); font-size:20px;">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">No reframing entries found</h3>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">
+            ${cbtJournalSearch || cbtJournalFilter !== 'all' ? 'Try clearing your search or distortion filter.' : 'Capture your first cognitive reframe using the Stumble-to-Step worksheet!'}
+          </p>
+          <button class="btn btn-teal" onclick="cbtJournalFilter='all'; cbtJournalSearch=''; setCbtSubTab('worksheet');">
+            Open Stumble-to-Step Worksheet
+          </button>
+        </div>
+      ` : `
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          ${filtered.map(entry => {
+            const shift = entry.initialBelief - entry.finalBelief;
+            const formattedDate = new Date(entry.date).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            return `
+              <div class="cbt-journal-card" id="${entry.id}">
+                <!-- Entry Top Bar -->
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:12px; color:var(--text2);">${formattedDate}</span>
+                    <span style="font-size:12px; color:var(--border2);">•</span>
+                    <span style="font-size:12px; font-weight:600; color:var(--text);">${escHtml(entry.trigger)}</span>
+                    <span class="badge" style="background:var(--bg); font-size:11px;">${escHtml(entry.emotion || 'Overwhelmed')}</span>
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn btn-sm btn-ghost" title="Mark as helpful" onclick="toggleCbtHelpful('${entry.id}')" style="color:${entry.helpful ? 'var(--accent)' : 'var(--text2)'};">
+                      <i class="${entry.helpful ? 'fas fa-heart' : 'far fa-heart'}"></i> ${entry.helpful ? 'Helpful' : ''}
+                    </button>
+                    <button class="btn btn-sm btn-ghost" title="Delete entry" onclick="deleteCbtReframe('${entry.id}')" style="color:var(--text2);">
+                      <i class="fas fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Distortion Tags -->
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  ${entry.distortions.map(distId => {
+                    const d = COGNITIVE_DISTORTIONS.find(x => x.id === distId);
+                    if (!d) return '';
+                    return `<span class="cbt-tag" style="background:${d.bg}; color:${d.color};"><i class="fas ${d.icon}"></i> ${d.name}</span>`;
+                  }).join('')}
+                </div>
+
+                <!-- Side-by-side Stumble vs Step -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+                  <div class="cbt-stumble-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase;">
+                        <i class="fas fa-xmark"></i> The Stumble
+                      </span>
+                      <span style="font-size:11px; color:var(--red); font-weight:700;">Belief: ${entry.initialBelief}%</span>
+                    </div>
+                    <div style="font-size:13px; font-style:italic; line-height:1.4;">"${escHtml(entry.stumble)}"</div>
+                  </div>
+
+                  <div class="cbt-step-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span style="font-size:11px; font-weight:700; color:var(--green); text-transform:uppercase;">
+                        <i class="fas fa-check"></i> Realistic Reframe
+                      </span>
+                      <span class="badge" style="background:var(--green-g); color:var(--green); font-weight:700; font-size:11px;">
+                        ${shift > 0 ? '-' + shift + '% Shift' : 'Grounded'} (${entry.finalBelief}%)
+                      </span>
+                    </div>
+                    <div style="font-size:13px; font-weight:600; line-height:1.4; color:var(--text);">"${escHtml(entry.stepReframe)}"</div>
+                  </div>
+                </div>
+
+                <!-- Key Evidence or Best Friend Advice if present -->
+                ${entry.friendAdvice ? `
+                  <div style="font-size:12px; color:var(--purple); background:rgba(168, 85, 247, 0.05); padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-heart"></i>
+                    <span><strong>Friend Compassion:</strong> "${escHtml(entry.friendAdvice)}"</span>
+                  </div>
+                ` : ''}
+
+                <!-- Micro-Action Checkbox -->
+                ${entry.microAction ? `
+                  <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 12px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:600; ${entry.actionDone ? 'text-decoration:line-through; color:var(--text2);' : ''}">
+                      <input type="checkbox" ${entry.actionDone ? 'checked' : ''} onchange="toggleCbtAction('${entry.id}')" style="cursor:pointer; accent-color:var(--teal);">
+                      <span>Micro-Action: ${escHtml(entry.microAction)}</span>
+                    </label>
+                    <span style="font-size:11px; color:${entry.actionDone ? 'var(--green)' : 'var(--text2)'}; font-weight:700;">
+                      ${entry.actionDone ? '<i class="fas fa-circle-check"></i> Completed (+10 XP)' : 'Action Step'}
+                    </span>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderCbtFieldGuideTab() {
+  return `
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="card" style="padding:18px 20px; background:var(--card);">
+        <h3 style="font-size:17px; font-weight:700; margin-bottom:4px;">Cognitive Distortions Field Guide</h3>
+        <p style="font-size:13px; color:var(--text2); line-height:1.5;">
+          Distortions are habitual, faulty lenses our brains use when stressed. Recognizing the trap pattern by name is 80% of breaking free.
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+        ${COGNITIVE_DISTORTIONS.map(d => `
+          <div class="card" style="padding:20px; display:flex; flex-direction:column; justify-content:space-between; gap:14px; border-top:3px solid ${d.color};">
+            <div>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <div style="width:36px; height:36px; border-radius:10px; background:${d.bg}; display:flex; align-items:center; justify-content:center;">
+                  <i class="fas ${d.icon}" style="color:${d.color}; font-size:16px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-size:16px; font-weight:700; line-height:1.2;">${d.name}</h4>
+                  <span style="font-size:11px; color:var(--text2);">${d.subtitle}</span>
+                </div>
+              </div>
+
+              <p style="font-size:13px; color:var(--text); line-height:1.5; margin-bottom:12px;">
+                ${d.summary}
+              </p>
+
+              <div style="background:rgba(239, 68, 68, 0.05); border-left:3px solid var(--red); padding:8px 12px; border-radius:6px; font-size:12px; color:var(--text); margin-bottom:10px;">
+                <strong style="color:var(--red);">How it sounds:</strong> "${d.trapPrompt}"
+              </div>
+
+              <div style="background:rgba(78, 205, 196, 0.06); border-left:3px solid var(--teal); padding:8px 12px; border-radius:6px; font-size:12px; color:var(--text);">
+                <strong style="color:var(--teal);">Disarming Detective Question:</strong> ${d.counterQuestion}
+              </div>
+            </div>
+
+            <button class="btn btn-sm btn-ghost" style="border:1px solid var(--border); width:100%; justify-content:center; color:var(--teal);" onclick="practiceDistortionInWorksheet('${d.id}')">
+              <i class="fas fa-pen"></i> Practice Reframing This Trap
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderCbtAdhdCardsTab() {
+  return `
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="card" style="background:var(--card); border-left:4px solid var(--accent); padding:18px 20px;">
+        <h3 style="font-size:17px; font-weight:700; margin-bottom:4px;">ADHD Compassion & Anti-Paralysis Reframes</h3>
+        <p style="color:var(--text2); font-size:13px; line-height:1.5;">
+          The neurodivergent and ADHD brain frequently hits task paralysis, intense distraction guilt, and perfectionist freeze. Keep these compassion anchors handy:
+        </p>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
         ${ADHD_REFRAMES.map(r => `
-          <div class="reframe-card">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <div class="card" style="padding:18px; display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
               <div style="width:36px; height:36px; border-radius:10px; background:var(--teal-g); display:flex; align-items:center; justify-content:center;">
                 <i class="fas ${r.icon}" style="color:var(--teal);"></i>
               </div>
-              <h4 style="font-weight:700; font-size:16px;">${r.title}</h4>
+              <h4 style="font-weight:700; font-size:15px;">${r.title}</h4>
             </div>
-            <div style="font-size:13px; color:var(--red); margin-bottom:10px; font-weight:600;">
+
+            <div style="font-size:12px; color:var(--red); font-weight:600; background:rgba(239,68,68,0.06); padding:8px 10px; border-radius:8px;">
               <i class="fas fa-xmark"></i> "${r.problem}"
             </div>
-            <div style="font-size:13px; color:var(--green); background:var(--bg); padding:10px 12px; border-radius:8px; line-height:1.5;">
+
+            <div style="font-size:12px; color:var(--green); background:var(--bg); border:1px solid rgba(34,197,94,0.2); padding:10px 12px; border-radius:8px; line-height:1.5;">
               <i class="fas fa-lightbulb"></i> <strong>Compassionate Reframe:</strong> ${r.reframe}
             </div>
           </div>
