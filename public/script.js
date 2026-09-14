@@ -428,6 +428,15 @@ const Store={
       if(!this._d.settings.schedule) {
         this._d.settings.schedule = { weekStartDay: 6, dayStartHour: 8, dayEndHour: 20 };
       }
+      if(!this._d.calcHistory){
+        this._d.calcHistory = [
+          { id: 'ch_seed_1', expr: '2*pi*5^2', result: '157.07963268', timestamp: Date.now() - 3600000 },
+          { id: 'ch_seed_2', expr: 'sin(45) * sqrt(2)', result: '1', timestamp: Date.now() - 7200000 }
+        ];
+      }
+      if(!this._d.calcSettings){
+        this._d.calcSettings = { angleUnit: 'deg', tab: 'geogebra', ggbApp: 'scientific' };
+      }
       if(!this._d.inventory){
         this._d.inventory={avatars:['default'],companions:['default'],timers:['classic'],colors:['#FF8C42'],themes:['default'],equipped:{avatar:'default',companion:'default',timer:'classic',color:'#FF8C42',theme:'default'}};
       }
@@ -750,7 +759,7 @@ function breakDownTask(task){
 
 // ======================== ROUTER & SIDEBAR ========================
 let currentView = 'dashboard';
-const VN = ['dashboard','focus','planner','schedule','wellness','learn','flashcards','store','resources','progress','settings'];
+const VN = ['dashboard','focus','planner','schedule','wellness','learn','science','calculator','flashcards','store','resources','progress','settings'];
 
 const VIEW_INFO = {
   dashboard: { title: 'Dashboard', icon: 'fa-home' },
@@ -759,6 +768,8 @@ const VIEW_INFO = {
   schedule: { title: 'Schedule & Timetable', icon: 'fa-calendar-days' },
   wellness: { title: 'Mind & Mood', icon: 'fa-heart-pulse' },
   learn: { title: 'Learn & Play', icon: 'fa-gamepad' },
+  science: { title: 'Science Lab (PhET)', icon: 'fa-flask-vial' },
+  calculator: { title: 'Scientific Calculator', icon: 'fa-calculator' },
   flashcards: { title: 'Flashcards', icon: 'fa-clone' },
   store: { title: 'Store', icon: 'fa-store' },
   resources: { title: 'Resources', icon: 'fa-book-open' },
@@ -881,6 +892,8 @@ function renderView(v) {
     schedule: renderSchedule,
     wellness: renderWellness,
     learn: renderLearn,
+    science: renderScience,
+    calculator: renderCalculator,
     flashcards: renderFlashcards,
     store: renderStore,
     resources: renderResources,
@@ -1057,6 +1070,7 @@ function renderDashboard(){
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px">
       <div class="card card-glow" style="cursor:pointer" onclick="navigate('focus')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:var(--teal-g);display:flex;align-items:center;justify-content:center"><i class="fas fa-bullseye" style="color:var(--teal);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Focus Lab</div><div style="font-size:12px;color:var(--text2)">${ttf>0?ttf+'m done today':'Start your first session'}</div></div></div><div class="btn btn-teal btn-sm" style="width:100%;justify-content:center">Just 10 Minutes <i class="fas fa-arrow-right"></i></div></div>
       <div class="card" style="cursor:pointer" onclick="navigate('learn')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(255,140,66,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-gamepad" style="color:var(--accent);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Math Adventure</div><div style="font-size:12px;color:var(--text2)">Primary (Grades 1–6)</div></div></div><div class="btn btn-primary btn-sm" style="width:100%;justify-content:center">Play Now <i class="fas fa-arrow-right"></i></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('calculator')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(78,205,196,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-calculator" style="color:var(--teal);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Calculator</div><div style="font-size:12px;color:var(--text2)">GeoGebra & Scientific</div></div></div><div class="btn btn-teal btn-sm" style="width:100%;justify-content:center">Calculate <i class="fas fa-arrow-right"></i></div></div>
       <div class="card" style="cursor:pointer" onclick="navigate('flashcards')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(88,166,255,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-clone" style="color:var(--blue);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Flashcards</div><div style="font-size:12px;color:var(--text2)">Spaced repetition review</div></div></div><div class="btn btn-sm btn-secondary" style="width:100%;justify-content:center">Study <i class="fas fa-arrow-right"></i></div></div>
       <div class="card" style="cursor:pointer" onclick="navigate('store')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(216,180,254,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-store" style="color:#D8B4FE;size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Store</div><div style="font-size:12px;color:var(--text2)">Spend your XP</div></div></div><div class="btn btn-sm" style="width:100%;justify-content:center;border:1px solid var(--text2);background:transparent">Shop <i class="fas fa-arrow-right"></i></div></div>
     </div>
@@ -1750,17 +1764,935 @@ function genQ(grade){
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
+// ======================== PHET INTERACTIVE SCIENCE SIMULATIONS ========================
+const PHET_SIMULATIONS = [
+  {
+    id: 'circuit-construction-kit-dc',
+    name: 'Circuit Construction Kit: DC',
+    subject: 'Physics',
+    category: 'Electricity & Circuits',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_all.html',
+    icon: 'fa-bolt',
+    color: '#F59E0B',
+    featured: true,
+    desc: 'Build circuits with batteries, light bulbs, resistors, and switches. Measure current and voltage using lifelike ammeters and voltmeters.',
+    learningGoals: [
+      'Construct functional series and parallel circuits with live electron flow',
+      'Verify Ohm’s Law (V = I × R) across varying resistances',
+      'Test electrical conductivity and resistivity of everyday materials'
+    ],
+    challenge: 'Build a parallel circuit with 2 light bulbs and 1 switch that controls only one bulb without turning off the other. Compare the current in each branch.'
+  },
+  {
+    id: 'build-an-atom',
+    name: 'Build an Atom',
+    subject: 'Chemistry',
+    category: 'Atomic Structure & Isotopes',
+    grades: [6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/build-an-atom/latest/build-an-atom_all.html',
+    icon: 'fa-atom',
+    color: '#10B981',
+    featured: true,
+    desc: 'Assemble protons, neutrons, and electrons to construct chemical elements on the periodic table. Inspect net charge, mass number, and nuclear stability.',
+    learningGoals: [
+      'Relate proton count directly to element identity on the periodic table',
+      'Calculate net atomic charge based on proton and electron imbalance',
+      'Distinguish neutral atoms from positive cations and negative anions'
+    ],
+    challenge: 'Build a neutral, stable Carbon-12 atom, then add one neutron to synthesize Carbon-13, and remove an electron to create a C⁺ cation.'
+  },
+  {
+    id: 'states-of-matter-basics',
+    name: 'States of Matter: Basics',
+    subject: 'Chemistry',
+    category: 'Thermodynamics & Phase Changes',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/states-of-matter-basics/latest/states-of-matter-basics_all.html',
+    icon: 'fa-fire-flame-curved',
+    color: '#EF4444',
+    featured: true,
+    desc: 'Heat, cool, and compress atoms and molecules. Watch Neon, Argon, Oxygen, and Water transition between solid, liquid, and gas phases.',
+    learningGoals: [
+      'Connect temperature to molecular kinetic velocity and lattice vibration',
+      'Compare particle spacing and intermolecular bonds across solid, liquid, and gas phases',
+      'Observe the anomalous crystalline structure expansion of solid ice compared to liquid water'
+    ],
+    challenge: 'Heat ice at 0 K until it vaporizes completely into steam. Notice the temperature transitions and atomic velocity changes.'
+  },
+  {
+    id: 'energy-skate-park-basics',
+    name: 'Energy Skate Park: Basics',
+    subject: 'Physics',
+    category: 'Mechanics & Conservation of Energy',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/energy-skate-park-basics/latest/energy-skate-park-basics_all.html',
+    icon: 'fa-person-skating',
+    color: '#3B82F6',
+    featured: true,
+    desc: 'Explore conservation of mechanical energy with a skater on ramps and curved tracks. View real-time kinetic, potential, and thermal energy bar graphs.',
+    learningGoals: [
+      'Observe total mechanical energy remaining constant when friction is zero',
+      'Analyze potential energy (PE = mgh) at apex vs kinetic energy (KE = ½mv²) at nadir',
+      'Observe mechanical energy converting into thermal friction energy as heat accumulates'
+    ],
+    challenge: 'Design a curved track with a loop-the-loop where the skater completes the full loop without falling, using the minimal starting drop height.'
+  },
+  {
+    id: 'balancing-chemical-equations',
+    name: 'Balancing Chemical Equations',
+    subject: 'Chemistry',
+    category: 'Stoichiometry & Reactions',
+    grades: [8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/balancing-chemical-equations/latest/balancing-chemical-equations_all.html',
+    icon: 'fa-vial',
+    color: '#8B5CF6',
+    featured: true,
+    desc: 'Balance synthesis, decomposition, and combustion reactions by adjusting integer coefficients. Use balance scales to verify conservation of mass.',
+    learningGoals: [
+      'Demonstrate that matter is conserved in chemical reactions (Lavoisier’s Law)',
+      'Understand why subscripts cannot be altered when balancing coefficients',
+      'Master balancing combustion reactions involving hydrocarbons and diatomic oxygen'
+    ],
+    challenge: 'Play the chemical balancing challenge game and score a perfect 5/5 stars on Level 2 or Level 3!'
+  },
+  {
+    id: 'forces-and-motion-basics',
+    name: 'Forces and Motion: Basics',
+    subject: 'Physics',
+    category: 'Newton’s Laws of Motion',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html',
+    icon: 'fa-arrows-left-right',
+    color: '#EC4899',
+    featured: false,
+    desc: 'Investigate net force, friction, acceleration, and Newton’s laws of motion by pulling wagons and pushing crates across surfaces with friction.',
+    learningGoals: [
+      'Relate net unbalanced force to acceleration: F_net = m × a (Newton’s 2nd Law)',
+      'Investigate static friction thresholds vs kinetic friction resistance',
+      'Observe inertia and constant speed when net horizontal force is zero'
+    ],
+    challenge: 'Calculate and verify the exact threshold force in Newtons required to overcome static friction on a 100 kg crate.'
+  },
+  {
+    id: 'bending-light',
+    name: 'Bending Light (Refraction & Reflection)',
+    subject: 'Physics',
+    category: 'Optics & Wave Mechanics',
+    grades: [7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_all.html',
+    icon: 'fa-wand-magic-sparkles',
+    color: '#06B6D4',
+    featured: false,
+    desc: 'Explore the refraction and reflection of light rays passing between air, water, glass, and mystery prisms. Measure angles with protractors to verify Snell’s Law.',
+    learningGoals: [
+      'Demonstrate Snell’s law: n₁ sin(θ₁) = n₂ sin(θ₂)',
+      'Observe Total Internal Reflection (TIR) when incident from high to low index of refraction',
+      'Observe chromatic dispersion of white light into spectrum rainbow colors through triangular prisms'
+    ],
+    challenge: 'Direct a laser from glass (n = 1.50) into air (n = 1.00) and find the critical angle where 100% of light undergoes Total Internal Reflection.'
+  },
+  {
+    id: 'gravity-and-orbits',
+    name: 'Gravity and Orbits',
+    subject: 'Earth & Space',
+    category: 'Astronomy & Gravitation',
+    grades: [5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_all.html',
+    icon: 'fa-earth-americas',
+    color: '#10B981',
+    featured: true,
+    desc: 'Manipulate the Sun, Earth, Moon, and space station to visualize gravitational force vectors, orbital velocities, and planetary motion.',
+    learningGoals: [
+      'Relate gravitational force to masses and orbital radius (Newton’s Universal Gravitation)',
+      'Differentiate stable circular orbits from elliptical or open escape paths',
+      'Investigate lunar orbit periods and orbital decay mechanics'
+    ],
+    challenge: 'Double the mass of the central star and adjust Earth’s tangential speed to maintain a stable circular orbit without crashing.'
+  },
+  {
+    id: 'wave-on-a-string',
+    name: 'Wave on a String',
+    subject: 'Physics',
+    category: 'Waves, Resonance & Harmonics',
+    grades: [6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_all.html',
+    icon: 'fa-water',
+    color: '#0284C7',
+    featured: false,
+    desc: 'Generate pulses or continuous harmonic waves on a string. Control amplitude, frequency, damping, and tension to measure wave speed and wavelength.',
+    learningGoals: [
+      'Verify the wave propagation speed equation: v = f × λ',
+      'Observe standing wave nodes, antinodes, and harmonic resonances',
+      'Compare fixed boundary phase inversion with free end non-inverting reflection'
+    ],
+    challenge: 'Set oscillator frequency to 2.0 Hz with zero damping and tune string tension to create a clean 3-node standing wave pattern.'
+  },
+  {
+    id: 'natural-selection',
+    name: 'Natural Selection',
+    subject: 'Biology',
+    category: 'Genetics, Evolution & Ecology',
+    grades: [7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/natural-selection/latest/natural-selection_all.html',
+    icon: 'fa-dna',
+    color: '#16A34A',
+    featured: true,
+    desc: 'Simulate natural selection in rabbit populations across temperate grassland and arctic biomes. Introduce mutations and environmental selection pressures.',
+    learningGoals: [
+      'Observe how gene mutations introduce new alleles into a population',
+      'Analyze predator selection pressure (wolves) and food scarcity selection',
+      'Track changes in phenotypic ratios and population survival curves over generations'
+    ],
+    challenge: 'Introduce white fur mutation in the arctic tundra biome with wolves present. Observe how camouflage causes white fur allele frequency to rise.'
+  },
+  {
+    id: 'gene-expression-essentials',
+    name: 'Gene Expression Essentials',
+    subject: 'Biology',
+    category: 'Molecular Biology & Genetics',
+    grades: [9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/gene-expression-essentials/latest/gene-expression-essentials_all.html',
+    icon: 'fa-virus',
+    color: '#A855F7',
+    featured: false,
+    desc: 'Simulate the central dogma of genetics: transcribe DNA into mRNA via RNA polymerase and translate mRNA into fluorescent proteins with ribosomes.',
+    learningGoals: [
+      'Trace transcription factor binding to gene promoter sequences',
+      'Observe mRNA synthesis and subsequent translation by cytoplasmic ribosomes',
+      'Analyze protein degradation and transcription factor concentration equilibrium'
+    ],
+    challenge: 'Tune transcription factor affinity and promoter strength to synthesize over 50 fluorescent protein molecules without excessive mRNA backlog.'
+  },
+  {
+    id: 'density',
+    name: 'Density & Buoyancy',
+    subject: 'Physics',
+    category: 'Fluid Mechanics & Material Science',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/density/latest/density_all.html',
+    icon: 'fa-scale-balanced',
+    color: '#EAB308',
+    featured: false,
+    desc: 'Submerge custom blocks into water tanks to observe buoyant force, water volume displacement, and calculate density (ρ = mass / volume).',
+    learningGoals: [
+      'Calculate volumetric density ρ = m / V for regular and irregular solids',
+      'State Archimedes’ Principle: buoyant force equals weight of displaced liquid',
+      'Predict whether an object will sink, float, or remain neutrally buoyant'
+    ],
+    challenge: 'Measure mass and water volume displacement for the 5 mystery blocks to deduce the exact material of each block.'
+  },
+  {
+    id: 'ph-scale-basics',
+    name: 'pH Scale: Basics',
+    subject: 'Chemistry',
+    category: 'Acids, Bases & Aqueous Solutions',
+    grades: [6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/ph-scale-basics/latest/ph-scale-basics_all.html',
+    icon: 'fa-droplet',
+    color: '#D946EF',
+    featured: false,
+    desc: 'Test the pH of coffee, saliva, drain cleaner, blood, spit, and battery acid. Add water to observe dilution effects on logarithmic ion concentration.',
+    learningGoals: [
+      'Understand the 0–14 pH scale with neutral water at pH 7.0',
+      'Categorize everyday household substances as strong or weak acids and bases',
+      'Demonstrate how diluting an acidic solution shifts its pH toward 7'
+    ],
+    challenge: 'Pour 0.50 L of coffee (pH 5.0). Add pure water until the mixture reaches pH 5.5. Calculate the volume ratio needed.'
+  },
+  {
+    id: 'molecule-shapes',
+    name: 'Molecule Shapes (VSEPR Theory)',
+    subject: 'Chemistry',
+    category: 'Chemical Bonding & Geometry',
+    grades: [9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/molecule-shapes/latest/molecule-shapes_all.html',
+    icon: 'fa-cubes',
+    color: '#6366F1',
+    featured: false,
+    desc: 'Build 3D molecules by attaching single, double, and triple bonds with lone electron pairs. Rotate molecules in 3D WebGL space and measure bond angles.',
+    learningGoals: [
+      'Predict 3D molecular geometry: Linear, Bent, Trigonal Planar, Tetrahedral, Trigonal Bipyramidal, Octahedral',
+      'Distinguish electron domain geometry from actual molecular shape',
+      'Demonstrate how lone pair repulsion compresses bonded angle values'
+    ],
+    challenge: 'Construct methane (CH₄), ammonia (NH₃), and water (H₂O). Compare how lone pairs compress the bond angles from 109.5° down to 104.5°.'
+  },
+  {
+    id: 'pendulum-lab',
+    name: 'Pendulum Lab',
+    subject: 'Physics',
+    category: 'Periodic Motion & Oscillations',
+    grades: [6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/pendulum-lab/latest/pendulum-lab_all.html',
+    icon: 'fa-clock',
+    color: '#14B8A6',
+    featured: false,
+    desc: 'Swing 1 or 2 pendulums simultaneously. Discover how oscillation period depends on string length, bob mass, release angle, and gravitational acceleration.',
+    learningGoals: [
+      'Determine factors affecting period: T = 2π√(L/g)',
+      'Confirm that bob mass does NOT affect the period of a simple pendulum',
+      'Compare pendulum behavior on Earth (g = 9.8 m/s²), the Moon, Jupiter, and Planet X'
+    ],
+    challenge: 'Calibrate a pendulum with a length that creates an exact 1.00-second half-period (a grandfather clock second tick).'
+  },
+  {
+    id: 'faradays-law',
+    name: 'Faraday’s Electromagnetic Lab',
+    subject: 'Physics',
+    category: 'Electromagnetism & Induction',
+    grades: [8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/faradays-law/latest/faradays-law_all.html',
+    icon: 'fa-magnet',
+    color: '#F97316',
+    featured: false,
+    desc: 'Move a permanent bar magnet through wire coils to light up a light bulb and deflect a voltmeter. Investigate Lenz’s Law and electromagnetic induction.',
+    learningGoals: [
+      'Discover that changing magnetic flux induces electromotive force (EMF)',
+      'Relate number of coil loops to magnitude of induced voltage',
+      'Demonstrate that faster magnet speed produces higher induced current'
+    ],
+    challenge: 'Pass the magnet through the 2-loop coil vs the 4-loop coil at equal speed and observe the difference in voltmeter deflection.'
+  },
+  {
+    id: 'greenhouse-effect',
+    name: 'Greenhouse Effect',
+    subject: 'Earth & Space',
+    category: 'Atmospheric Physics & Climate',
+    grades: [5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/greenhouse-effect/latest/greenhouse-effect_all.html',
+    icon: 'fa-temperature-arrow-up',
+    color: '#EA580C',
+    featured: false,
+    desc: 'Explore how greenhouse gas molecules (CO₂, CH₄, H₂O) absorb and re-emit infrared photons to warm Earth’s surface from the Ice Age to today.',
+    learningGoals: [
+      'Differentiate incoming solar visible light from outgoing terrestrial infrared radiation',
+      'Compare atmospheric temperatures across the Ice Age, 1750 Pre-Industrial, and Today',
+      'Analyze how cloud cover and atmospheric concentrations alter planetary energy balance'
+    ],
+    challenge: 'Ramp atmospheric greenhouse gas concentration from Ice Age to modern levels and record the global surface temperature increase.'
+  },
+  {
+    id: 'hookes-law',
+    name: 'Hooke’s Law & Spring Force',
+    subject: 'Physics',
+    category: 'Elasticity & Harmonic Force',
+    grades: [7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/hookes-law/latest/hookes-law_all.html',
+    icon: 'fa-arrows-split-up-and-left',
+    color: '#059669',
+    featured: false,
+    desc: 'Stretch and compress springs to investigate the direct relationship between applied force, restorative spring force, spring constant, and displacement.',
+    learningGoals: [
+      'Verify Hooke’s law: F_s = -k × x',
+      'Plot force vs displacement to calculate spring stiffness constant k',
+      'Compare effective spring constants for springs connected in series vs parallel'
+    ],
+    challenge: 'Set spring constant to 200 N/m. Apply 60 N of displacement force and verify the exact displacement with the virtual ruler.'
+  },
+  {
+    id: 'color-vision',
+    name: 'Color Vision & RGB Light',
+    subject: 'Physics',
+    category: 'Optics, Wavelength & Human Perception',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/color-vision/latest/color-vision_all.html',
+    icon: 'fa-eye',
+    color: '#8B5CF6',
+    featured: false,
+    desc: 'Mix Red, Green, and Blue primary light beams to produce any color in the rainbow. Explore human cone photoreceptors and monochromatic light filters.',
+    learningGoals: [
+      'Understand additive color mixing in light (RGB)',
+      'Simulate how red, green, and blue cone receptors in the retina send color signals to the brain',
+      'Observe light subtraction through colored optical absorption filters'
+    ],
+    challenge: 'Combine Red and Green beams at 100% intensity with zero Blue to see pure perceived Yellow light.'
+  },
+  {
+    id: 'friction',
+    name: 'Friction at Atomic Scale',
+    subject: 'Physics',
+    category: 'Thermodynamics & Atomic Lattice',
+    grades: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/friction/latest/friction_all.html',
+    icon: 'fa-hand-sparkles',
+    color: '#DC2626',
+    featured: false,
+    desc: 'Rub two books together and examine the contact surface at the microscopic atomic level. Watch atoms vibrate faster as mechanical friction turns into heat.',
+    learningGoals: [
+      'Observe macroscopic mechanical friction transferring kinetic energy into microscopic atomic vibration',
+      'Relate lattice vibration amplitude to thermal temperature',
+      'Observe atomic wear and tear when friction forces exceed atomic bonds'
+    ],
+    challenge: 'Rub the book surfaces rapidly until individual atoms break away from the surface lattice.'
+  },
+  {
+    id: 'under-pressure',
+    name: 'Under Pressure (Fluid Dynamics)',
+    subject: 'Physics',
+    category: 'Fluids & Hydrostatic Pressure',
+    grades: [6, 7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/under-pressure/latest/under-pressure_all.html',
+    icon: 'fa-gauge-high',
+    color: '#0284C7',
+    featured: false,
+    desc: 'Explore fluid pressure in water, gasoline, and honey. Discover how pressure changes with fluid density, depth, gravity, and atmospheric pressure.',
+    learningGoals: [
+      'Verify hydrostatic pressure formula: P = P_atm + ρ × g × h',
+      'Observe that fluid pressure depends solely on depth, not the shape of the container',
+      'Compare pressure on Earth vs Mars vs Jupiter'
+    ],
+    challenge: 'Measure pressure at 3 meters depth in water vs gasoline vs honey and calculate the density ratio.'
+  },
+  {
+    id: 'concentration',
+    name: 'Solution Concentration',
+    subject: 'Chemistry',
+    category: 'Solutions & Molarity',
+    grades: [7, 8, 9, 10, 11, 12],
+    embedUrl: 'https://phet.colorado.edu/sims/html/concentration/latest/concentration_all.html',
+    icon: 'fa-flask',
+    color: '#0D9488',
+    featured: false,
+    desc: 'Dissolve solid drink mix, cobalt chloride, or potassium permanganate in water to measure solution molarity (mol/L). Evaporate water or dilute to observe saturation.',
+    learningGoals: [
+      'Calculate molar concentration M = moles of solute / liters of solution',
+      'Observe saturation limits where solute precipitates as crystals',
+      'Demonstrate how solvent evaporation increases solution concentration'
+    ],
+    challenge: 'Dissolve drink mix until reaching saturation, then evaporate 0.2 L of water and count precipitate crystal formation.'
+  }
+];
+
+// PhET Science Lab State
+let phetActiveSimId = null;
+let phetSubjectFilter = 'all'; // 'all' | 'Physics' | 'Chemistry' | 'Biology' | 'Earth & Space'
+let phetGradeFilter = 'all';
+let phetSearchQuery = '';
+let phetOnlyFavorites = false;
+let phetShowNotebook = true;
+let learnActiveTab = 'science'; // 'science' | 'math'
+let phetNotesDebounceTimer = null;
+
+function phetLaunchSim(simId) {
+  phetActiveSimId = simId;
+  SFX.click();
+  if (currentView !== 'science' && currentView !== 'learn') {
+    navigate('science');
+  } else {
+    renderView(currentView);
+  }
+}
+
+function phetCloseSim() {
+  phetActiveSimId = null;
+  SFX.click();
+  renderView(currentView === 'learn' ? 'learn' : 'science');
+}
+
+function phetToggleFullscreen() {
+  const container = document.getElementById('phet-frame-container');
+  if (!container) return;
+  if (!document.fullscreenElement) {
+    container.requestFullscreen?.() || container.webkitRequestFullscreen?.();
+  } else {
+    document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+  }
+}
+
+function phetReloadSim() {
+  const iframe = document.getElementById('phet-sim-iframe');
+  const loader = document.getElementById('phet-loader');
+  if (!iframe) return;
+  if (loader) loader.style.opacity = '1';
+  iframe.src = iframe.src;
+}
+
+function phetToggleNotebook() {
+  phetShowNotebook = !phetShowNotebook;
+  renderView(currentView === 'learn' ? 'learn' : 'science');
+}
+
+function phetToggleFavorite(simId) {
+  let favs = Store.get('phetFavorites') || [];
+  if (favs.includes(simId)) {
+    favs = favs.filter(id => id !== simId);
+    toast('Removed simulation from bookmarks', 'info');
+  } else {
+    favs.push(simId);
+    SFX.click();
+    toast('Bookmarked simulation for quick access! ⭐', 'success');
+  }
+  Store.set('phetFavorites', favs);
+  renderView(currentView === 'learn' ? 'learn' : 'science');
+}
+
+function phetSaveNotes(simId, val) {
+  clearTimeout(phetNotesDebounceTimer);
+  phetNotesDebounceTimer = setTimeout(() => {
+    let notes = Store.get('phetLabNotes') || {};
+    notes[simId] = val;
+    Store.set('phetLabNotes', notes);
+    const indicator = document.getElementById('phet-save-status');
+    if (indicator) {
+      indicator.textContent = 'Auto-saved ✓';
+      setTimeout(() => { if (indicator) indicator.textContent = ''; }, 2000);
+    }
+  }, 400);
+}
+
+function phetToggleGoal(simId, idx) {
+  let goals = Store.get('phetCompletedGoals') || {};
+  if (!goals[simId]) goals[simId] = [];
+  if (goals[simId].includes(idx)) {
+    goals[simId] = goals[simId].filter(i => i !== idx);
+  } else {
+    goals[simId].push(idx);
+    SFX.click();
+  }
+  Store.set('phetCompletedGoals', goals);
+  renderView(currentView === 'learn' ? 'learn' : 'science');
+}
+
+function phetCompleteLab(simId) {
+  let completed = Store.get('phetCompletedLabs') || [];
+  if (completed.includes(simId)) {
+    toast('Lab experiment already completed!', 'info');
+    return;
+  }
+  completed.push(simId);
+  Store.set('phetCompletedLabs', completed);
+  Store.addXP(25);
+  completeQuest('resource');
+  SFX.complete();
+  spawnP(document.getElementById('phet-frame-container'), ['#4ECDC4', '#FFD93D', '#FF8C42', '#22C55E']);
+  toast('Lab Experiment Completed! +25 XP awarded 🎉', 'success');
+  renderView(currentView === 'learn' ? 'learn' : 'science');
+}
+
+function phetOnFrameLoad() {
+  const loader = document.getElementById('phet-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    setTimeout(() => { if (loader) loader.style.display = 'none'; }, 350);
+  }
+}
+
+// Renders the Science Content (Workbench or Catalog)
+function renderScienceContent(mountEl) {
+  if (!mountEl) return;
+  const user = Store.get('user') || { grade: 2 };
+  const userGrade = user.grade || 2;
+  const favs = Store.get('phetFavorites') || [];
+  const completedLabs = Store.get('phetCompletedLabs') || [];
+  const activeSim = phetActiveSimId ? PHET_SIMULATIONS.find(s => s.id === phetActiveSimId) : null;
+
+  // 1. ACTIVE WORKBENCH VIEW
+  if (activeSim) {
+    const isFav = favs.includes(activeSim.id);
+    const isCompleted = completedLabs.includes(activeSim.id);
+    const savedNotes = (Store.get('phetLabNotes') || {})[activeSim.id] || '';
+    const completedGoals = (Store.get('phetCompletedGoals') || {})[activeSim.id] || [];
+
+    mountEl.innerHTML = `
+      <div class="science-workbench">
+        <div class="science-workbench-bar">
+          <div class="science-wb-title-group">
+            <button class="btn btn-secondary btn-sm" onclick="phetCloseSim()" title="Return to Simulations Catalog">
+              <i class="fas fa-arrow-left"></i> All Labs
+            </button>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="science-sim-icon-box" style="background:${activeSim.color}22; color:${activeSim.color};">
+                <i class="fas ${activeSim.icon}"></i>
+              </div>
+              <div>
+                <div style="font-weight:800; font-size:16px;">${escHtml(activeSim.name)}</div>
+                <div style="font-size:12px; color:var(--text2); display:flex; align-items:center; gap:8px;">
+                  <span class="tag" style="background:${activeSim.color}1A; color:${activeSim.color}; font-size:10px; padding:1px 6px;">${activeSim.subject}</span>
+                  <span>${activeSim.category}</span>
+                  <span>&middot;</span>
+                  <span>Grades ${activeSim.grades[0]}–${activeSim.grades[activeSim.grades.length - 1]}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="science-wb-actions">
+            <button class="btn btn-sm btn-secondary" onclick="phetToggleNotebook()" title="Toggle Inquiry Notebook panel">
+              <i class="fas fa-book-open"></i> <span>${phetShowNotebook ? 'Hide Notebook' : 'Open Notebook'}</span>
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="phetReloadSim()" title="Reload simulation state">
+              <i class="fas fa-rotate-right"></i> <span>Reload</span>
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="phetToggleFullscreen()" title="Fullscreen mode">
+              <i class="fas fa-expand"></i> <span>Fullscreen</span>
+            </button>
+            <button class="btn btn-sm ${isFav ? 'btn-warning' : 'btn-secondary'}" onclick="phetToggleFavorite('${activeSim.id}')" title="${isFav ? 'Remove bookmark' : 'Bookmark simulation'}">
+              <i class="fas fa-star" style="${isFav ? 'color:#F59E0B;' : ''}"></i>
+            </button>
+            <a href="${activeSim.embedUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-ghost" title="Open directly from PhET (colorado.edu)">
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="science-workbench-layout ${phetShowNotebook ? 'with-notebook' : ''}">
+          <!-- Simulation Interactive Iframe Stage -->
+          <div class="science-frame-container" id="phet-frame-container">
+            <div class="science-iframe-loader" id="phet-loader">
+              <div class="spinner"></div>
+              <div style="font-weight:700; font-size:14px;">Loading ${escHtml(activeSim.name)}...</div>
+              <div style="font-size:12px; color:var(--text2);">Interactive PhET HTML5 Simulation</div>
+            </div>
+            <iframe
+              id="phet-sim-iframe"
+              src="${activeSim.embedUrl}"
+              allow="fullscreen; autoplay; clipboard-write;"
+              allowfullscreen
+              onload="phetOnFrameLoad()"
+              title="${escHtml(activeSim.name)}">
+            </iframe>
+          </div>
+
+          <!-- Lab Inquiry Notebook Panel -->
+          ${phetShowNotebook ? `
+            <div class="science-notebook-panel">
+              <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-clipboard-check" style="color:var(--teal); font-size:16px;"></i>
+                  <h3 style="font-size:15px; font-weight:800;">Lab Notebook</h3>
+                </div>
+                <span id="phet-save-status" style="font-size:11px; color:var(--green); font-weight:700;"></span>
+              </div>
+
+              <!-- Inquiry Challenge Prompt -->
+              <div class="card" style="padding:14px; background:rgba(78,205,196,0.08); border:1px solid rgba(78,205,196,0.3); border-radius:12px;">
+                <div style="display:flex; align-items:center; gap:6px; font-weight:800; font-size:12px; color:var(--teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">
+                  <i class="fas fa-flag-checkered"></i> Investigation Challenge
+                </div>
+                <div style="font-size:13px; line-height:1.5; color:var(--text);">${escHtml(activeSim.challenge)}</div>
+              </div>
+
+              <!-- Learning Goals Checklist -->
+              <div>
+                <label style="font-size:12px; font-weight:800; color:var(--text2); display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                  Key Concepts & Goals
+                </label>
+                <div class="science-goals-list">
+                  ${activeSim.learningGoals.map((goal, idx) => {
+                    const done = completedGoals.includes(idx);
+                    return `
+                      <label class="science-goal-item ${done ? 'done' : ''}">
+                        <input type="checkbox" ${done ? 'checked' : ''} onchange="phetToggleGoal('${activeSim.id}', ${idx})">
+                        <span>${escHtml(goal)}</span>
+                      </label>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <!-- Student Lab Notes Area -->
+              <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; font-weight:800; color:var(--text2); display:block; text-transform:uppercase; letter-spacing:0.5px;">
+                  Observations & Hypotheses
+                </label>
+                <textarea
+                  class="science-notes-area"
+                  placeholder="Record your data, observations, hypotheses, and conclusions here..."
+                  oninput="phetSaveNotes('${activeSim.id}', this.value)">${escHtml(savedNotes)}</textarea>
+              </div>
+
+              <!-- Completion & XP Reward Card -->
+              <div>
+                ${isCompleted ? `
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:12px; color:var(--green); font-weight:800; font-size:13px;">
+                    <span><i class="fas fa-circle-check" style="margin-right:6px;"></i> Lab Completed</span>
+                    <span class="tag" style="background:var(--green); color:#0F0F14; font-weight:800;">+25 XP</span>
+                  </div>
+                ` : `
+                  <button class="btn btn-primary" style="width:100%; justify-content:center; gap:8px; padding:12px;" onclick="phetCompleteLab('${activeSim.id}')">
+                    <i class="fas fa-award"></i> Complete Lab & Claim +25 XP
+                  </button>
+                `}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // 2. CATALOG VIEW (SIMULATION DIRECTORY & DISCOVERY)
+  const subjects = ['all', 'Physics', 'Chemistry', 'Biology', 'Earth & Space'];
+
+  // Filter calculations
+  let filtered = PHET_SIMULATIONS.filter(sim => {
+    if (phetSubjectFilter !== 'all' && sim.subject !== phetSubjectFilter) return false;
+    if (phetOnlyFavorites && !favs.includes(sim.id)) return false;
+    if (phetGradeFilter !== 'all') {
+      const g = parseInt(phetGradeFilter);
+      if (!sim.grades.includes(g)) return false;
+    }
+    if (phetSearchQuery.trim()) {
+      const q = phetSearchQuery.toLowerCase();
+      const matchName = sim.name.toLowerCase().includes(q);
+      const matchDesc = sim.desc.toLowerCase().includes(q);
+      const matchCat = sim.category.toLowerCase().includes(q);
+      const matchSubject = sim.subject.toLowerCase().includes(q);
+      if (!matchName && !matchDesc && !matchCat && !matchSubject) return false;
+    }
+    return true;
+  });
+
+  const subjectCounts = {
+    Physics: PHET_SIMULATIONS.filter(s => s.subject === 'Physics').length,
+    Chemistry: PHET_SIMULATIONS.filter(s => s.subject === 'Chemistry').length,
+    Biology: PHET_SIMULATIONS.filter(s => s.subject === 'Biology').length,
+    'Earth & Space': PHET_SIMULATIONS.filter(s => s.subject === 'Earth & Space').length
+  };
+
+  mountEl.innerHTML = `
+    <!-- Science Hero Header -->
+    <div class="science-header-hero">
+      <div class="science-hero-top">
+        <div class="science-hero-title-group">
+          <div class="science-hero-icon">
+            <i class="fas fa-flask-vial"></i>
+          </div>
+          <div>
+            <h1 style="font-size:24px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:10px;">
+              PhET Interactive Science Labs
+              <span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:11px; font-weight:800;">Embedded Suite</span>
+            </h1>
+            <p style="color:var(--text2); font-size:14px; margin:0;">
+              Research-backed interactive simulations by University of Colorado Boulder. Explore physics, chemistry, biology, and earth science with real-time feedback.
+            </p>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="card" style="padding:8px 14px; display:flex; align-items:center; gap:10px; background:var(--bg); border:1px solid var(--border);">
+            <div style="text-align:right;">
+              <div style="font-size:11px; color:var(--text2);">Completed</div>
+              <div style="font-weight:800; font-size:15px; color:var(--green);">${completedLabs.length} / ${PHET_SIMULATIONS.length}</div>
+            </div>
+            <i class="fas fa-trophy" style="color:var(--green); font-size:18px;"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="science-controls-toolbar">
+        <!-- Subject Chips -->
+        <div class="science-subject-chips">
+          <button class="science-subject-chip ${phetSubjectFilter === 'all' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='all'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <i class="fas fa-layer-group"></i> All Labs (${PHET_SIMULATIONS.length})
+          </button>
+          <button class="science-subject-chip ${phetSubjectFilter === 'Physics' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Physics'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <i class="fas fa-bolt" style="color:#F59E0B;"></i> Physics (${subjectCounts.Physics})
+          </button>
+          <button class="science-subject-chip ${phetSubjectFilter === 'Chemistry' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Chemistry'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <i class="fas fa-flask" style="color:#10B981;"></i> Chemistry (${subjectCounts.Chemistry})
+          </button>
+          <button class="science-subject-chip ${phetSubjectFilter === 'Biology' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Biology'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <i class="fas fa-dna" style="color:#16A34A;"></i> Biology (${subjectCounts.Biology})
+          </button>
+          <button class="science-subject-chip ${phetSubjectFilter === 'Earth & Space' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Earth & Space'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <i class="fas fa-earth-americas" style="color:#06B6D4;"></i> Earth & Space (${subjectCounts['Earth & Space']})
+          </button>
+          <button class="science-subject-chip ${phetOnlyFavorites ? 'selected' : ''}" onclick="phetOnlyFavorites=!phetOnlyFavorites; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <i class="fas fa-star" style="color:#F59E0B;"></i> Bookmarks (${favs.length})
+          </button>
+        </div>
+
+        <!-- Grade & Search Filters -->
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <select class="input" style="width:auto; padding:7px 12px; font-size:13px;" onchange="phetGradeFilter=this.value; renderScienceContent(document.getElementById('${mountEl.id}'))">
+            <option value="all" ${phetGradeFilter === 'all' ? 'selected' : ''}>All Grades</option>
+            <optgroup label="Primary Stage">
+              <option value="4" ${phetGradeFilter === '4' ? 'selected' : ''}>Grade 4</option>
+              <option value="5" ${phetGradeFilter === '5' ? 'selected' : ''}>Grade 5</option>
+              <option value="6" ${phetGradeFilter === '6' ? 'selected' : ''}>Grade 6</option>
+            </optgroup>
+            <optgroup label="Preparatory Stage">
+              <option value="7" ${phetGradeFilter === '7' ? 'selected' : ''}>Grade 7</option>
+              <option value="8" ${phetGradeFilter === '8' ? 'selected' : ''}>Grade 8</option>
+              <option value="9" ${phetGradeFilter === '9' ? 'selected' : ''}>Grade 9</option>
+            </optgroup>
+            <optgroup label="Secondary Stage">
+              <option value="10" ${phetGradeFilter === '10' ? 'selected' : ''}>Grade 10</option>
+              <option value="11" ${phetGradeFilter === '11' ? 'selected' : ''}>Grade 11</option>
+              <option value="12" ${phetGradeFilter === '12' ? 'selected' : ''}>Grade 12 (Thanawya)</option>
+            </optgroup>
+          </select>
+
+          <div style="position:relative; display:flex; align-items:center;">
+            <i class="fas fa-search" style="position:absolute; left:10px; color:var(--text2); font-size:12px; pointer-events:none;"></i>
+            <input
+              type="text"
+              class="input"
+              style="padding-left:30px; width:220px; font-size:13px;"
+              placeholder="Search experiments..."
+              value="${escHtml(phetSearchQuery)}"
+              oninput="phetSearchQuery=this.value; renderScienceContent(document.getElementById('${mountEl.id}'))">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulations Cards Grid -->
+    ${filtered.length ? `
+      <div class="science-cards-grid">
+        ${filtered.map(sim => {
+          const isFav = favs.includes(sim.id);
+          const isCompleted = completedLabs.includes(sim.id);
+          return `
+            <div class="science-sim-card">
+              <div class="science-sim-card-header">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div class="science-sim-icon-box" style="background:${sim.color}20; color:${sim.color};">
+                    <i class="fas ${sim.icon}"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight:800; font-size:15px;">${escHtml(sim.name)}</div>
+                    <div style="font-size:11px; color:var(--text2);">${sim.category}</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:4px;">
+                  ${isCompleted ? `<span title="Lab Completed" style="color:var(--green); font-size:14px; margin-right:4px;"><i class="fas fa-circle-check"></i></span>` : ''}
+                  <button class="btn btn-sm btn-ghost" style="padding:6px 8px; color:${isFav ? '#F59E0B' : 'var(--text2)'};" onclick="phetToggleFavorite('${sim.id}')" title="${isFav ? 'Remove bookmark' : 'Bookmark'}">
+                    <i class="fas fa-star"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="science-sim-card-body">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <span class="tag" style="background:${sim.color}18; color:${sim.color}; font-size:10px; font-weight:700;">${sim.subject}</span>
+                  <span class="tag" style="background:var(--bg); border:1px solid var(--border); color:var(--text2); font-size:10px;">Grades ${sim.grades[0]}–${sim.grades[sim.grades.length - 1]}</span>
+                  ${sim.featured ? `<span class="tag" style="background:rgba(255,140,66,0.15); color:var(--accent); font-size:10px; font-weight:700;">★ Popular</span>` : ''}
+                </div>
+
+                <p style="font-size:12px; color:var(--text2); line-height:1.45; margin:0; flex:1;">
+                  ${escHtml(sim.desc)}
+                </p>
+
+                <div class="science-sim-challenge-snippet">
+                  <div style="font-weight:800; font-size:11px; color:var(--teal); margin-bottom:3px; display:flex; align-items:center; gap:5px;">
+                    <i class="fas fa-compass"></i> Challenge
+                  </div>
+                  <div style="font-size:11px; color:var(--text); line-height:1.35; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                    ${escHtml(sim.challenge)}
+                  </div>
+                </div>
+              </div>
+
+              <div class="science-sim-card-footer">
+                <button class="btn btn-sm btn-primary" style="flex:1; justify-content:center; gap:8px;" onclick="phetLaunchSim('${sim.id}')">
+                  <i class="fas fa-play"></i> Launch Virtual Lab
+                </button>
+                <a href="${sim.embedUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" style="padding:6px 10px;" title="Open on PhET Colorado">
+                  <i class="fas fa-external-link-alt"></i>
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    ` : `
+      <div class="card" style="text-align:center; padding:50px 20px; color:var(--text2);">
+        <i class="fas fa-flask-vial" style="font-size:36px; margin-bottom:12px; opacity:0.4; display:block;"></i>
+        <h3 style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:6px;">No science simulations found</h3>
+        <p style="font-size:13px; margin-bottom:16px;">Try clearing your search query or switching subject and grade filters.</p>
+        <button class="btn btn-secondary btn-sm" onclick="phetSubjectFilter='all'; phetGradeFilter='all'; phetSearchQuery=''; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
+          Reset Filters
+        </button>
+      </div>
+    `}
+  `;
+}
+
+// Standalone Science View handler
+function renderScience() {
+  updateUserPanel();
+  const el = document.getElementById('view-science');
+  if (!el) return;
+  el.innerHTML = `<div class="science-wrap" id="science-main-mount"></div>`;
+  renderScienceContent(document.getElementById('science-main-mount'));
+}
+
 function renderLearn(){
-  updateUserPanel();const el=document.getElementById('view-learn'),u=Store.get('user'),grade=u?u.grade:2;
-  if(!gameState.active){
-    const best={};Store.get('games').filter(g=>g.type==='math').forEach(g=>{if(!best[g.grade]||g.xp>best[g.grade].xp)best[g.grade]=g;});
-    el.innerHTML=`<div style="max-width:600px;margin:0 auto;text-align:center"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Learn & Play</h1><p style="color:var(--text2);margin-bottom:28px">Practice math with quick, fun rounds.</p>
-      <div class="card" style="margin-bottom:24px;text-align:left"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="char-face happy"><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div></div><div><div style="font-weight:700;font-size:17px">Math Adventure</div><div style="font-size:13px;color:var(--text2)">Primary (Grades 1–6) &middot; 10 questions &middot; +10 XP each</div></div></div>
-      <label style="font-weight:700;font-size:14px;display:block;margin-bottom:10px">Grade Level</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">${[1,2,3,4,5,6].map(g=>`<button class="grade-pill ${g===grade?'selected':''}" onclick="gameState.grade=${g};SFX.click();renderLearn()">${g}</button>`).join('')}</div>
-      <button class="btn btn-lg btn-primary" style="width:100%;justify-content:center" onclick="startMathGame()"><i class="fas fa-play"></i> Start Round</button>
-      ${best[gameState.grade]?`<div style="text-align:center;margin-top:12px;font-size:13px;color:var(--text2)">Best: ${best[gameState.grade].score}/${best[gameState.grade].total} &middot; ${best[gameState.grade].xp} XP</div>`:''}</div>
-      <div class="card" style="text-align:left"><h3 style="font-size:15px;margin-bottom:10px"><i class="fas fa-info-circle" style="color:var(--blue)"></i> Scoring</h3><div style="font-size:13px;color:var(--text2);display:flex;flex-direction:column;gap:6px"><div><span style="color:var(--green);font-weight:700">+10 XP</span> correct answer</div><div><span style="color:var(--accent);font-weight:700">Streak bonus</span> 3+ in a row = +5 extra</div><div><span style="color:#D8B4FE;font-weight:700">Surprise bonus</span> random bonus after rounds</div><div><span style="color:var(--text);font-weight:700">No penalty</span> for wrong answers</div></div></div></div>`;
-  } else renderMathQ(el);
+  updateUserPanel();
+  const el = document.getElementById('view-learn');
+  if (!el) return;
+  const u = Store.get('user');
+  const grade = u ? u.grade : 2;
+
+  // Learn & Play tab switcher at top
+  const navTabsHtml = `
+    <div class="learn-subnav-bar">
+      <button class="learn-subnav-btn ${learnActiveTab === 'science' ? 'active' : ''}" onclick="learnActiveTab='science'; SFX.click(); renderLearn();">
+        <i class="fas fa-atom" style="font-size:16px;"></i> PhET Science Simulations
+      </button>
+      <button class="learn-subnav-btn ${learnActiveTab === 'math' ? 'active accent' : ''}" onclick="learnActiveTab='math'; SFX.click(); renderLearn();">
+        <i class="fas fa-gamepad" style="font-size:16px;"></i> Math Adventure Game
+      </button>
+    </div>
+  `;
+
+  if (learnActiveTab === 'science') {
+    el.innerHTML = `
+      <div class="science-wrap">
+        ${navTabsHtml}
+        <div id="learn-science-mount"></div>
+      </div>
+    `;
+    renderScienceContent(document.getElementById('learn-science-mount'));
+    return;
+  }
+
+  // Math Adventure Game Tab
+  if (!gameState.active) {
+    const best = {};
+    Store.get('games').filter(g => g.type === 'math').forEach(g => {
+      if (!best[g.grade] || g.xp > best[g.grade].xp) best[g.grade] = g;
+    });
+    el.innerHTML = `
+      <div style="max-width:680px; margin:0 auto;">
+        ${navTabsHtml}
+        <div class="card" style="margin-bottom:24px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <div class="char-face happy"><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div></div>
+            <div>
+              <div style="font-weight:700; font-size:17px;">Math Adventure</div>
+              <div style="font-size:13px; color:var(--text2);">Primary (Grades 1–6) &middot; 10 questions &middot; +10 XP each</div>
+            </div>
+          </div>
+          <label style="font-weight:700; font-size:14px; display:block; margin-bottom:10px;">Grade Level</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+            ${[1, 2, 3, 4, 5, 6].map(g => `<button class="grade-pill ${g === grade ? 'selected' : ''}" onclick="gameState.grade=${g}; SFX.click(); renderLearn()">${g}</button>`).join('')}
+          </div>
+          <button class="btn btn-lg btn-primary" style="width:100%; justify-content:center;" onclick="startMathGame()">
+            <i class="fas fa-play"></i> Start Round
+          </button>
+          ${best[gameState.grade] ? `<div style="text-align:center; margin-top:12px; font-size:13px; color:var(--text2);">Best: ${best[gameState.grade].score}/${best[gameState.grade].total} &middot; ${best[gameState.grade].xp} XP</div>` : ''}
+        </div>
+        <div class="card" style="text-align:left;">
+          <h3 style="font-size:15px; margin-bottom:10px;"><i class="fas fa-info-circle" style="color:var(--blue);"></i> Scoring</h3>
+          <div style="font-size:13px; color:var(--text2); display:flex; flex-direction:column; gap:6px;">
+            <div><span style="color:var(--green); font-weight:700;">+10 XP</span> correct answer</div>
+            <div><span style="color:var(--accent); font-weight:700;">Streak bonus</span> 3+ in a row = +5 extra</div>
+            <div><span style="color:#D8B4FE; font-weight:700;">Surprise bonus</span> random bonus after rounds</div>
+            <div><span style="color:var(--text); font-weight:700;">No penalty</span> for wrong answers</div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    renderMathQ(el);
+  }
 }
 
 function startMathGame(){SFX.click();gameState={active:true,questions:[],current:0,score:0,streak:0,xp:0,grade:gameState.grade,answered:false};for(let i=0;i<10;i++)gameState.questions.push(genQ(gameState.grade));renderLearn();}
@@ -1776,7 +2708,9 @@ function endMathGame(){gameState.active=false;SFX.complete();const gr=gameState.
 // ======================== RESOURCES ========================
 function renderResources(){updateUserPanel();const el=document.getElementById('view-resources'),u=Store.get('user'),grade=u?u.grade:2;el.innerHTML=`<div style="max-width:900px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Free Learning Resources</h1><p style="color:var(--text2);margin-bottom:24px">Curated for the Egyptian curriculum. All free or free-with-school-email.</p><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px"><div><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Grade</label><select class="input" id="res-grade" style="width:auto;padding:8px 12px" onchange="filterRes()"><option value="all">All Grades</option><optgroup label="Primary">${[1,2,3,4,5,6].map(g=>`<option value="${g}" ${g===grade?'selected':''}>Grade ${g}</option>`).join('')}</optgroup><optgroup label="Preparatory">${[7,8,9].map(g=>`<option value="${g}" ${g===grade?'selected':''}>Grade ${g}</option>`).join('')}</optgroup><optgroup label="Secondary">${[10,11,12].map(g=>`<option value="${g}" ${g===grade?'selected':''}>Grade ${g}</option>`).join('')}</optgroup></select></div><div><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Subject</label><select class="input" id="res-subject" style="width:auto;padding:8px 12px" onchange="filterRes()"><option value="all">All Subjects</option><option value="Math">Math</option><option value="Arabic">Arabic</option><option value="English">English</option><option value="Science">Science</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option><option value="Social Studies">Social Studies</option><option value="History">History</option><option value="Philosophy">Philosophy</option></select></div></div><div id="res-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:16px"></div><div id="res-empty" style="display:none;text-align:center;padding:40px;color:var(--text2)"><i class="fas fa-search" style="font-size:32px;margin-bottom:12px;display:block"></i>No resources match this filter.</div></div>`;filterRes();}
 
-function filterRes(){const g=document.getElementById('res-grade').value,s=document.getElementById('res-subject').value,f=RESOURCES.filter(r=>{if(g!=='all'&&!r.grades.includes(parseInt(g)))return false;if(s!=='all'&&!r.subjects.includes(s))return false;return true;}),grid=document.getElementById('res-grid'),empty=document.getElementById('res-empty');if(!f.length){grid.innerHTML='';empty.style.display='block';return;}empty.style.display='none';const colors={Math:'rgba(255,140,66,.12);color:var(--accent)',Arabic:'rgba(239,68,68,.12);color:#EF4444',English:'rgba(88,166,255,.12);color:var(--blue)',Science:'rgba(78,205,196,.12);color:var(--teal)',Physics:'rgba(168,85,247,.12);color:#A855F7',Chemistry:'rgba(6,182,212,.12);color:#06B6D4',Biology:'rgba(34,197,94,.12);color:#22C55E','Social Studies':'rgba(251,191,36,.12);color:#FBBF24',History:'rgba(251,191,36,.12);color:#FBBF24',Philosophy:'rgba(236,72,153,.12);color:#EC4899'};grid.innerHTML=f.map(r=>`<a href="${r.url}" target="_blank" rel="noopener" class="res-card" onclick="completeQuest('resource');return true;" style="text-decoration:none;color:inherit;display:block"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:40px;height:40px;border-radius:10px;background:${r.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas ${r.icon}" style="color:${r.color};font-size:16px"></i></div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">${r.subjects.map(x=>`<span class="tag" style="background:${colors[x]||'rgba(78,205,196,.12);color:var(--teal)'};font-size:10px;padding:2px 6px">${x}</span>`).join('')}</div></div><i class="fas fa-external-link-alt" style="color:var(--text2);font-size:12px"></i></div><p style="font-size:13px;color:var(--text2);line-height:1.4">${r.desc}</p><div style="margin-top:8px;font-size:11px;color:var(--text2)">Grades ${r.grades[0]}–${r.grades[r.grades.length-1]}</div></a>`).join('');}
+function filterRes(){const g=document.getElementById('res-grade').value,s=document.getElementById('res-subject').value,f=RESOURCES.filter(r=>{if(g!=='all'&&!r.grades.includes(parseInt(g)))return false;if(s!=='all'&&!r.subjects.includes(s))return false;return true;}),grid=document.getElementById('res-grid'),empty=document.getElementById('res-empty');if(!f.length){grid.innerHTML='';empty.style.display='block';return;}empty.style.display='none';const colors={Math:'rgba(255,140,66,.12);color:var(--accent)',Arabic:'rgba(239,68,68,.12);color:#EF4444',English:'rgba(88,166,255,.12);color:var(--blue)',Science:'rgba(78,205,196,.12);color:var(--teal)',Physics:'rgba(168,85,247,.12);color:#A855F7',Chemistry:'rgba(6,182,212,.12);color:#06B6D4',Biology:'rgba(34,197,94,.12);color:#22C55E','Social Studies':'rgba(251,191,36,.12);color:#FBBF24',History:'rgba(251,191,36,.12);color:#FBBF24',Philosophy:'rgba(236,72,153,.12);color:#EC4899'};grid.innerHTML=f.map(r=>{
+  const isPhet = r.name === 'PhET Simulations';
+  return `<div class="res-card" style="display:flex;flex-direction:column;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:40px;height:40px;border-radius:10px;background:${r.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas ${r.icon}" style="color:${r.color};font-size:16px"></i></div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">${r.subjects.map(x=>`<span class="tag" style="background:${colors[x]||'rgba(78,205,196,.12);color:var(--teal)'};font-size:10px;padding:2px 6px">${x}</span>`).join('')}</div></div><a href="${r.url}" target="_blank" rel="noopener" onclick="completeQuest('resource');" title="Open website" style="color:var(--text2);font-size:12px"><i class="fas fa-external-link-alt"></i></a></div><p style="font-size:13px;color:var(--text2);line-height:1.4">${r.desc}</p></div><div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:11px;color:var(--text2)">Grades ${r.grades[0]}–${r.grades[r.grades.length-1]}</div>${isPhet?`<button class="btn btn-primary btn-sm" style="font-size:11px;padding:4px 10px;gap:6px" onclick="navigate('science')"><i class="fas fa-flask-vial"></i> Launch Labs</button>`:`<a href="${r.url}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:11px;padding:4px 10px" onclick="completeQuest('resource');">Visit</a>`}</div></div>`;}).join('');}
 
 // ======================== PROGRESS ========================
 let progressChart=null;
@@ -1875,6 +2809,2131 @@ function saveWhitelist(){const t=document.getElementById('whitelist-input').valu
 function genBookmarklet(){const w=JSON.stringify(Store.get('settings').whitelist),u=location.href.split('#')[0]+'#focus',c=`javascript:void((function(){var w=${w},h=location.hostname.toLowerCase(),ok=w.some(function(d){return h.indexOf(d)!==-1});if(!ok){location.href='${u}';}else{var m=document.createElement('div');m.style.cssText='position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;background:#1C1C2A;color:#4ECDC4;border-radius:10px;font-family:sans-serif;font-size:14px;font-weight:bold;box-shadow:0 8px 25px rgba(0,0,0,0.5)';m.textContent='\\u2713 Productive site. Keep going!';document.body.appendChild(m);setTimeout(function(){m.remove()},2000);}})())`;const l=document.getElementById('bookmarklet-link');if(l)l.href=c;}
 function exportData(){const b=new Blob([JSON.stringify(Store._d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='spark-data.json';a.click();toast('Data exported!','success');}
 function clearData(){showModal(`<h2 style="font-size:20px;margin-bottom:10px">Clear All Data?</h2><p style="color:var(--text2);margin-bottom:20px">This cannot be undone. Includes flashcard decks stored in IndexedDB.</p><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn" style="background:var(--red);color:#fff" onclick="localStorage.removeItem('spark_data');localStorage.removeItem('spark_sticky_notes');localStorage.removeItem('sticky_notes');localStorage.removeItem('stickyNotes');localStorage.removeItem('spark_sticky_notes_visible');localStorage.removeItem('sticky_notes_visible');localStorage.removeItem('spark_sticky_notes_highest_z');localStorage.removeItem('sticky_notes_highest_z');Store.load();FlashDB.clearAll().catch(()=>{});cleanupFlash();closeModal();showOnboarding();renderStickyNotes();toast('All data cleared','info')">Delete Everything</button></div>`);}
+
+// ======================== UNIFIED MATH RENDERER (KATEX) & MATHEMATICAL SUITE ========================
+function renderUnifiedMath(container = document.body) {
+  if (typeof renderMathInElement === 'function') {
+    try {
+      renderMathInElement(container, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '\\[', right: '\\]', display: true }
+        ],
+        throwOnError: false,
+        errorColor: '#FF6B6B'
+      });
+    } catch (e) {
+      console.warn('Unified Math rendering error:', e);
+    }
+  }
+}
+
+function renderKatexToString(latex, display = false) {
+  if (typeof katex !== 'undefined' && typeof katex.renderToString === 'function') {
+    try {
+      return katex.renderToString(latex, { displayMode: display, throwOnError: false });
+    } catch (e) {
+      return `<span class="katex-fallback">${escHtml(latex)}</span>`;
+    }
+  }
+  return `<span class="katex-fallback">${escHtml(latex)}</span>`;
+}
+
+// ------------------------ SUITE STATE & ENGINE ------------------------
+let calcTab = 'desmos'; // 'desmos', 'three3d', 'scratchpad', 'native', 'formulas', 'converter'
+let calcAngleUnit = 'deg'; // 'deg', 'rad'
+let calcMemory = 0;
+let calcExpr = '';
+let calcResult = '0';
+let calcLastAns = '0';
+let calcIsNew = true;
+let calcBaseInputVal = '42';
+let calcBaseType = 'dec';
+
+// Desmos 2D Graphing API State
+let desmosCalculator = null;
+let desmosFullscreen = false;
+
+// 3D Studio State (Three.js & Math3D.org)
+let calc3dMode = 'three'; // 'three' or 'math3d'
+let three3dFormula = '(x^2 - y^2)/4';
+let three3dColormap = 'neon'; // 'neon', 'viridis', 'coolwarm', 'aurora'
+let three3dAutoRotate = true;
+let three3dWireframe = false;
+let three3dFullscreen = false;
+let threeScene = null, threeCamera = null, threeRenderer = null, threeControls = null;
+let threeSurfaceMesh = null, threeWireMesh = null, threeAnimId = null, threeResizeObserver = null;
+
+// Unified Math Scratchpad State
+let unifiedMathText = 'f(x) = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}';
+let savedUserFormulas = [
+  'f(x) = x^2 - 4x + 3',
+  'y = 2\\sin(3x) \\cdot e^{-0.1x}',
+  'z = \\frac{x^2 - y^2}{4}',
+  '\\int_{0}^{\\pi} \\sin(x)\\,dx = 2'
+];
+
+const DESMOS_PRESETS = [
+  {
+    category: 'Algebra & Polynomials',
+    icon: 'fa-chart-line',
+    items: [
+      { name: 'Quadratic Parabola', latex: 'y = x^2 - 4x + 3', desc: 'Vertex at (2, -1), roots at x = 1, 3' },
+      { name: 'Cubic with Local Extrema', latex: 'y = x^3 - 3x^2 + 2', desc: 'Local maximum and minimum inflection' },
+      { name: 'Factored Polynomial', latex: 'y = (x - 2)(x + 1)(x - 3)', desc: 'Multi-root curve with zeros at -1, 2, 3' },
+      { name: 'Rational Hyperbola', latex: 'y = \\frac{x^2 - 1}{x^2 + 1}', desc: 'Symmetric bounded rational curve' }
+    ]
+  },
+  {
+    category: 'Trigonometry & Polar Waves',
+    icon: 'fa-wave-square',
+    items: [
+      { name: 'Harmonic Sine Wave', latex: 'y = 2\\sin(3x)', desc: 'Amplitude 2, angular frequency 3' },
+      { name: 'Damped Oscillation', latex: 'y = e^{-0.2x} \\cos(4x)', desc: 'Exponential decay harmonic motion' },
+      { name: 'Polar 5-Petal Rose', latex: 'r = 3\\sin(5\\theta)', desc: 'Symmetric 5-petal floral curve' },
+      { name: 'Tangent Asymptotes', latex: 'y = \\tan(x)', desc: 'Periodic vertical asymptotic curves' }
+    ]
+  },
+  {
+    category: 'Calculus & Tangents',
+    icon: 'fa-square-root-variable',
+    items: [
+      { name: 'Function & Derivative', latex: 'f(x) = x^3 - 3x', desc: "Primary polynomial plus derivative f'(x)" },
+      { name: 'Dynamic Tangent Slider', latex: "y - f(a) = f'(a)(x - a)", desc: 'Tangent line sliding across curve' },
+      { name: 'Accumulation Integral', latex: 'y = \\int_{0}^{x} \\sin(t)\\,dt', desc: 'Area accumulation function' },
+      { name: 'Taylor Series Polynomial', latex: 'y = x - \\frac{x^3}{6} + \\frac{x^5}{120}', desc: '5th-order Taylor polynomial for sin(x)' }
+    ]
+  },
+  {
+    category: 'Conics & Statistics',
+    icon: 'fa-shapes',
+    items: [
+      { name: 'Standard Circle', latex: 'x^2 + y^2 = 25', desc: 'Radius 5 centered at origin' },
+      { name: 'Centered Ellipse', latex: '\\frac{x^2}{9} + \\frac{y^2}{4} = 1', desc: 'Major axis 6, minor axis 4' },
+      { name: 'Normal Bell Distribution', latex: 'y = \\frac{1}{\\sqrt{2\\pi}} e^{-\\frac{x^2}{2}}', desc: 'Standard Gaussian distribution curve' },
+      { name: 'Hyperbola Conic', latex: '\\frac{x^2}{4} - \\frac{y^2}{9} = 1', desc: 'Asymptotic conic curve' }
+    ]
+  }
+];
+
+const THREE_3D_PRESETS = [
+  { name: 'Hyperbolic Paraboloid (Saddle)', formula: '(x^2 - y^2)/4', latex: 'z = \\frac{x^2 - y^2}{4}', desc: 'Classic saddle surface with minimax point at origin' },
+  { name: 'Sinc Wave Ripple', formula: '3 * sin(sqrt(x^2 + y^2) + 0.001) / (sqrt(x^2 + y^2) + 0.001)', latex: 'z = 3\\frac{\\sin\\left(\\sqrt{x^2+y^2}\\right)}{\\sqrt{x^2+y^2}}', desc: 'Circular wave disturbance spreading across fluid' },
+  { name: 'Circular Paraboloid Bowl', formula: '(x^2 + y^2)/6', latex: 'z = \\frac{x^2 + y^2}{6}', desc: 'Convex paraboloid dish with global minimum' },
+  { name: 'Monkey Saddle', formula: '(x^3 - 3*x*y^2)/10', latex: 'z = \\frac{x^3 - 3xy^2}{10}', desc: 'Surface with 3 depressions for legs and tail' },
+  { name: 'Egg Carton / 2D Sine', formula: 'sin(x) * cos(y)', latex: 'z = \\sin(x)\\cos(y)', desc: 'Periodic lattice grid of peaks and valleys' },
+  { name: 'Damped Shockwave', formula: '2.5 * exp(-0.15*(x^2+y^2)) * cos(sqrt(x^2+y^2))', latex: 'z = 2.5 e^{-0.15(x^2+y^2)}\\cos\\left(\\sqrt{x^2+y^2}\\right)', desc: 'Damped energy impulse dissipating outward' },
+  { name: 'Gaussian Bell Curve 3D', formula: '3 * exp(-(x^2 + y^2)/3)', latex: 'z = 3 e^{-\\frac{x^2+y^2}{3}}', desc: 'Bivariate normal probability distribution density' },
+  { name: 'Whirlpool Spiral Wave', formula: 'sin(sqrt(x^2+y^2)*2 - 1.5)', latex: 'z = \\sin\\left(2\\sqrt{x^2+y^2} - 1.5\\right)', desc: 'Concentric wave bands vibrating at high frequency' }
+];
+
+const MATH3D_PRESETS = [
+  { name: '3D Vector Field & Flow Lines', desc: 'Visualizing 3D vector fields F(x,y,z) with direction vectors' },
+  { name: 'Parametric Space Helix', desc: 'Space curves r(t) = ⟨cos(t), sin(t), t/3⟩ and tangent vectors' },
+  { name: 'Hyperboloid of One Sheet', desc: 'Implicit quadric surface x² + y² - z² = 1 with saddle curves' },
+  { name: 'Tangent Plane to Surface', desc: 'Gradient vectors ∇f and tangent planes at any point (x₀, y₀)' }
+];
+
+const MATH_FORMULAS = [
+  {
+    category: 'algebra',
+    name: 'Quadratic Formula',
+    latex: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',
+    desc: 'Finds real and complex roots of ax² + bx + c = 0',
+    insert: '(-b + sqrt(b^2 - 4*a*c))/(2*a)',
+    desmos: 'y = x^2 - 4x + 3'
+  },
+  {
+    category: 'algebra',
+    name: 'Pythagorean Theorem',
+    latex: 'a^2 + b^2 = c^2 \\implies c = \\sqrt{a^2 + b^2}',
+    desc: 'Fundamental relationship between sides of a right triangle',
+    insert: 'sqrt(a^2 + b^2)',
+    desmos: 'x^2 + y^2 = 25'
+  },
+  {
+    category: 'algebra',
+    name: 'Difference of Squares',
+    latex: 'a^2 - b^2 = (a - b)(a + b)',
+    desc: 'Factoring identity for quadratic polynomials',
+    insert: '(a - b)*(a + b)',
+    desmos: 'y = x^2 - 9'
+  },
+  {
+    category: 'trig',
+    name: 'Pythagorean Trig Identity',
+    latex: '\\sin^2(\\theta) + \\cos^2(\\theta) = 1',
+    desc: 'Fundamental circular identity valid for all angles',
+    insert: 'sin(x)^2 + cos(x)^2',
+    desmos: 'y = \\sin(x)^2 + \\cos(x)^2'
+  },
+  {
+    category: 'trig',
+    name: 'Tangent Quotient',
+    latex: '\\tan(\\theta) = \\frac{\\sin(\\theta)}{\\cos(\\theta)}',
+    desc: 'Trigonometric quotient identity with periodic vertical asymptotes',
+    insert: 'sin(x)/cos(x)',
+    desmos: 'y = \\tan(x)'
+  },
+  {
+    category: 'trig',
+    name: 'Double Angle Sine',
+    latex: '\\sin(2\\theta) = 2\\sin(\\theta)\\cos(\\theta)',
+    desc: 'Double-angle sine expansion identity',
+    insert: '2*sin(x)*cos(x)',
+    desmos: 'y = 2\\sin(x)\\cos(x)'
+  },
+  {
+    category: 'trig',
+    name: 'Law of Cosines',
+    latex: 'c^2 = a^2 + b^2 - 2ab\\cos(C)',
+    desc: 'Generalizes Pythagorean theorem for any oblique triangle',
+    insert: 'sqrt(a^2 + b^2 - 2*a*b*cos(C))'
+  },
+  {
+    category: 'calculus',
+    name: 'Power Rule (Derivative)',
+    latex: '\\frac{d}{dx}\\left[x^n\\right] = n x^{n-1}',
+    desc: 'Differentiation of polynomial terms with real exponents',
+    insert: 'n*x^(n-1)',
+    desmos: 'f(x) = x^3 - 3x'
+  },
+  {
+    category: 'calculus',
+    name: 'Exponential Derivative',
+    latex: '\\frac{d}{dx}\\left[e^x\\right] = e^x',
+    desc: 'The unique real function identical to its own derivative',
+    insert: 'exp(x)',
+    desmos: 'y = e^x'
+  },
+  {
+    category: 'calculus',
+    name: 'Fundamental Theorem of Calculus',
+    latex: '\\int_{a}^{b} f(x)\\,dx = F(b) - F(a)',
+    desc: 'Connects differentiation with definite integration',
+    insert: 'F(b) - F(a)',
+    desmos: 'y = \\int_0^x \\sin(t)\\,dt'
+  },
+  {
+    category: 'calculus',
+    name: '3D Hyperbolic Paraboloid (Saddle)',
+    latex: 'z = \\frac{x^2 - y^2}{4}',
+    desc: 'Classic saddle surface with stationary minimax saddle point at origin',
+    insert: '(x^2 - y^2)/4',
+    three: '(x^2 - y^2)/4'
+  },
+  {
+    category: 'calculus',
+    name: '3D Sinc Ripple Surface',
+    latex: 'z = 3\\frac{\\sin\\left(\\sqrt{x^2+y^2}\\right)}{\\sqrt{x^2+y^2}}',
+    desc: 'Radially symmetric circular wave propagation in 3D',
+    insert: '3*sin(sqrt(x^2+y^2))/(sqrt(x^2+y^2))',
+    three: '3 * sin(sqrt(x^2+y^2)+0.001)/(sqrt(x^2+y^2)+0.001)'
+  },
+  {
+    category: 'constants',
+    name: "Euler's Identity",
+    latex: 'e^{i\\pi} + 1 = 0',
+    desc: 'Profound identity uniting exponential, imaginary, and circular constants',
+    insert: '-1'
+  },
+  {
+    category: 'constants',
+    name: 'Speed of Light (c)',
+    latex: 'c = 299{,}792{,}458\\text{ m/s}',
+    desc: 'Universal speed of electromagnetic radiation in vacuum',
+    insert: '299792458'
+  },
+  {
+    category: 'constants',
+    name: "Planck's Constant (h)",
+    latex: 'h = 6.62607015 \\times 10^{-34}\\text{ J}\\cdot\\text{s}',
+    desc: 'Fundamental quantum proportionality constant in physics',
+    insert: '6.62607015e-34'
+  },
+  {
+    category: 'constants',
+    name: 'Gravitational Constant (G)',
+    latex: 'G = 6.67430 \\times 10^{-11}\\text{ N}\\cdot\\text{m}^2/\\text{kg}^2',
+    desc: "Empirical physical constant in Newton's law of gravitation",
+    insert: '6.67430e-11'
+  },
+  {
+    category: 'constants',
+    name: "Avogadro's Number (Nₐ)",
+    latex: 'N_A = 6.02214076 \\times 10^{23}\\text{ mol}^{-1}',
+    desc: 'Number of constituent particles per mole of substance',
+    insert: '6.02214076e23'
+  },
+  {
+    category: 'constants',
+    name: 'Golden Ratio (φ)',
+    latex: '\\phi = \\frac{1 + \\sqrt{5}}{2} \\approx 1.6180339887',
+    desc: 'Aesthetic geometric ratio and limit of successive Fibonacci terms',
+    insert: '1.618033988749895'
+  }
+];
+
+// ------------------------ MAIN CALCULATOR RENDERER ------------------------
+function renderCalculator() {
+  updateUserPanel();
+  const el = document.getElementById('view-calculator');
+  if (!el) return;
+
+  // Restore settings if stored, migrate legacy geogebra tab to desmos
+  const s = Store.get('calcSettings') || {};
+  if (s.tab) calcTab = s.tab;
+  if (calcTab === 'geogebra') calcTab = 'desmos';
+  if (s.angleUnit && !calcAngleUnit) calcAngleUnit = s.angleUnit;
+
+  el.innerHTML = `
+    <div class="calc-container">
+      <!-- Header with refined typography -->
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h1 style="font-size:26px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+            <i class="fas fa-calculator" style="color:var(--teal);"></i> Mathematical Suite & Calculator
+          </h1>
+          <p style="color:var(--text2); font-size:14px; max-width:720px;">
+            Unified mathematical environment featuring the Desmos 2D Graphing API, Three.js 3D Surface Plotter, Math3D.org, and a Unified KaTeX Math Renderer matching Desmos typography.
+          </p>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="calc-mode-pill ${calcAngleUnit==='deg'?'active':''}" onclick="calcToggleAngleUnit()" title="Toggle Degrees / Radians">
+            <span class="dot"></span> ${calcAngleUnit.toUpperCase()}
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="showCalcHelpModal()" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+            <i class="fas fa-circle-question"></i> Guide & Shortcuts
+          </button>
+        </div>
+      </div>
+
+      <!-- Segmented Navigation Tabs -->
+      <div class="calc-nav-tabs">
+        <button class="calc-tab-btn ${calcTab==='desmos'?'active':''}" onclick="calcSetTab('desmos')">
+          <i class="fas fa-chart-line"></i> Desmos 2D Grapher
+        </button>
+        <button class="calc-tab-btn ${calcTab==='three3d'?'active':''}" onclick="calcSetTab('three3d')">
+          <i class="fas fa-cube"></i> 3D Studio (Three.js & Math3D)
+        </button>
+        <button class="calc-tab-btn ${calcTab==='scratchpad'?'active':''}" onclick="calcSetTab('scratchpad')">
+          <i class="fas fa-pen-to-square"></i> Unified Math Studio
+        </button>
+        <button class="calc-tab-btn ${calcTab==='native'?'active':''}" onclick="calcSetTab('native')">
+          <i class="fas fa-calculator"></i> Scientific Keypad
+        </button>
+        <button class="calc-tab-btn ${calcTab==='formulas'?'active':''}" onclick="calcSetTab('formulas')">
+          <i class="fas fa-square-root-variable"></i> Formulas & Constants
+        </button>
+        <button class="calc-tab-btn ${calcTab==='converter'?'active':''}" onclick="calcSetTab('converter')">
+          <i class="fas fa-repeat"></i> Base & Unit Converter
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div id="calc-tab-content">
+        ${calcTab === 'desmos' ? renderCalcDesmosTab() : ''}
+        ${calcTab === 'three3d' ? renderCalcThree3dTab() : ''}
+        ${calcTab === 'scratchpad' ? renderCalcScratchpadTab() : ''}
+        ${calcTab === 'native' ? renderCalcNativeTab() : ''}
+        ${calcTab === 'formulas' ? renderCalcFormulasTab() : ''}
+        ${calcTab === 'converter' ? renderCalcConverterTab() : ''}
+      </div>
+    </div>
+  `;
+
+  // Initialize active tab interactive engines
+  if (calcTab === 'desmos') {
+    setTimeout(initDesmosGrapher, 50);
+  } else if (calcTab === 'three3d') {
+    setTimeout(initThree3dStudio, 50);
+  } else if (calcTab === 'scratchpad') {
+    setTimeout(initUnifiedMathStudio, 50);
+  } else if (calcTab === 'native') {
+    attachCalcKeyboardListener();
+  }
+
+  // Render unified KaTeX across all rendered math elements
+  renderUnifiedMath(el);
+}
+
+function calcSetTab(t) {
+  if (calcTab === 'three3d' && t !== 'three3d') {
+    destroyThree3d();
+  }
+  calcTab = t;
+  const s = Store.get('calcSettings') || {};
+  s.tab = t;
+  Store.set('calcSettings', s);
+  SFX.click();
+  renderCalculator();
+}
+
+// ======================== 1. DESMOS API GRAPHING SUITE ========================
+function renderCalcDesmosTab() {
+  return `
+    <div class="math-workstation">
+      <!-- Toolbar with Actions & Helpers -->
+      <div class="math-app-bar">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-weight:700; font-size:14px; color:var(--teal); display:inline-flex; align-items:center; gap:6px;">
+            <i class="fas fa-chart-line"></i> Desmos API 2D Graphing Calculator
+          </span>
+          <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px;">
+            Official Web API
+          </span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn-sm btn-ghost" onclick="desmosClearAll()" title="Clear all equations" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+            <i class="fas fa-trash-can"></i> Clear All
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="desmosResetView()" title="Reset viewport" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+            <i class="fas fa-rotate"></i> Reset View
+          </button>
+          <button class="btn btn-sm btn-teal" id="desmos-fullscreen-btn" onclick="calcToggleDesmosFullscreen()" style="font-size:12px; border-radius:10px;">
+            <i class="fas fa-expand"></i> Fullscreen
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Command Bar for Direct Desmos Plotting -->
+      <div class="math-cmd-panel">
+        <i class="fas fa-terminal" style="color:var(--teal); font-size:14px;"></i>
+        <input
+          id="desmos-cmd-input"
+          class="math-cmd-input"
+          type="text"
+          placeholder="Type formula (e.g. y = \\sin(3x) * e^{-0.2x}, y = x^2 - 4x + 3, x^2 + y^2 = 25)..."
+          onkeydown="if(event.key==='Enter'){desmosSubmitCommand();}"
+        />
+        <button class="btn btn-sm btn-teal" onclick="desmosSubmitCommand()" style="font-size:12px; white-space:nowrap; border-radius:8px;">
+          <i class="fas fa-paper-plane"></i> Graph in Desmos
+        </button>
+      </div>
+
+      <!-- Instant Math Presets Ribbon -->
+      <div>
+        <div style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-bolt" style="color:var(--accent);"></i> Instant Graph Presets (1-Click Plot)
+        </div>
+        <div class="calc-preset-ribbon no-scrollbar">
+          ${DESMOS_PRESETS.flatMap(g => g.items.slice(0, 2)).map(p => `
+            <button class="calc-preset-chip" onclick="desmosPlotFormula('${escHtml(p.latex)}')" title="${escHtml(p.desc)}">
+              <i class="fas fa-play" style="font-size:10px; color:var(--teal);"></i>
+              <strong>${escHtml(p.name)}:</strong>
+              <span style="font-family:monospace; color:var(--text2);">${escHtml(p.latex)}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Main Desmos Canvas Chassis -->
+      <div id="desmos-frame-wrapper" class="desmos-frame-chassis ${desmosFullscreen ? 'fullscreen' : ''}">
+        <div id="desmos-calculator"></div>
+      </div>
+
+      <!-- Presets Reference Gallery by Mathematical Topic -->
+      <div class="card" style="margin-top:4px; border-radius:16px;">
+        <h3 style="font-size:15px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-lightbulb" style="color:var(--accent);"></i> Desmos Formula Gallery by Topic
+        </h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;">
+          ${DESMOS_PRESETS.map(cat => `
+            <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px;">
+              <div style="font-size:13px; font-weight:700; color:var(--teal); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                <i class="fas ${cat.icon}"></i> ${cat.category}
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                ${cat.items.map(item => `
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px; border-radius:8px; background:var(--card); font-size:12px; border:1px solid var(--border);">
+                    <div style="min-width:0; flex:1;">
+                      <div style="font-weight:700; color:var(--text);">${escHtml(item.name)}</div>
+                      <div style="font-family:monospace; color:var(--text2); font-size:11px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${escHtml(item.latex)}</div>
+                    </div>
+                    <button class="btn btn-xs btn-ghost" onclick="desmosPlotFormula('${escHtml(item.latex)}')" title="Insert & Graph" style="color:var(--teal);">
+                      <i class="fas fa-play"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initDesmosGrapher() {
+  const elt = document.getElementById('desmos-calculator');
+  if (!elt) return;
+
+  if (typeof Desmos === 'undefined') {
+    elt.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text2); gap:12px;">
+        <i class="fas fa-spinner fa-spin" style="font-size:28px; color:var(--teal);"></i>
+        <span>Loading Desmos API Calculator...</span>
+      </div>
+    `;
+    setTimeout(initDesmosGrapher, 400);
+    return;
+  }
+
+  if (desmosCalculator) {
+    try {
+      desmosCalculator.resize();
+    } catch (e) {}
+    return;
+  }
+
+  elt.innerHTML = '';
+  desmosCalculator = Desmos.GraphingCalculator(elt, {
+    keypad: true,
+    expressions: true,
+    settingsMenu: true,
+    zoomButtons: true,
+    border: false,
+    fontSize: 14,
+    showResetButtonOnGraphpaper: true
+  });
+
+  // Seed with initial illustrative expressions
+  desmosCalculator.setExpressions([
+    { id: 'exp_seed_1', latex: 'y = \\sin(x) \\cdot \\cos(0.5x)', color: '#4ECDC4' },
+    { id: 'exp_seed_2', latex: 'y = \\frac{1}{2}x^2 - 3', color: '#FF8C42' },
+    { id: 'exp_seed_3', latex: '(2, -1)', label: 'Vertex', showLabel: true, color: '#FF8C42' }
+  ]);
+}
+
+function desmosPlotFormula(latex) {
+  if (!latex) return;
+  if (calcTab !== 'desmos') {
+    calcSetTab('desmos');
+  }
+  setTimeout(() => {
+    if (!desmosCalculator) initDesmosGrapher();
+    if (desmosCalculator) {
+      const exprId = 'user_expr_' + Date.now();
+      desmosCalculator.setExpression({ id: exprId, latex: latex });
+      toast(`Plotted in Desmos: ${latex}`, 'success');
+      Store.addXP(5);
+      SFX.success();
+    }
+  }, 100);
+}
+
+function desmosSubmitCommand() {
+  const inputEl = document.getElementById('desmos-cmd-input');
+  const val = inputEl ? inputEl.value.trim() : '';
+  if (!val) {
+    toast('Please enter a mathematical expression for Desmos', 'warn');
+    return;
+  }
+  desmosPlotFormula(val);
+  if (inputEl) inputEl.value = '';
+}
+
+function desmosClearAll() {
+  if (desmosCalculator) {
+    desmosCalculator.setBlank();
+    toast('Cleared all Desmos expressions', 'info');
+    SFX.click();
+  }
+}
+
+function desmosResetView() {
+  if (desmosCalculator) {
+    desmosCalculator.setDefaultState();
+    toast('Desmos view reset to default', 'info');
+    SFX.click();
+  }
+}
+
+function calcToggleDesmosFullscreen() {
+  desmosFullscreen = !desmosFullscreen;
+  const c = document.getElementById('desmos-frame-wrapper');
+  const btn = document.getElementById('desmos-fullscreen-btn');
+  if (c) c.classList.toggle('fullscreen', desmosFullscreen);
+  if (btn) {
+    btn.innerHTML = desmosFullscreen
+      ? `<i class="fas fa-compress"></i> Exit Fullscreen`
+      : `<i class="fas fa-expand"></i> Fullscreen`;
+  }
+  if (desmosCalculator) {
+    setTimeout(() => desmosCalculator.resize(), 100);
+  }
+  SFX.click();
+}
+
+// ======================== 2. THREE.JS 3D VISUALIZER & MATH3D.ORG ========================
+function renderCalcThree3dTab() {
+  return `
+    <div class="math-workstation">
+      <!-- Toolbar with 3D Mode Switcher (Three.js vs Math3D.org) -->
+      <div class="math-app-bar">
+        <div class="math-switcher-deck">
+          <button class="math-sub-pill ${calc3dMode==='three'?'active':''}" onclick="calcSet3dMode('three')">
+            <i class="fas fa-cube"></i> Three.js 3D Visualizer
+          </button>
+          <button class="math-sub-pill ${calc3dMode==='math3d'?'active':''}" onclick="calcSet3dMode('math3d')">
+            <i class="fas fa-globe"></i> Math3D.org Workstation
+          </button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          ${calc3dMode === 'three' ? `
+            <button class="btn btn-sm btn-ghost" onclick="three3dResetCamera()" title="Reset 3D camera" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+              <i class="fas fa-camera-rotate"></i> Reset Camera
+            </button>
+            <button class="btn btn-sm btn-teal" id="three-fullscreen-btn" onclick="three3dToggleFullscreen()" style="font-size:12px; border-radius:10px;">
+              <i class="fas fa-expand"></i> Fullscreen
+            </button>
+          ` : `
+            <button class="btn btn-sm btn-ghost" onclick="math3dReset()" title="Reload Math3D" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+              <i class="fas fa-rotate"></i> Reload
+            </button>
+            <button class="btn btn-sm btn-teal" id="math3d-fullscreen-btn" onclick="math3dToggleFullscreen()" style="font-size:12px; border-radius:10px;">
+              <i class="fas fa-expand"></i> Fullscreen
+            </button>
+            <a href="https://www.math3d.org/" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" title="Open math3d.org in new window" style="font-size:12px; border-radius:10px;">
+              <i class="fas fa-arrow-up-right-from-square"></i>
+            </a>
+          `}
+        </div>
+      </div>
+
+      ${calc3dMode === 'three' ? renderThree3dContent() : renderMath3dContent()}
+    </div>
+  `;
+}
+
+function renderThree3dContent() {
+  return `
+    <!-- Command Bar for 3D Surface Function -->
+    <div class="math-cmd-panel">
+      <span style="font-weight:700; color:var(--teal); font-family:monospace; font-size:15px;">z = f(x, y) =</span>
+      <input
+        id="three-formula-input"
+        class="math-cmd-input"
+        type="text"
+        value="${escHtml(three3dFormula)}"
+        placeholder="Type z = f(x, y) (e.g. (x^2 - y^2)/4, 3*sin(sqrt(x^2+y^2))/sqrt(x^2+y^2), sin(x)*cos(y))..."
+        onkeydown="if(event.key==='Enter'){three3dApplyInput();}"
+      />
+      <button class="btn btn-sm btn-teal" onclick="three3dApplyInput()" style="font-size:12px; white-space:nowrap; border-radius:8px;">
+        <i class="fas fa-cube"></i> Plot 3D Surface
+      </button>
+    </div>
+
+    <!-- 3D Presets Ribbon -->
+    <div>
+      <div style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+        <i class="fas fa-bolt" style="color:var(--accent);"></i> 3D Surface Presets
+      </div>
+      <div class="calc-preset-ribbon no-scrollbar">
+        ${THREE_3D_PRESETS.map(p => `
+          <button class="calc-preset-chip" onclick="three3dPlotFormula('${escHtml(p.formula)}')" title="${escHtml(p.desc)}">
+            <i class="fas fa-cube" style="font-size:10px; color:var(--accent);"></i>
+            <strong>${escHtml(p.name)}:</strong>
+            <span style="font-family:monospace; color:var(--text2);">${escHtml(p.formula)}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Three.js 3D Viewport Chassis -->
+    <div id="three-frame-wrapper" class="three-chassis ${three3dFullscreen ? 'fullscreen' : ''}">
+      <div id="three-canvas-mount"></div>
+
+      <!-- Real-Time HUD Overlay with KaTeX Math -->
+      <div class="three-overlay-hud">
+        <div class="three-hud-badge">
+          <i class="fas fa-cube" style="color:var(--teal);"></i>
+          <span id="three-hud-formula">
+            ${renderKatexToString(`z = ${three3dFormula}`, false)}
+          </span>
+        </div>
+        <div class="three-hud-badge" style="font-size:11px; color:#94A3B8;">
+          <i class="fas fa-arrows-up-down-left-right"></i> Drag to Rotate • Wheel to Zoom • Right-Click to Pan
+        </div>
+      </div>
+
+      <!-- Quick Interactive 3D Controls -->
+      <div class="three-hud-controls">
+        <button class="btn btn-xs btn-ghost" onclick="three3dToggleRotate()" style="background:rgba(13,17,28,0.85); color:#FFF; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
+          <i class="fas fa-arrows-spin"></i> Auto-Spin: ${three3dAutoRotate ? 'ON' : 'OFF'}
+        </button>
+        <button class="btn btn-xs btn-ghost" onclick="three3dToggleWireframe()" style="background:rgba(13,17,28,0.85); color:#FFF; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
+          <i class="fas fa-border-all"></i> Wireframe: ${three3dWireframe ? 'ON' : 'OFF'}
+        </button>
+        <select onchange="three3dSetColormap(this.value)" style="background:rgba(13,17,28,0.85); color:#FFF; border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:11px; padding:4px 8px;">
+          <option value="neon" ${three3dColormap==='neon'?'selected':''}>Colormap: Neon Cyberpunk</option>
+          <option value="viridis" ${three3dColormap==='viridis'?'selected':''}>Colormap: Viridis</option>
+          <option value="coolwarm" ${three3dColormap==='coolwarm'?'selected':''}>Colormap: Cool-Warm</option>
+          <option value="aurora" ${three3dColormap==='aurora'?'selected':''}>Colormap: Emerald Aurora</option>
+        </select>
+      </div>
+    </div>
+  `;
+}
+
+function renderMath3dContent() {
+  return `
+    <div id="math3d-frame-wrapper" class="math3d-frame-chassis ${three3dFullscreen ? 'fullscreen' : ''}">
+      <iframe
+        id="math3d-iframe"
+        src="https://www.math3d.org/"
+        title="Math3D.org Workstation"
+        allow="fullscreen; clipboard-read; clipboard-write"
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <!-- Math3D Reference Topics -->
+    <div class="card" style="border-radius:16px;">
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-compass" style="color:var(--teal);"></i> Multivariable Calculus in Math3D.org
+      </h3>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+        ${MATH3D_PRESETS.map(p => `
+          <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px;">
+            <div style="font-weight:700; font-size:13px; color:var(--text); margin-bottom:4px;">${escHtml(p.name)}</div>
+            <div style="font-size:12px; color:var(--text2);">${escHtml(p.desc)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function calcSet3dMode(mode) {
+  if (mode !== 'three') destroyThree3d();
+  calc3dMode = mode;
+  SFX.click();
+  renderCalculator();
+}
+
+function math3dReset() {
+  const iframe = document.getElementById('math3d-iframe');
+  if (iframe) {
+    const src = iframe.src;
+    iframe.src = '';
+    setTimeout(() => { iframe.src = src; }, 50);
+    toast('Math3D.org refreshed', 'info');
+  }
+}
+
+function math3dToggleFullscreen() {
+  three3dFullscreen = !three3dFullscreen;
+  const c = document.getElementById('math3d-frame-wrapper');
+  const btn = document.getElementById('math3d-fullscreen-btn');
+  if (c) c.classList.toggle('fullscreen', three3dFullscreen);
+  if (btn) {
+    btn.innerHTML = three3dFullscreen
+      ? `<i class="fas fa-compress"></i> Exit Fullscreen`
+      : `<i class="fas fa-expand"></i> Fullscreen`;
+  }
+  SFX.click();
+}
+
+// ------------------------ THREE.JS INITIALIZATION & RUNTIME ------------------------
+function destroyThree3d() {
+  if (threeAnimId) {
+    cancelAnimationFrame(threeAnimId);
+    threeAnimId = null;
+  }
+  if (threeResizeObserver) {
+    threeResizeObserver.disconnect();
+    threeResizeObserver = null;
+  }
+  if (threeRenderer) {
+    try {
+      threeRenderer.dispose();
+      if (threeRenderer.domElement && threeRenderer.domElement.parentNode) {
+        threeRenderer.domElement.parentNode.removeChild(threeRenderer.domElement);
+      }
+    } catch (e) {}
+    threeRenderer = null;
+  }
+  threeScene = null;
+  threeCamera = null;
+  threeControls = null;
+  threeSurfaceMesh = null;
+  threeWireMesh = null;
+}
+
+function compileMathFunction(exprStr) {
+  let s = (exprStr || '').trim().toLowerCase();
+  if (!s) s = '(x*x - y*y)/4';
+
+  s = s.replace(/\^/g, '**');
+  s = s.replace(/(\d)([a-z(])/g, '$1*$2');
+  s = s.replace(/(\))([a-z0-9(])/g, '$1*$2');
+
+  const fns = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sqrt', 'cbrt', 'abs', 'exp', 'log'];
+  fns.forEach(fn => {
+    const reg = new RegExp('\\b' + fn + '\\b', 'g');
+    s = s.replace(reg, 'Math.' + fn);
+  });
+  s = s.replace(/\bpi\b/g, 'Math.PI');
+  s = s.replace(/\be\b/g, 'Math.E');
+
+  try {
+    const fn = new Function('x', 'y', `"use strict"; return (${s});`);
+    const val = fn(1, 1);
+    if (typeof val !== 'number' || isNaN(val)) throw new Error('Invalid formula');
+    return fn;
+  } catch (e) {
+    console.warn('Formula parse error, fallback to saddle:', e);
+    return (x, y) => (x * x - y * y) / 4;
+  }
+}
+
+function getColormapColor(t, scheme = 'neon') {
+  t = Math.max(0, Math.min(1, t));
+  if (scheme === 'viridis') {
+    if (t < 0.25) {
+      const u = t / 0.25;
+      return { r: 0.27 * (1 - u) + 0.19 * u, g: 0.0 * (1 - u) + 0.40 * u, b: 0.33 * (1 - u) + 0.55 * u };
+    } else if (t < 0.5) {
+      const u = (t - 0.25) / 0.25;
+      return { r: 0.19 * (1 - u) + 0.13 * u, g: 0.40 * (1 - u) + 0.57 * u, b: 0.55 * (1 - u) + 0.55 * u };
+    } else if (t < 0.75) {
+      const u = (t - 0.5) / 0.25;
+      return { r: 0.13 * (1 - u) + 0.46 * u, g: 0.57 * (1 - u) + 0.78 * u, b: 0.55 * (1 - u) + 0.35 * u };
+    } else {
+      const u = (t - 0.75) / 0.25;
+      return { r: 0.46 * (1 - u) + 0.99 * u, g: 0.78 * (1 - u) + 0.90 * u, b: 0.35 * (1 - u) + 0.14 * u };
+    }
+  } else if (scheme === 'coolwarm') {
+    if (t < 0.5) {
+      const u = t / 0.5;
+      return { r: 0.23 * (1 - u) + 0.92 * u, g: 0.44 * (1 - u) + 0.92 * u, b: 0.85 * (1 - u) + 0.92 * u };
+    } else {
+      const u = (t - 0.5) / 0.5;
+      return { r: 0.92 * (1 - u) + 0.85 * u, g: 0.92 * (1 - u) + 0.20 * u, b: 0.92 * (1 - u) + 0.25 * u };
+    }
+  } else if (scheme === 'aurora') {
+    if (t < 0.5) {
+      const u = t / 0.5;
+      return { r: 0.05 * (1 - u) + 0.10 * u, g: 0.20 * (1 - u) + 0.85 * u, b: 0.50 * (1 - u) + 0.65 * u };
+    } else {
+      const u = (t - 0.5) / 0.5;
+      return { r: 0.10 * (1 - u) + 0.90 * u, g: 0.85 * (1 - u) + 0.95 * u, b: 0.65 * (1 - u) + 0.20 * u };
+    }
+  } else {
+    // 'neon' Cyberpunk
+    if (t < 0.5) {
+      const u = t / 0.5;
+      return { r: 0.10 * (1 - u) + 0.70 * u, g: 0.85 * (1 - u) + 0.25 * u, b: 0.95 * (1 - u) + 0.90 * u };
+    } else {
+      const u = (t - 0.5) / 0.5;
+      return { r: 0.70 * (1 - u) + 1.00 * u, g: 0.25 * (1 - u) + 0.55 * u, b: 0.90 * (1 - u) + 0.15 * u };
+    }
+  }
+}
+
+function buildSurfaceGeometry(fn, xMin = -5, xMax = 5, yMin = -5, yMax = 5, segments = 55) {
+  const geom = new THREE.BufferGeometry();
+  const positions = [];
+  const colors = [];
+  const indices = [];
+
+  const dx = (xMax - xMin) / segments;
+  const dy = (yMax - yMin) / segments;
+
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  const zGrid = [];
+
+  for (let i = 0; i <= segments; i++) {
+    const x = xMin + i * dx;
+    zGrid[i] = [];
+    for (let j = 0; j <= segments; j++) {
+      const y = yMin + j * dy;
+      let z = 0;
+      try {
+        z = fn(x, y);
+        if (isNaN(z) || !isFinite(z)) z = 0;
+        z = Math.max(-12, Math.min(12, z));
+      } catch (e) {
+        z = 0;
+      }
+      zGrid[i][j] = z;
+      if (z < minZ) minZ = z;
+      if (z > maxZ) maxZ = z;
+    }
+  }
+
+  const rangeZ = (maxZ - minZ) > 0.001 ? (maxZ - minZ) : 1;
+
+  for (let i = 0; i <= segments; i++) {
+    const x = xMin + i * dx;
+    for (let j = 0; j <= segments; j++) {
+      const y = yMin + j * dy;
+      const z = zGrid[i][j];
+      positions.push(x, z, y);
+
+      const t = Math.max(0, Math.min(1, (z - minZ) / rangeZ));
+      const c = getColormapColor(t, three3dColormap);
+      colors.push(c.r, c.g, c.b);
+    }
+  }
+
+  const stride = segments + 1;
+  for (let i = 0; i < segments; i++) {
+    for (let j = 0; j < segments; j++) {
+      const a = i * stride + j;
+      const b = (i + 1) * stride + j;
+      const c = (i + 1) * stride + (j + 1);
+      const d = i * stride + (j + 1);
+
+      indices.push(a, b, d);
+      indices.push(b, c, d);
+    }
+  }
+
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geom.setIndex(indices);
+  geom.computeVertexNormals();
+
+  return geom;
+}
+
+function initThree3dStudio() {
+  if (calc3dMode !== 'three') return;
+  const container = document.getElementById('three-canvas-mount');
+  if (!container || typeof THREE === 'undefined') return;
+
+  destroyThree3d();
+
+  const width = container.clientWidth || 800;
+  const height = container.clientHeight || 580;
+
+  threeScene = new THREE.Scene();
+  threeScene.background = new THREE.Color(0x080C16);
+
+  threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  threeCamera.position.set(13, 11, 15);
+
+  threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+  threeRenderer.setSize(width, height);
+  threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  container.appendChild(threeRenderer.domElement);
+
+  if (typeof THREE.OrbitControls !== 'undefined') {
+    threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
+    threeControls.enableDamping = true;
+    threeControls.dampingFactor = 0.05;
+    threeControls.autoRotate = three3dAutoRotate;
+    threeControls.autoRotateSpeed = 1.2;
+    threeControls.maxDistance = 50;
+    threeControls.minDistance = 3;
+  }
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xFFFFFF, 0.65);
+  threeScene.add(ambient);
+
+  const dirLight1 = new THREE.DirectionalLight(0x4ECDC4, 0.8);
+  dirLight1.position.set(15, 20, 10);
+  threeScene.add(dirLight1);
+
+  const dirLight2 = new THREE.DirectionalLight(0xFF8C42, 0.6);
+  dirLight2.position.set(-15, -10, -10);
+  threeScene.add(dirLight2);
+
+  // Coordinate Grid & Axes
+  const grid = new THREE.GridHelper(14, 14, 0x4ECDC4, 0x1E293B);
+  grid.position.y = -0.01;
+  threeScene.add(grid);
+
+  // RGB Axes helper
+  const axes = new THREE.AxesHelper(6);
+  threeScene.add(axes);
+
+  // Build Surface Mesh
+  const fn = compileMathFunction(three3dFormula);
+  const geom = buildSurfaceGeometry(fn);
+  const mat = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.35,
+    metalness: 0.15,
+    side: THREE.DoubleSide
+  });
+  threeSurfaceMesh = new THREE.Mesh(geom, mat);
+  threeScene.add(threeSurfaceMesh);
+
+  // Wireframe Overlay Mesh
+  const wireMat = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.2
+  });
+  threeWireMesh = new THREE.Mesh(geom, wireMat);
+  threeWireMesh.visible = three3dWireframe;
+  threeScene.add(threeWireMesh);
+
+  // Animation Loop
+  function animate() {
+    threeAnimId = requestAnimationFrame(animate);
+    if (threeControls) threeControls.update();
+    if (threeRenderer && threeScene && threeCamera) {
+      threeRenderer.render(threeScene, threeCamera);
+    }
+  }
+  animate();
+
+  // Resize Observer
+  threeResizeObserver = new ResizeObserver(() => {
+    if (!container || !threeRenderer || !threeCamera) return;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if (w > 0 && h > 0) {
+      threeCamera.aspect = w / h;
+      threeCamera.updateProjectionMatrix();
+      threeRenderer.setSize(w, h);
+    }
+  });
+  threeResizeObserver.observe(container);
+}
+
+function three3dSetFormula(formulaStr) {
+  three3dFormula = formulaStr;
+  const inputEl = document.getElementById('three-formula-input');
+  if (inputEl) inputEl.value = formulaStr;
+
+  const badgeEl = document.getElementById('three-hud-formula');
+  if (badgeEl) {
+    badgeEl.innerHTML = renderKatexToString(`z = ${formulaStr}`, false);
+  }
+
+  if (threeSurfaceMesh && threeScene) {
+    const fn = compileMathFunction(formulaStr);
+    const newGeom = buildSurfaceGeometry(fn);
+    threeSurfaceMesh.geometry.dispose();
+    threeSurfaceMesh.geometry = newGeom;
+
+    if (threeWireMesh) {
+      threeWireMesh.geometry = newGeom;
+    }
+  }
+}
+
+function three3dPlotFormula(formulaStr) {
+  if (calcTab !== 'three3d') calcSetTab('three3d');
+  if (calc3dMode !== 'three') calcSet3dMode('three');
+
+  setTimeout(() => {
+    three3dSetFormula(formulaStr);
+    toast(`Plotted in 3D: z = ${formulaStr}`, 'success');
+    Store.addXP(5);
+    SFX.success();
+  }, 100);
+}
+
+function three3dApplyInput() {
+  const el = document.getElementById('three-formula-input');
+  const val = el ? el.value.trim() : '';
+  if (!val) {
+    toast('Please enter a 3D function expression', 'warn');
+    return;
+  }
+  three3dSetFormula(val);
+  toast(`3D Surface updated: z = ${val}`, 'success');
+  Store.addXP(5);
+  SFX.success();
+}
+
+function three3dSetColormap(cmap) {
+  three3dColormap = cmap;
+  if (threeSurfaceMesh) {
+    const fn = compileMathFunction(three3dFormula);
+    const newGeom = buildSurfaceGeometry(fn);
+    threeSurfaceMesh.geometry.dispose();
+    threeSurfaceMesh.geometry = newGeom;
+    if (threeWireMesh) threeWireMesh.geometry = newGeom;
+  }
+}
+
+function three3dToggleRotate() {
+  three3dAutoRotate = !three3dAutoRotate;
+  if (threeControls) threeControls.autoRotate = three3dAutoRotate;
+  const el = document.getElementById('calc-tab-content');
+  if (el) renderCalculator();
+}
+
+function three3dToggleWireframe() {
+  three3dWireframe = !three3dWireframe;
+  if (threeWireMesh) threeWireMesh.visible = three3dWireframe;
+  const el = document.getElementById('calc-tab-content');
+  if (el) renderCalculator();
+}
+
+function three3dResetCamera() {
+  if (threeCamera && threeControls) {
+    threeCamera.position.set(13, 11, 15);
+    threeControls.target.set(0, 0, 0);
+    threeControls.update();
+    toast('Camera position reset', 'info');
+    SFX.click();
+  }
+}
+
+function three3dToggleFullscreen() {
+  three3dFullscreen = !three3dFullscreen;
+  const c = document.getElementById('three-frame-wrapper');
+  const btn = document.getElementById('three-fullscreen-btn');
+  if (c) c.classList.toggle('fullscreen', three3dFullscreen);
+  if (btn) {
+    btn.innerHTML = three3dFullscreen
+      ? `<i class="fas fa-compress"></i> Exit Fullscreen`
+      : `<i class="fas fa-expand"></i> Fullscreen`;
+  }
+  SFX.click();
+}
+
+// ======================== 3. UNIFIED MATH LATEX STUDIO & SCRATCHPAD ========================
+function renderCalcScratchpadTab() {
+  const symbols = [
+    { label: 'a/b', latex: '\\frac{a}{b}', title: 'Fraction' },
+    { label: '√x', latex: '\\sqrt{x}', title: 'Square Root' },
+    { label: 'ⁿ√x', latex: '\\sqrt[n]{x}', title: 'N-th Root' },
+    { label: 'xⁿ', latex: 'x^{n}', title: 'Exponent' },
+    { label: 'xₙ', latex: 'x_{n}', title: 'Subscript' },
+    { label: '∫', latex: '\\int_{a}^{b}', title: 'Definite Integral' },
+    { label: '∑', latex: '\\sum_{i=1}^{n}', title: 'Summation' },
+    { label: 'lim', latex: '\\lim_{x \\to 0}', title: 'Limit' },
+    { label: '∂/∂x', latex: '\\frac{\\partial z}{\\partial x}', title: 'Partial Derivative' },
+    { label: 'π', latex: '\\pi', title: 'Pi' },
+    { label: 'θ', latex: '\\theta', title: 'Theta' },
+    { label: 'α', latex: '\\alpha', title: 'Alpha' },
+    { label: 'β', latex: '\\beta', title: 'Beta' },
+    { label: 'λ', latex: '\\lambda', title: 'Lambda' },
+    { label: '∞', latex: '\\infty', title: 'Infinity' },
+    { label: '±', latex: '\\pm', title: 'Plus-Minus' },
+    { label: '×', latex: '\\times', title: 'Multiply' },
+    { label: '÷', latex: '\\div', title: 'Divide' },
+    { label: '≤', latex: '\\le', title: 'Less or Equal' },
+    { label: '≥', latex: '\\ge', title: 'Greater or Equal' },
+    { label: '≠', latex: '\\neq', title: 'Not Equal' },
+    { label: '≈', latex: '\\approx', title: 'Approximate' }
+  ];
+
+  return `
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <!-- Banner with Explanation -->
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:38px; height:38px; border-radius:10px; background:rgba(78,205,196,0.12); display:flex; align-items:center; justify-content:center; color:var(--teal);">
+            <i class="fas fa-square-root-variable" style="font-size:18px;"></i>
+          </div>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:var(--text);">Unified KaTeX Typography & Expression Scratchpad</div>
+            <div style="font-size:12px; color:var(--text2);">Formulas typed in this custom text area render live in KaTeX, identical to Desmos mathematical notation.</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-ghost" onclick="unifiedMathCopyLatex()" style="border:1px solid var(--border); font-size:12px;">
+            <i class="fas fa-copy"></i> Copy LaTeX
+          </button>
+          <button class="btn btn-sm btn-secondary" onclick="unifiedMathSaveFormula()" style="font-size:12px;">
+            <i class="fas fa-bookmark"></i> Save Formula
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Dual-Pane: Custom Textarea (Left) + Desmos-Matched KaTeX Canvas (Right) -->
+      <div class="unified-math-studio">
+        <!-- Editor Left Pane -->
+        <div class="math-editor-pane">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-weight:700; font-size:14px; color:var(--text); display:inline-flex; align-items:center; gap:6px;">
+              <i class="fas fa-pen-to-square" style="color:var(--teal);"></i> Formula Custom Text Area
+            </span>
+            <span class="tag" style="background:rgba(255,140,66,0.12); color:var(--accent); font-size:11px;">
+              LaTeX & Math Syntax
+            </span>
+          </div>
+
+          <!-- Symbol & Syntax Insertion Palette -->
+          <div class="math-symbol-toolbar">
+            ${symbols.map(s => `
+              <button class="math-sym-btn" onclick="unifiedMathInsert('${s.latex}')" title="${s.title}">
+                ${s.label}
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Custom Textarea for Formulas -->
+          <textarea
+            id="unified-math-input"
+            class="math-custom-textarea"
+            placeholder="Type mathematical formula or LaTeX here (e.g. \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a} or y = \\sin(2x) + \\cos(3x))..."
+            oninput="updateUnifiedMathStudio(this.value)"
+          >${escHtml(unifiedMathText)}</textarea>
+
+          <!-- Quick Templates -->
+          <div>
+            <div style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; margin-bottom:6px;">
+              Instant Templates:
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('f(x) = \\\\frac{-b \\\\pm \\\\sqrt{b^2 - 4ac}}{2a}')" style="border:1px solid var(--border); font-size:11px;">
+                Quadratic
+              </button>
+              <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('e^{i\\\\pi} + 1 = 0')" style="border:1px solid var(--border); font-size:11px;">
+                Euler's Identity
+              </button>
+              <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('\\\\int_{-\\\\infty}^{\\\\infty} e^{-x^2}\\\\,dx = \\\\sqrt{\\\\pi}')" style="border:1px solid var(--border); font-size:11px;">
+                Gaussian Integral
+              </button>
+              <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('y = 2\\\\sin(3x) \\\\cdot e^{-0.15x}')" style="border:1px solid var(--border); font-size:11px;">
+                Damped Wave
+              </button>
+              <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('z = \\\\frac{x^2 - y^2}{4}')" style="border:1px solid var(--border); font-size:11px;">
+                3D Saddle
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Right Pane (Rendered identically to Desmos) -->
+        <div class="math-preview-pane">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-weight:700; font-size:14px; color:var(--text); display:inline-flex; align-items:center; gap:6px;">
+              <i class="fas fa-eye" style="color:var(--teal);"></i> Rendered Output (Matches Desmos Typography)
+            </span>
+            <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px;">
+              KaTeX High-DPI
+            </span>
+          </div>
+
+          <!-- Dynamic Display Box -->
+          <div id="unified-math-preview-canvas" class="math-preview-canvas">
+            ${renderKatexToString(unifiedMathText || ' ', true)}
+          </div>
+
+          <!-- Cross-Engine Action Deck -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text2);">Send to Visualization Engines:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <button class="btn btn-sm btn-teal" onclick="unifiedMathSendToDesmos()" style="justify-content:center; font-size:12px;">
+                <i class="fas fa-chart-line"></i> Plot in Desmos 2D
+              </button>
+              <button class="btn btn-sm btn-primary" onclick="unifiedMathSendTo3D()" style="justify-content:center; font-size:12px;">
+                <i class="fas fa-cube"></i> Plot in Three.js 3D
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Formulas Notebook -->
+      <div class="card" style="border-radius:16px;">
+        <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-bookmark" style="color:var(--teal);"></i> Formula Notebook (Saved Expressions)
+        </h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+          ${savedUserFormulas.map((formula, idx) => `
+            <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="overflow-x:auto; padding:6px 0; text-align:center;">
+                ${renderKatexToString(formula, false)}
+              </div>
+              <div style="display:flex; gap:6px; margin-top:auto;">
+                <button class="btn btn-xs btn-teal" onclick="unifiedMathLoadSaved('${escHtml(formula)}')" style="flex:1; justify-content:center;">
+                  <i class="fas fa-arrow-up"></i> Load
+                </button>
+                <button class="btn btn-xs btn-ghost" onclick="desmosPlotFormula('${escHtml(formula)}')" title="Plot in Desmos" style="border:1px solid var(--border); color:var(--teal);">
+                  <i class="fas fa-chart-line"></i>
+                </button>
+                <button class="btn btn-xs btn-ghost" onclick="unifiedMathDeleteSaved(${idx})" title="Remove" style="color:#FF6B6B;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initUnifiedMathStudio() {
+  const ta = document.getElementById('unified-math-input');
+  if (ta) {
+    updateUnifiedMathStudio(ta.value);
+  }
+}
+
+function updateUnifiedMathStudio(text) {
+  unifiedMathText = text;
+  const canvas = document.getElementById('unified-math-preview-canvas');
+  if (canvas) {
+    const raw = (text || '').trim();
+    canvas.innerHTML = renderKatexToString(raw || '\\text{Type a mathematical formula above...}', true);
+  }
+}
+
+function unifiedMathSetText(str) {
+  const ta = document.getElementById('unified-math-input');
+  if (ta) {
+    ta.value = str;
+    updateUnifiedMathStudio(str);
+  }
+}
+
+function unifiedMathInsert(snippet) {
+  const ta = document.getElementById('unified-math-input');
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const text = ta.value;
+  ta.value = text.substring(0, start) + snippet + text.substring(end);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = start + snippet.length;
+  updateUnifiedMathStudio(ta.value);
+  SFX.click();
+}
+
+function unifiedMathCopyLatex() {
+  const ta = document.getElementById('unified-math-input');
+  const val = ta ? ta.value.trim() : unifiedMathText;
+  if (!val) {
+    toast('No formula to copy', 'warn');
+    return;
+  }
+  navigator.clipboard.writeText(val).then(() => {
+    toast('LaTeX formula copied to clipboard!', 'success');
+  }).catch(() => {
+    calcCopyText(val);
+  });
+}
+
+function unifiedMathSendToDesmos() {
+  const ta = document.getElementById('unified-math-input');
+  let val = ta ? ta.value.trim() : unifiedMathText;
+  if (!val) {
+    toast('Please enter a formula first', 'warn');
+    return;
+  }
+  desmosPlotFormula(val);
+}
+
+function unifiedMathSendTo3D() {
+  const ta = document.getElementById('unified-math-input');
+  let val = ta ? ta.value.trim() : unifiedMathText;
+  if (!val) {
+    toast('Please enter a formula first', 'warn');
+    return;
+  }
+  // Strip "z =" or "f(x, y) =" if present
+  val = val.replace(/^[zZ]\s*=\s*/, '').replace(/^f\([xyXY,\s]+\)\s*=\s*/, '');
+  // Clean basic latex fractions for standard 3D eval if needed
+  val = val.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)');
+  val = val.replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)');
+  val = val.replace(/\\sin/g, 'sin').replace(/\\cos/g, 'cos').replace(/\\tan/g, 'tan');
+  val = val.replace(/\\pi/g, 'pi');
+
+  three3dPlotFormula(val);
+}
+
+function unifiedMathSaveFormula() {
+  const ta = document.getElementById('unified-math-input');
+  const val = ta ? ta.value.trim() : unifiedMathText;
+  if (!val) return;
+  if (!savedUserFormulas.includes(val)) {
+    savedUserFormulas.unshift(val);
+    if (savedUserFormulas.length > 12) savedUserFormulas.pop();
+    toast('Formula saved to notebook!', 'success');
+    renderCalculator();
+  } else {
+    toast('Formula already in notebook', 'info');
+  }
+}
+
+function unifiedMathLoadSaved(formula) {
+  unifiedMathSetText(formula);
+  toast('Loaded formula from notebook', 'info');
+  SFX.click();
+}
+
+function unifiedMathDeleteSaved(idx) {
+  savedUserFormulas.splice(idx, 1);
+  toast('Formula removed from notebook', 'info');
+  renderCalculator();
+}
+
+
+// ------------------------ NATIVE SCIENTIFIC CALCULATOR TAB ------------------------
+function renderCalcNativeTab() {
+  const history = Store.get('calcHistory') || [];
+
+  return `
+    <div class="native-calc-layout">
+      <!-- Calculator Chassis (Luxury Precision Instrument) -->
+      <div class="native-calc-chassis">
+        <!-- Precision Display Screen -->
+        <div class="calc-screen-enclosure">
+          <div class="calc-screen-header">
+            <div class="calc-status-group">
+              <button class="calc-mode-pill ${calcAngleUnit==='deg'?'active':''}" onclick="calcToggleAngleUnit()" title="Click to toggle DEG / RAD">
+                <span class="dot"></span> ${calcAngleUnit.toUpperCase()}
+              </button>
+              <span class="calc-mem-pill" title="Memory Register">${calcMemory !== 0 ? `M: ${calcMemory}` : 'M: 0'}</span>
+              ${calcLastAns !== '0' ? `<span class="calc-screen-btn" onclick="calcAppend('ANS')" title="Click to use ANS">Ans: ${calcLastAns}</span>` : ''}
+            </div>
+            <div class="calc-screen-actions">
+              <button class="calc-screen-btn" onclick="calcCopyResult()" title="Copy current result to clipboard">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="calc-screen-btn" onclick="calcClear()" style="color:var(--red);" title="All Clear (AC)">
+                <i class="fas fa-trash-can"></i> Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="calc-expression-row" id="calc-screen-expr">${calcExpr || '0'}</div>
+          <div class="calc-result-row" id="calc-screen-result" onclick="calcCopyResult()" title="Click to copy result">
+            ${calcResult}
+          </div>
+        </div>
+
+        <!-- Dual-Deck Keypad System -->
+        <div class="calc-keypad-decks">
+          <!-- Scientific Functions Deck (Left) -->
+          <div class="calc-deck-sci">
+            <div class="calc-deck-section-title">
+              <i class="fas fa-atom" style="color:var(--teal)"></i> Functions & Powers
+            </div>
+            <div class="calc-sci-grid">
+              <!-- Row 1: Trigonometry -->
+              <button class="c-key c-key-fn" onclick="calcAppendFn('sin(')">sin</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('cos(')">cos</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('tan(')">tan</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('asin(')">sin⁻¹</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('acos(')">cos⁻¹</button>
+
+              <!-- Row 2: Inverses & Logs -->
+              <button class="c-key c-key-fn" onclick="calcAppendFn('atan(')">tan⁻¹</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('ln(')">ln</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('log(')">log₁₀</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('log2(')">log₂</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('exp(')">eˣ</button>
+
+              <!-- Row 3: Radicals & Powers -->
+              <button class="c-key c-key-fn" onclick="calcAppendFn('sqrt(')">√x</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('cbrt(')">³√x</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('^')">xʸ</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('^2')">x²</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('^3')">x³</button>
+
+              <!-- Row 4: Fractions, Abs, Factorial -->
+              <button class="c-key c-key-fn" onclick="calcAppendFn('1/(')">1/x</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('abs(')">|x|</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('!')">n!</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('%')">%</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('10^(')">10ˣ</button>
+
+              <!-- Row 5: Mathematical Constants & Combinatorics -->
+              <button class="c-key c-key-fn" onclick="calcAppend('pi')">π</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('e')">e</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('phi')">φ</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('nCr(')">nCr</button>
+              <button class="c-key c-key-fn" onclick="calcAppendFn('nPr(')">nPr</button>
+
+              <!-- Row 6: Memory Operations & Ans -->
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('MC')" title="Clear Memory">MC</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('MR')" title="Recall Memory">MR</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('M+')" title="Add to Memory">M+</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('M-')" title="Subtract from Memory">M−</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('ANS')" style="color:var(--accent); font-weight:800;" title="Previous Answer">ANS</button>
+            </div>
+          </div>
+
+          <!-- Numeric & Arithmetic Pad (Right) -->
+          <div class="calc-deck-num">
+            <div class="calc-deck-section-title">
+              <i class="fas fa-calculator" style="color:var(--accent)"></i> Input Pad
+            </div>
+            <div class="calc-num-grid">
+              <!-- Row 1: Clear & Parentheses -->
+              <button class="c-key c-key-clear" onclick="calcClear()" title="All Clear">AC</button>
+              <button class="c-key c-key-clear" onclick="calcBackspace()" title="Delete Backspace">DEL</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('(')">(</button>
+              <button class="c-key c-key-fn" onclick="calcAppend(')')">)</button>
+
+              <!-- Row 2: 7-9 & Division -->
+              <button class="c-key c-key-num" onclick="calcAppend('7')">7</button>
+              <button class="c-key c-key-num" onclick="calcAppend('8')">8</button>
+              <button class="c-key c-key-num" onclick="calcAppend('9')">9</button>
+              <button class="c-key c-key-op" onclick="calcAppend('÷')">÷</button>
+
+              <!-- Row 3: 4-6 & Multiplication -->
+              <button class="c-key c-key-num" onclick="calcAppend('4')">4</button>
+              <button class="c-key c-key-num" onclick="calcAppend('5')">5</button>
+              <button class="c-key c-key-num" onclick="calcAppend('6')">6</button>
+              <button class="c-key c-key-op" onclick="calcAppend('×')">×</button>
+
+              <!-- Row 4: 1-3 & Subtraction -->
+              <button class="c-key c-key-num" onclick="calcAppend('1')">1</button>
+              <button class="c-key c-key-num" onclick="calcAppend('2')">2</button>
+              <button class="c-key c-key-num" onclick="calcAppend('3')">3</button>
+              <button class="c-key c-key-op" onclick="calcAppend('−')">−</button>
+
+              <!-- Row 5: Sign, Zero, Decimal, Addition -->
+              <button class="c-key c-key-fn" onclick="calcToggleSign()" title="Toggle Sign (±)">±</button>
+              <button class="c-key c-key-num" onclick="calcAppend('0')">0</button>
+              <button class="c-key c-key-num" onclick="calcAppend('.')">.</button>
+              <button class="c-key c-key-op" onclick="calcAppend('+')">+</button>
+
+              <!-- Row 6: Big Equals Button -->
+              <button class="c-key c-key-equals" onclick="calcEvaluate()" style="grid-column: span 4;" title="Evaluate Expression (Enter)">
+                <i class="fas fa-equals"></i> Calculate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Panel Card -->
+      <div class="calc-history-card">
+        <div class="calc-history-header">
+          <div class="calc-history-title">
+            <i class="fas fa-clock-rotate-left" style="color:var(--teal);"></i> History
+            ${history.length > 0 ? `<span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:11px; padding:2px 7px;">${history.length}</span>` : ''}
+          </div>
+          ${history.length > 0 ? `
+            <button class="btn btn-xs btn-ghost" onclick="calcClearHistory()" title="Clear History" style="color:var(--red);">
+              <i class="fas fa-trash-can"></i>
+            </button>
+          ` : ''}
+        </div>
+
+        <div class="calc-history-stream no-scrollbar">
+          ${history.length === 0 ? `
+            <div style="text-align:center; padding:36px 12px; color:var(--text2); font-size:13px;">
+              <i class="fas fa-receipt" style="font-size:24px; opacity:0.3; margin-bottom:8px; display:block;"></i>
+              No calculations yet.<br>Solve a problem to track it here!
+            </div>
+          ` : history.map(item => `
+            <div class="calc-history-entry" onclick="calcLoadHistory('${escHtml(item.expr)}', '${escHtml(item.result)}')" title="Click to reload into screen">
+              <div class="calc-history-expr-text">${escHtml(item.expr)} =</div>
+              <div class="calc-history-res-val">
+                <span>${escHtml(item.result)}</span>
+                <button class="btn btn-xs btn-ghost" onclick="event.stopPropagation(); calcCopyText('${escHtml(item.result)}')" title="Copy result">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="font-size:11px; color:var(--text2); text-align:center; padding-top:8px; border-top:1px solid var(--border);">
+          <i class="fas fa-keyboard" style="margin-right:4px;"></i> Keyboard active (0-9, + - * /, Enter, Esc)
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ------------------------ FORMULAS & CONSTANTS TAB ------------------------
+let calcFormulaFilter = 'all';
+function renderCalcFormulasTab() {
+  const filtered = calcFormulaFilter === 'all'
+    ? MATH_FORMULAS
+    : MATH_FORMULAS.filter(f => f.category === calcFormulaFilter);
+
+  return `
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <!-- Filter Chips -->
+      <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
+        <button class="grade-pill ${calcFormulaFilter==='all'?'selected':''}" onclick="calcFormulaFilter='all'; renderCalculator();">All Formulas</button>
+        <button class="grade-pill ${calcFormulaFilter==='algebra'?'selected':''}" onclick="calcFormulaFilter='algebra'; renderCalculator();">Algebra & Geometry</button>
+        <button class="grade-pill ${calcFormulaFilter==='trig'?'selected':''}" onclick="calcFormulaFilter='trig'; renderCalculator();">Trigonometry</button>
+        <button class="grade-pill ${calcFormulaFilter==='calculus'?'selected':''}" onclick="calcFormulaFilter='calculus'; renderCalculator();">Calculus & 3D</button>
+        <button class="grade-pill ${calcFormulaFilter==='constants'?'selected':''}" onclick="calcFormulaFilter='constants'; renderCalculator();">Scientific Constants</button>
+      </div>
+
+      <!-- Formula Cards Grid with KaTeX Unified Math Rendering -->
+      <div class="formula-grid">
+        ${filtered.map(f => `
+          <div class="formula-card">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-weight:700; font-size:15px; color:var(--text);">${escHtml(f.name)}</span>
+              <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px; text-transform:capitalize;">
+                ${f.category}
+              </span>
+            </div>
+            <div class="formula-math-box" style="justify-content:center; padding:12px 14px; overflow-x:auto;">
+              ${renderKatexToString(f.latex, true)}
+            </div>
+            <p style="font-size:12px; color:var(--text2); line-height:1.5; margin:0;">${escHtml(f.desc)}</p>
+            <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-teal" onclick="calcInsertFormula('${escHtml(f.insert)}')" style="flex:1; justify-content:center; font-size:12px; border-radius:8px;">
+                <i class="fas fa-calculator"></i> Use in Calc
+              </button>
+              ${f.desmos ? `
+                <button class="btn btn-sm btn-secondary" onclick="desmosPlotFormula('${escHtml(f.desmos)}')" style="font-size:12px; border-radius:8px;" title="Plot in Desmos 2D">
+                  <i class="fas fa-chart-line" style="color:var(--teal);"></i> Desmos
+                </button>
+              ` : ''}
+              ${f.three ? `
+                <button class="btn btn-sm btn-secondary" onclick="three3dPlotFormula('${escHtml(f.three)}')" style="font-size:12px; border-radius:8px;" title="Plot in Three.js 3D">
+                  <i class="fas fa-cube" style="color:var(--accent);"></i> 3D Plot
+                </button>
+              ` : ''}
+              <button class="btn btn-sm btn-ghost" onclick="calcCopyText('${escHtml(f.latex)}')" style="font-size:12px; border-radius:8px; border:1px solid var(--border);" title="Copy LaTeX">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ------------------------ BASE & UNIT CONVERTER TAB ------------------------
+function renderCalcConverterTab() {
+  const num = parseInt(calcBaseInputVal, 10) || 0;
+  const decVal = isNaN(num) ? '0' : num.toString(10);
+  const hexVal = isNaN(num) ? '0' : '0x' + num.toString(16).toUpperCase();
+  const binVal = isNaN(num) ? '0' : num.toString(2);
+  const octVal = isNaN(num) ? '0' : '0o' + num.toString(8);
+
+  // Group binary string in 4-bit nibbles
+  const binPadded = binVal.padStart(Math.ceil(binVal.length / 4) * 4 || 4, '0');
+  const binNibbles = binPadded.match(/.{1,4}/g)?.join(' ') || binVal;
+
+  return `
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+      <!-- Programmer Base Converter Card -->
+      <div class="converter-card">
+        <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-binary" style="color:var(--teal);"></i> Programmer Base Converter
+        </h3>
+        <p style="font-size:13px; color:var(--text2); margin:0;">Convert numbers dynamically between Decimal, Hexadecimal, Binary (with 4-bit grouping), and Octal.</p>
+
+        <div style="display:flex; flex-direction:column; gap:14px; margin-top:8px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">Decimal (Base 10)</label>
+              <span style="font-size:11px; color:var(--teal); font-family:monospace;">DEC</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="input-field" value="${decVal}" oninput="calcUpdateBaseFromDec(this.value)" style="font-family:monospace; font-size:15px;" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${decVal}')" title="Copy Decimal" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">Hexadecimal (Base 16)</label>
+              <span style="font-size:11px; color:var(--teal); font-family:monospace;">HEX</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="input-field" value="${hexVal}" oninput="calcUpdateBaseFromHex(this.value)" style="font-family:monospace; font-size:15px; color:var(--teal);" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${hexVal}')" title="Copy Hex" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">Binary (Base 2)</label>
+              <span style="font-size:11px; color:var(--accent); font-family:monospace;">${binVal.length} bits</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="input-field" value="${binNibbles}" oninput="calcUpdateBaseFromBin(this.value)" style="font-family:monospace; font-size:15px; color:var(--accent);" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${binVal}')" title="Copy Binary" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">Octal (Base 8)</label>
+              <span style="font-size:11px; color:var(--blue); font-family:monospace;">OCT</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="input-field" value="${octVal}" oninput="calcUpdateBaseFromOct(this.value)" style="font-family:monospace; font-size:15px;" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${octVal}')" title="Copy Octal" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Angle & Trigonometry Converter -->
+      <div class="converter-card">
+        <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-compass" style="color:var(--accent);"></i> Angle Unit Converter
+        </h3>
+        <p style="font-size:13px; color:var(--text2); margin:0;">Convert between Degrees, Radians, and Gradians with real-time bidirectional synchronization.</p>
+
+        <!-- Angle Presets -->
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+          ${[0, 30, 45, 60, 90, 180, 270, 360].map(deg => `
+            <button class="btn btn-xs btn-ghost" onclick="document.getElementById('conv-deg-input').value='${deg}'; calcUpdateAngles('${deg}','deg')" style="font-size:11px; border:1px solid var(--border); border-radius:6px;">
+              ${deg}°
+            </button>
+          `).join('')}
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px; margin-top:14px;" id="angle-conv-wrapper">
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">Degrees (°)</label>
+            <input type="number" id="conv-deg-input" class="input-field" value="180" oninput="calcUpdateAngles(this.value, 'deg')" style="font-family:monospace; font-size:15px;" />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">Radians (rad)</label>
+            <input type="number" id="conv-rad-input" class="input-field" value="${(Math.PI).toFixed(6)}" oninput="calcUpdateAngles(this.value, 'rad')" style="font-family:monospace; font-size:15px; color:var(--teal);" />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">Gradians (gon)</label>
+            <input type="number" id="conv-grad-input" class="input-field" value="200" oninput="calcUpdateAngles(this.value, 'grad')" style="font-family:monospace; font-size:15px;" />
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function calcUpdateBaseFromDec(v) {
+  calcBaseInputVal = v.replace(/[^0-9-]/g, '') || '0';
+  renderCalcConverterLive();
+}
+function calcUpdateBaseFromHex(v) {
+  const clean = v.replace(/^0x/i, '').replace(/[^0-9a-fA-F]/g, '');
+  const n = parseInt(clean, 16);
+  calcBaseInputVal = isNaN(n) ? '0' : String(n);
+  renderCalcConverterLive();
+}
+function calcUpdateBaseFromBin(v) {
+  const clean = v.replace(/\s+/g, '').replace(/[^01]/g, '');
+  const n = parseInt(clean, 2);
+  calcBaseInputVal = isNaN(n) ? '0' : String(n);
+  renderCalcConverterLive();
+}
+function calcUpdateBaseFromOct(v) {
+  const clean = v.replace(/^0o/i, '').replace(/[^0-7]/g, '');
+  const n = parseInt(clean, 8);
+  calcBaseInputVal = isNaN(n) ? '0' : String(n);
+  renderCalcConverterLive();
+}
+
+function renderCalcConverterLive() {
+  const c = document.getElementById('calc-tab-content');
+  if (c && calcTab === 'converter') {
+    c.innerHTML = renderCalcConverterTab();
+  }
+}
+
+function calcUpdateAngles(val, fromUnit) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return;
+  let deg = 0;
+  if (fromUnit === 'deg') deg = n;
+  else if (fromUnit === 'rad') deg = n * (180 / Math.PI);
+  else if (fromUnit === 'grad') deg = n * (180 / 200);
+
+  const rad = deg * (Math.PI / 180);
+  const grad = deg * (200 / 180);
+
+  const degEl = document.getElementById('conv-deg-input');
+  const radEl = document.getElementById('conv-rad-input');
+  const gradEl = document.getElementById('conv-grad-input');
+
+  if (fromUnit !== 'deg' && degEl) degEl.value = Number(deg.toFixed(6));
+  if (fromUnit !== 'rad' && radEl) radEl.value = Number(rad.toFixed(6));
+  if (fromUnit !== 'grad' && gradEl) gradEl.value = Number(grad.toFixed(6));
+}
+
+// ------------------------ CALCULATOR INTERACTION HELPERS ------------------------
+function calcAppend(str) {
+  if (calcIsNew && /^[0-9.]/.test(str)) {
+    calcExpr = '';
+    calcIsNew = false;
+  } else {
+    calcIsNew = false;
+  }
+  if (str === 'ANS') {
+    calcExpr += calcLastAns;
+  } else {
+    calcExpr += str;
+  }
+  calcUpdateScreen();
+  SFX.click();
+}
+
+function calcAppendFn(fnStr) {
+  if (calcIsNew) {
+    calcExpr = '';
+    calcIsNew = false;
+  }
+  calcExpr += fnStr;
+  calcUpdateScreen();
+  SFX.click();
+}
+
+function calcBackspace() {
+  if (!calcExpr) return;
+  // If ends with function like sin(, asin(, log(, delete whole function
+  const fns = ['asin(', 'acos(', 'atan(', 'sinh(', 'cosh(', 'tanh(', 'log10(', 'log2(', 'sqrt(', 'cbrt(', 'nCr(', 'nPr(', 'abs(', 'fact(', 'sin(', 'cos(', 'tan(', 'log(', 'ln(', '1/('];
+  let matched = false;
+  for (const fn of fns) {
+    if (calcExpr.endsWith(fn)) {
+      calcExpr = calcExpr.slice(0, -fn.length);
+      matched = true;
+      break;
+    }
+  }
+  if (!matched) {
+    calcExpr = calcExpr.slice(0, -1);
+  }
+  calcUpdateScreen();
+  SFX.click();
+}
+
+function calcClear() {
+  calcExpr = '';
+  calcResult = '0';
+  calcIsNew = true;
+  calcUpdateScreen();
+  SFX.click();
+}
+
+function calcToggleSign() {
+  if (calcIsNew && calcResult !== '0' && calcResult !== 'Error') {
+    if (calcResult.startsWith('-')) {
+      calcResult = calcResult.slice(1);
+    } else {
+      calcResult = '-' + calcResult;
+    }
+    calcExpr = calcResult;
+    calcUpdateScreen();
+    SFX.click();
+    return;
+  }
+  if (!calcExpr) {
+    calcExpr = '-';
+    calcIsNew = false;
+    calcUpdateScreen();
+    SFX.click();
+    return;
+  }
+  // If ending with a number like 42 or (-42)
+  const wrappedNegMatch = calcExpr.match(/\(-(\d+(\.\d+)?)\)$/);
+  if (wrappedNegMatch) {
+    calcExpr = calcExpr.slice(0, -wrappedNegMatch[0].length) + wrappedNegMatch[1];
+  } else {
+    const numMatch = calcExpr.match(/(\d+(\.\d+)?)$/);
+    if (numMatch) {
+      const num = numMatch[1];
+      calcExpr = calcExpr.slice(0, -num.length) + '(-' + num + ')';
+    } else if (calcExpr.endsWith('-')) {
+      calcExpr = calcExpr.slice(0, -1);
+    } else {
+      calcExpr += '(-';
+    }
+  }
+  calcUpdateScreen();
+  SFX.click();
+}
+
+function calcToggleAngleUnit() {
+  calcAngleUnit = calcAngleUnit === 'deg' ? 'rad' : 'deg';
+  const s = Store.get('calcSettings') || {};
+  s.angleUnit = calcAngleUnit;
+  Store.set('calcSettings', s);
+  toast(`Trig angle mode: ${calcAngleUnit.toUpperCase()}`, 'info');
+  SFX.click();
+  calcUpdateScreen();
+}
+
+function calcMemoryAction(action) {
+  const curNum = parseFloat(calcResult) || 0;
+  if (action === 'MC') {
+    calcMemory = 0;
+    toast('Memory register cleared', 'info');
+  } else if (action === 'MR') {
+    calcAppend(calcMemory.toString());
+    toast(`Recalled memory: ${calcMemory}`, 'info');
+  } else if (action === 'M+') {
+    calcMemory += curNum;
+    toast(`Added to memory: ${calcMemory}`, 'success');
+  } else if (action === 'M-') {
+    calcMemory -= curNum;
+    toast(`Subtracted from memory: ${calcMemory}`, 'success');
+  } else if (action === 'MS') {
+    calcMemory = curNum;
+    toast(`Stored to memory: ${calcMemory}`, 'success');
+  }
+  SFX.click();
+  calcUpdateScreen();
+}
+
+function calcEvaluate() {
+  if (!calcExpr || !calcExpr.trim()) return;
+  try {
+    const res = evaluateMathExpression(calcExpr, calcAngleUnit);
+    calcResult = res;
+    calcLastAns = res;
+    calcIsNew = true;
+
+    // Save to history
+    const history = Store.get('calcHistory') || [];
+    history.unshift({
+      id: 'ch_' + Date.now(),
+      expr: calcExpr,
+      result: res,
+      timestamp: Date.now()
+    });
+    if (history.length > 50) history.pop();
+    Store.set('calcHistory', history);
+
+    Store.addXP(2);
+    SFX.success();
+    renderCalculator();
+  } catch (err) {
+    calcResult = 'Error';
+    SFX.pop();
+    calcUpdateScreen();
+  }
+}
+
+function calcUpdateScreen() {
+  const exprEl = document.getElementById('calc-screen-expr');
+  const resEl = document.getElementById('calc-screen-result');
+  if (exprEl) exprEl.textContent = calcExpr || '0';
+  if (resEl) resEl.textContent = calcResult;
+}
+
+function calcCopyResult() {
+  calcCopyText(calcResult);
+}
+
+function calcCopyText(txt) {
+  if (!txt) return;
+  navigator.clipboard.writeText(txt).then(() => {
+    toast(`Copied "${txt}" to clipboard!`, 'success');
+    SFX.click();
+  }).catch(() => {
+    toast(`Value: ${txt}`, 'info');
+  });
+}
+
+function calcLoadHistory(expr, res) {
+  calcExpr = expr;
+  calcResult = res;
+  calcIsNew = true;
+  calcUpdateScreen();
+  SFX.click();
+  toast('Loaded past calculation', 'info');
+}
+
+function calcClearHistory() {
+  Store.set('calcHistory', []);
+  toast('Calculation history cleared', 'info');
+  renderCalculator();
+}
+
+function calcInsertFormula(formulaStr) {
+  calcSetTab('native');
+  calcExpr = formulaStr;
+  calcIsNew = false;
+  calcUpdateScreen();
+  toast(`Inserted formula: ${formulaStr}`, 'success');
+}
+
+function showCalcHelpModal() {
+  showModal(`
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-calculator" style="color:var(--teal);"></i> Mathematical Suite Guide & Shortcuts
+    </h2>
+    <div style="display:flex; flex-direction:column; gap:12px; font-size:14px; color:var(--text2); line-height:1.5;">
+      <div>
+        <strong style="color:var(--text);"><i class="fas fa-chart-line" style="color:var(--teal);"></i> Desmos API 2D Graphing:</strong>
+        <p style="margin:4px 0 0;">Official Desmos 2D Graphing Calculator engine. Plot equations, polar curves, tangents, derivatives, and polynomials. Click any preset formula chip to graph instantly.</p>
+      </div>
+      <div>
+        <strong style="color:var(--text);"><i class="fas fa-cube" style="color:var(--accent);"></i> Three.js 3D Surface Visualizer & Math3D.org:</strong>
+        <p style="margin:4px 0 0;">Real-time interactive 3D WebGL plotter for surfaces z = f(x, y) with OrbitControls, custom colormaps (Neon, Viridis, Cool-Warm, Aurora), wireframe mode, and auto-rotation. Also includes embedded Math3D.org for multivariable calculus.</p>
+      </div>
+      <div>
+        <strong style="color:var(--text);"><i class="fas fa-pen-to-square" style="color:#A78BFA;"></i> Unified KaTeX Math Studio:</strong>
+        <p style="margin:4px 0 0;">Type formulas in the custom text area with live KaTeX rendering designed to match Desmos mathematical typography. Includes quick syntax symbol palette and 1-click dispatch to Desmos or Three.js 3D.</p>
+      </div>
+      <div>
+        <strong style="color:var(--text);"><i class="fas fa-keyboard" style="color:var(--blue);"></i> Keyboard Shortcuts (Scientific Keypad):</strong>
+        <ul style="margin:4px 0 0 18px;">
+          <li><code>0-9</code>, <code>.</code> — Enter numbers</li>
+          <li><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code> — Math operations</li>
+          <li><code>Enter</code> or <code>=</code> — Calculate result</li>
+          <li><code>Backspace</code> — Delete character</li>
+          <li><code>Escape</code> or <code>C</code> — All Clear (AC)</li>
+          <li><code>D</code> — Toggle Degrees / Radians</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+      <button class="btn btn-teal" onclick="closeModal()">Got it!</button>
+    </div>
+  `);
+}
+
+// ------------------------ MATH EVALUATION ENGINE ------------------------
+function evaluateMathExpression(expr, angleUnit) {
+  if (!expr || !expr.trim()) return '0';
+  let s = expr.trim();
+
+  // Replace typographic visual symbols
+  s = s.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/π/g, 'pi');
+
+  // Handle percentages: e.g. 50% -> (50/100), 50%*20
+  s = s.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+
+  // Implicit multiplication: 2pi -> 2*pi, 2(3) -> 2*(3), (2)(3) -> (2)*(3), 2sin -> 2*sin
+  s = s.replace(/(\d)(\()/g, '$1*$2');
+  s = s.replace(/(\))(\d)/g, '$1*$2');
+  s = s.replace(/(\))(\()/g, '$1*$2');
+  s = s.replace(/(\d)(pi|e|phi|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log|ln|log2|sqrt|cbrt|abs|exp)/g, '$1*$2');
+  s = s.replace(/(\))(pi|e|phi|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log|ln|log2|sqrt|cbrt|abs|exp)/g, '$1*$2');
+  s = s.replace(/(pi|e|phi)(\d)/g, '$1*$2');
+
+  // Factorial n! -> fact(n)
+  s = s.replace(/(\d+)!/g, 'fact($1)');
+
+  // Exponentiation ^ -> **
+  s = s.replace(/\^/g, '**');
+
+  const isDeg = angleUnit === 'deg';
+  const toRad = deg => deg * (Math.PI / 180);
+  const toDeg = rad => rad * (180 / Math.PI);
+
+  const scope = {
+    pi: Math.PI,
+    e: Math.E,
+    phi: 1.618033988749895,
+    sin: x => isDeg ? Math.sin(toRad(x)) : Math.sin(x),
+    cos: x => isDeg ? Math.cos(toRad(x)) : Math.cos(x),
+    tan: x => isDeg ? Math.tan(toRad(x)) : Math.tan(x),
+    asin: x => isDeg ? toDeg(Math.asin(x)) : Math.asin(x),
+    acos: x => isDeg ? toDeg(Math.acos(x)) : Math.acos(x),
+    atan: x => isDeg ? toDeg(Math.atan(x)) : Math.atan(x),
+    sinh: Math.sinh,
+    cosh: Math.cosh,
+    tanh: Math.tanh,
+    log10: Math.log10,
+    log: Math.log10,
+    ln: Math.log,
+    log2: Math.log2,
+    exp: Math.exp,
+    sqrt: Math.sqrt,
+    cbrt: Math.cbrt,
+    abs: Math.abs,
+    fact: n => {
+      n = Math.round(Number(n));
+      if (n < 0) return NaN;
+      if (n === 0 || n === 1) return 1;
+      if (n > 170) return Infinity;
+      let r = 1;
+      for (let i = 2; i <= n; i++) r *= i;
+      return r;
+    },
+    nCr: (n, r) => {
+      n = Math.round(Number(n)); r = Math.round(Number(r));
+      if (r < 0 || r > n) return 0;
+      let num = 1, den = 1;
+      for (let i = 1; i <= r; i++) {
+        num *= (n - (r - i));
+        den *= i;
+      }
+      return num / den;
+    },
+    nPr: (n, r) => {
+      n = Math.round(Number(n)); r = Math.round(Number(r));
+      if (r < 0 || r > n) return 0;
+      let num = 1;
+      for (let i = 0; i < r; i++) num *= (n - i);
+      return num;
+    }
+  };
+
+  const allowedIdentifiers = 'pi|e|phi|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log10|log|ln|log2|exp|sqrt|cbrt|abs|fact|nCr|nPr';
+  const sanitized = s.replace(new RegExp(allowedIdentifiers, 'g'), '');
+  if (!/^[0-9+\-*/%.(),\s*]+$/.test(sanitized)) {
+    throw new Error('Invalid characters');
+  }
+
+  const scopeKeys = Object.keys(scope);
+  const scopeValues = Object.values(scope);
+  const fn = new Function(...scopeKeys, `return (${s});`);
+  const val = fn(...scopeValues);
+
+  if (typeof val !== 'number' || isNaN(val)) {
+    throw new Error('Undefined');
+  }
+
+  if (Math.abs(val) < 1e-12) return '0';
+  if (!isFinite(val)) return val > 0 ? 'Infinity' : '-Infinity';
+
+  const rounded = Number(Math.round(val + 'e+10') + 'e-10');
+  return String(rounded);
+}
+
+// Attach keyboard listeners for scientific calculator
+let _calcKeyHandlerAttached = false;
+function attachCalcKeyboardListener() {
+  if (_calcKeyHandlerAttached) return;
+  _calcKeyHandlerAttached = true;
+
+  window.addEventListener('keydown', (e) => {
+    if (currentView !== 'calculator' || calcTab !== 'native') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key >= '0' && e.key <= '9') {
+      e.preventDefault();
+      calcAppend(e.key);
+    } else if (e.key === '.') {
+      e.preventDefault();
+      calcAppend('.');
+    } else if (e.key === '+') {
+      e.preventDefault();
+      calcAppend('+');
+    } else if (e.key === '-') {
+      e.preventDefault();
+      calcAppend('−');
+    } else if (e.key === '*') {
+      e.preventDefault();
+      calcAppend('×');
+    } else if (e.key === '/') {
+      e.preventDefault();
+      calcAppend('÷');
+    } else if (e.key === '^') {
+      e.preventDefault();
+      calcAppend('^');
+    } else if (e.key === '(' || e.key === ')') {
+      e.preventDefault();
+      calcAppend(e.key);
+    } else if (e.key === 'Enter' || e.key === '=') {
+      e.preventDefault();
+      calcEvaluate();
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      calcBackspace();
+    } else if (e.key === 'Escape' || e.key.toLowerCase() === 'c') {
+      e.preventDefault();
+      calcClear();
+    } else if (e.key.toLowerCase() === 'd') {
+      e.preventDefault();
+      calcToggleAngleUnit();
+    }
+  });
+}
 
 // ======================== FLASHCARDS (IndexedDB + SM-2) ========================
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
