@@ -548,7 +548,7 @@ const Store={
             y: 80,
             width: 230,
             height: 200,
-            minimized: false,
+            minimized: true,
             zIndex: 100
           }
         ];
@@ -2184,6 +2184,12 @@ function applyTheme(item){
     b.style.removeProperty('--accent');
   }
   if(item.class) b.classList.add(item.class);
+}
+
+function applyAccentColor(hexColor) {
+  if (!hexColor) return;
+  document.documentElement.style.setProperty('--accent', hexColor);
+  document.documentElement.style.setProperty('--accent-glow', hexColor + '33');
 }
 
 // ======================== MATH GAME (Primary 1–6, Egypt curriculum) ========================
@@ -10847,6 +10853,14 @@ function renderCbtAdhdCardsTab() {
 function showOnboarding(){
   const isAr = currentLang() === 'ar';
   const logoUrl = 'https://placehold.co/80x80/4ECDC4/0F0F14?text=S';
+
+  // Ensure sticky notes are collapsed and hidden before user enters their name
+  stickyNotesVisible = false;
+  const layer = document.getElementById('sticky-notes-layer');
+  if (layer) layer.style.display = 'none';
+  const dock = document.getElementById('sticky-dock');
+  if (dock) dock.style.display = 'none';
+
   showModal(`
     <div style="text-align:center">
       <div style="display:flex;justify-content:center;margin-bottom:12px">
@@ -10896,7 +10910,7 @@ function showOnboarding(){
       </div>
 
       <button class="btn btn-lg btn-primary" style="width:100%;justify-content:center" onclick="finishOnboarding()">
-        ${isAr ? 'انطلق الآن في منارة <i class="fas fa-arrow-left" style="margin-right:6px"></i>' : "Let's Go <i class=\"fas fa-arrow-right\" style=\"margin-left:6px\"></i>"}
+        ${isAr ? 'انطلق الآن في سبارك <i class="fas fa-arrow-left" style="margin-right:6px"></i>' : "Let's Go <i class=\"fas fa-arrow-right\" style=\"margin-left:6px\"></i>"}
       </button>
     </div>
   `);
@@ -10924,6 +10938,52 @@ function finishOnboarding(){
   navigate('dashboard');
   toast(`Welcome, ${n}!`,'success');
   SFX.complete();
+
+  // ONLY open the sticky note now that the user has entered their name on first launch
+  const isAr = currentLang() === 'ar';
+  stickyNotesVisible = true;
+  try {
+    localStorage.setItem('spark_sticky_notes_visible', 'true');
+    localStorage.setItem('sticky_notes_visible', 'true');
+  } catch(e) {}
+
+  let notes = getStickyNotes();
+  if (!notes || notes.length === 0) {
+    notes = [
+      {
+        id: 'sn_welcome',
+        text: isAr 
+          ? `📌 مرحباً ${n}!\n• يمكنك سحب هذه البطاقة لأي مكان على الشاشة.\n• دوّن ملاحظاتك وأفكارك السريعة.\n• اضغط (-) لتصغيرها متى شئت!\n• استخدم قائمة البطاقات أسفل الشاشة.`
+          : `📌 Welcome ${n}!\n• Drag me anywhere on screen.\n• Write reminders or quick ideas.\n• Minimize me (-) when busy!\n• Use the bottom-right dock anytime.`,
+        color: 'yellow',
+        x: Math.max(260, (typeof window !== 'undefined' ? window.innerWidth : 1000) - 280),
+        y: 80,
+        width: 230,
+        height: 200,
+        minimized: false,
+        zIndex: 100
+      }
+    ];
+  } else {
+    // Uncollapse and open the note on first launch after name entry
+    notes.forEach(note => {
+      note.minimized = false;
+      if (note.id === 'sn_welcome') {
+        note.text = isAr 
+          ? `📌 مرحباً ${n}!\n• يمكنك سحب هذه البطاقة لأي مكان على الشاشة.\n• دوّن ملاحظاتك وأفكارك السريعة.\n• اضغط (-) لتصغيرها متى شئت!`
+          : `📌 Welcome ${n}!\n• Drag me anywhere on screen.\n• Write reminders or quick ideas.\n• Minimize me (-) when busy!`;
+      }
+    });
+  }
+  saveStickyNotes(notes);
+
+  const layer = document.getElementById('sticky-notes-layer');
+  const dock = document.getElementById('sticky-dock');
+  const visText = document.getElementById('sticky-vis-text');
+  if (layer) layer.style.display = 'block';
+  if (dock) dock.style.display = 'flex';
+  if (visText) visText.textContent = isAr ? 'إخفاء الكل' : 'Hide All';
+  renderStickyNotes();
 }
 // ======================== STICKY NOTES SYSTEM ========================
 let stickyNotesVisible = true;
@@ -11424,29 +11484,42 @@ function init(){
     }
   });
 
-  if(!Store.get('user'))showOnboarding();else{Store.updateStreak();updateUserPanel();renderDashboard();}
+  if(!Store.get('user')) {
+    stickyNotesVisible = false;
+    const layer = document.getElementById('sticky-notes-layer');
+    if (layer) layer.style.display = 'none';
+    const dock = document.getElementById('sticky-dock');
+    if (dock) dock.style.display = 'none';
+    showOnboarding();
+  } else {
+    Store.updateStreak();
+    updateUserPanel();
+    renderDashboard();
+
+    // Restore sticky notes visibility & highest zIndex from localStorage
+    try {
+      const savedVis = localStorage.getItem('spark_sticky_notes_visible') ?? localStorage.getItem('sticky_notes_visible');
+      if (savedVis !== null) {
+        stickyNotesVisible = JSON.parse(savedVis);
+      }
+      const savedZ = localStorage.getItem('spark_sticky_notes_highest_z') ?? localStorage.getItem('sticky_notes_highest_z');
+      if (savedZ !== null) {
+        highestZIndex = Math.max(highestZIndex, parseInt(savedZ, 10) || 100);
+      }
+    } catch(e) {}
+
+    const layer = document.getElementById('sticky-notes-layer');
+    const dock = document.getElementById('sticky-dock');
+    const visText = document.getElementById('sticky-vis-text');
+    if (layer) layer.style.display = stickyNotesVisible ? 'block' : 'none';
+    if (dock) dock.style.display = 'flex';
+    if (visText) visText.textContent = stickyNotesVisible ? (isAr ? 'إخفاء الكل' : 'Hide All') : (isAr ? 'إظهار الكل' : 'Show All');
+
+    renderStickyNotes();
+  }
   const savedThemeId = Store.get('inventory').equipped.theme;
   const savedTheme = CATALOG.themes.find(t=>t.id===savedThemeId);
   if(savedTheme) applyTheme(savedTheme);
-  
-  // Restore sticky notes visibility & highest zIndex from localStorage
-  try {
-    const savedVis = localStorage.getItem('spark_sticky_notes_visible') ?? localStorage.getItem('sticky_notes_visible');
-    if (savedVis !== null) {
-      stickyNotesVisible = JSON.parse(savedVis);
-    }
-    const savedZ = localStorage.getItem('spark_sticky_notes_highest_z') ?? localStorage.getItem('sticky_notes_highest_z');
-    if (savedZ !== null) {
-      highestZIndex = Math.max(highestZIndex, parseInt(savedZ, 10) || 100);
-    }
-  } catch(e) {}
-
-  const layer = document.getElementById('sticky-notes-layer');
-  const visText = document.getElementById('sticky-vis-text');
-  if (layer) layer.style.display = stickyNotesVisible ? 'block' : 'none';
-  if (visText) visText.textContent = stickyNotesVisible ? 'Hide All' : 'Show All';
-
-  renderStickyNotes();
 
   document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();SFX.click();navigate(a.dataset.view);}));
   window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(v&&VN.includes(v))navigate(v);});
