@@ -39,6 +39,52 @@ h1,h2,h3,h4{font-family:'Fredoka',sans-serif}
   flex: 1;
   min-width: 0;
 }
+.brand-logo-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid var(--teal);
+  box-shadow: 0 0 16px var(--teal-g);
+  background: var(--bg2);
+  transition: transform 0.2s ease;
+}
+.logo-brand:hover .brand-logo-img {
+  transform: scale(1.05);
+}
+.arabic-brand-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--teal);
+  margin-left: 4px;
+}
+.lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--teal) !important;
+  background: rgba(78, 205, 196, 0.12) !important;
+  color: var(--teal) !important;
+  font-family: 'Cairo', 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.lang-toggle-btn:hover {
+  background: var(--teal) !important;
+  color: #0F0F14 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px var(--teal-g);
+}
+.lang-toggle-btn i {
+  font-size: 13px;
+}
 .logo-brand .flame {
   width: 36px;
   height: 36px;
@@ -2602,6 +2648,227 @@ body.light-mode .science-notes-area {
   outline: none;
   border-color: var(--teal);
 }
+
+/* ==========================================================================
+   RTL (RIGHT-TO-LEFT) FULL ARABIC SUPPORT
+   ========================================================================== */
+html[dir="rtl"],
+body.rtl {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Cairo', 'Nunito', sans-serif;
+}
+
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+body.rtl h1,
+body.rtl h2,
+body.rtl h3,
+body.rtl h4 {
+  font-family: 'Cairo', 'Fredoka', sans-serif;
+  letter-spacing: 0;
+}
+
+/* Sidebar in RTL */
+html[dir="rtl"] #sidebar {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+html[dir="rtl"] #main {
+  margin-left: 0;
+  margin-right: 250px;
+  width: calc(100% - 250px);
+  max-width: calc(100% - 250px);
+  transition: margin-right 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[dir="rtl"] body.sidebar-collapsed #sidebar {
+  width: 70px;
+}
+
+html[dir="rtl"] body.sidebar-collapsed #main {
+  margin-left: 0 !important;
+  margin-right: 70px !important;
+  width: calc(100% - 70px) !important;
+  max-width: calc(100% - 70px) !important;
+}
+
+html[dir="rtl"] body.sidebar-collapsed #sidebar nav a:hover::after {
+  left: auto;
+  right: 54px;
+}
+
+/* Sidebar Logo & Nav */
+html[dir="rtl"] .logo-brand {
+  gap: 10px;
+}
+
+html[dir="rtl"] .arabic-brand-title {
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+html[dir="rtl"] #sidebar nav a {
+  text-align: right;
+}
+
+html[dir="rtl"] #sidebar nav a i {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Topbar alignment */
+html[dir="rtl"] .topbar-left {
+  flex-direction: row;
+}
+
+html[dir="rtl"] .topbar-right {
+  flex-direction: row;
+}
+
+/* Mobile adjustments */
+@media (max-width: 540px) {
+  html[dir="rtl"] #menu-btn {
+    left: auto;
+    right: 14px;
+  }
+  html[dir="rtl"] #sidebar {
+    left: auto;
+    right: -260px;
+    border-left: 1px solid var(--border);
+    border-right: none;
+  }
+  html[dir="rtl"] #sidebar.open {
+    transform: translateX(-260px);
+  }
+  html[dir="rtl"] #main {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Sticky dock positioning in RTL */
+html[dir="rtl"] #sticky-dock {
+  right: auto;
+  left: 24px;
+}
+
+html[dir="rtl"] .sticky-dock-menu {
+  right: auto;
+  left: 0;
+}
+
+html[dir="rtl"] .sticky-dock-menu button {
+  text-align: right;
+}
+
+/* Toast container positioning */
+html[dir="rtl"] #toast-container {
+  right: auto;
+  left: 20px;
+}
+
+html[dir="rtl"] .toast {
+  text-align: right;
+}
+
+/* Inputs with search icon */
+html[dir="rtl"] .search-input-wrap i,
+html[dir="rtl"] .science-controls-toolbar input[type="text"] + i,
+html[dir="rtl"] div[style*="position:relative"] > i.fa-search {
+  left: auto !important;
+  right: 10px !important;
+}
+
+html[dir="rtl"] div[style*="position:relative"] > input[placeholder*="Search"],
+html[dir="rtl"] div[style*="position:relative"] > input[placeholder*="بحث"] {
+  padding-left: 12px !important;
+  padding-right: 30px !important;
+  text-align: right;
+}
+
+/* Modals & Dialogs */
+html[dir="rtl"] .modal {
+  text-align: right;
+}
+
+/* Science & PhET Workbench */
+html[dir="rtl"] .science-wb-title-group {
+  flex-direction: row;
+}
+
+html[dir="rtl"] .science-wb-actions {
+  flex-direction: row;
+}
+
+html[dir="rtl"] .science-goal-item input[type="checkbox"] {
+  margin-left: 8px;
+  margin-right: 0;
+}
+
+/* Calculator & Desmos display */
+html[dir="rtl"] .calc-display-current,
+html[dir="rtl"] .calc-display-history {
+  direction: ltr;
+  text-align: right;
+}
+
+html[dir="rtl"] .desmos-wrap {
+  direction: ltr; /* Math graphs stay LTR for standard Cartesian axes */
+}
+
+/* Routine & Timetable RTL items */
+html[dir="rtl"] .routine-step-item,
+html[dir="rtl"] .planner-step-item {
+  text-align: right;
+}
+
+/* Language Toggle Button styling */
+.lang-toggle-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.lang-toggle-btn:hover {
+  border-color: var(--teal);
+  background: rgba(78, 205, 196, 0.12);
+  color: var(--teal);
+  transform: translateY(-1px);
+}
+
+.brand-logo-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.logo-brand:hover .brand-logo-img {
+  transform: scale(1.05);
+  border-color: var(--teal);
+}
+
 
 
 

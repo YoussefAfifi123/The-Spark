@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spark — Learning, Focus, and Cognitive Reframing Platform</title>
-<meta name="description" content="Learning, Focus, and Cognitive Reframing Platform">
-<meta property="og:title" content="Spark — Learning, Focus, and Cognitive Reframing Platform">
-<meta property="og:description" content="Learning, Focus, and Cognitive Reframing Platform">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Manara منارة — Learning, Focus & Cognitive Platform</title>
+<meta name="description" content="منصة منارة للتعلم والتركيز والعلوم وإعادة الصياغة الإدراكية — Learning, Focus, Science & Cognitive Reframing Platform">
+<meta property="og:title" content="Manara منارة — Learning, Focus & Cognitive Platform">
+<meta property="og:description" content="منصة منارة للتعلم والتركيز والعلوم وإعادة الصياغة الإدراكية — Learning, Focus, Science & Cognitive Reframing Platform">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,7 +25,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']},colors:{spark:{50:'#FFF4EB',100:'#FFE4C7',200:'#FFC78A',300:'#FFA64D',400:'#FF8C42',500:'#FF7023',600:'#E85A10',700:'#BF4410',800:'#963714',900:'#7A3016'},slate:{850:'#161621',900:'#0F0F14',950:'#0A0A0E'}}}}};
+tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka','Cairo'],body:['Nunito','Cairo']},colors:{spark:{50:'#FFF4EB',100:'#FFE4C7',200:'#FFC78A',300:'#FFA64D',400:'#FF8C42',500:'#FF7023',600:'#E85A10',700:'#BF4410',800:'#963714',900:'#7A3016'},slate:{850:'#161621',900:'#0F0F14',950:'#0A0A0E'}}}}};
 </script>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -32,11 +34,12 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
 <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 <aside id="sidebar" aria-label="Main Navigation">
   <div class="logo">
-    <div class="logo-brand" title="Spark - Learn & Focus">
-      <div class="flame"><i class="fas fa-fire" style="color:#fff"></i></div>
+    <div class="logo-brand" title="Manara منارة - Learn & Focus" onclick="navigate('dashboard')">
+      <!-- Placeholder link for Logo -->
+      <img id="brand-logo-img" src="https://placehold.co/80x80/4ECDC4/0F0F14?text=M" alt="Manara Logo" class="brand-logo-img">
       <div class="logo-text">
-        <div class="logo-title">Spark</div>
-        <div class="logo-subtitle">Learn & Focus</div>
+        <div class="logo-title">Manara <span class="arabic-brand-title">منارة</span></div>
+        <div class="logo-subtitle" id="logo-subtitle">Learn & Focus</div>
       </div>
     </div>
     <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" title="Collapse sidebar (Ctrl+B)" aria-label="Collapse sidebar">
@@ -44,25 +47,25 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
     </button>
   </div>
   <nav id="nav">
-    <a href="#dashboard" data-view="dashboard" class="active" data-tooltip="Dashboard" title="Dashboard"><i class="fas fa-home"></i><span class="nav-text">Dashboard</span></a>
-    <a href="#focus" data-view="focus" data-tooltip="Focus Lab" title="Focus Lab"><i class="fas fa-bullseye"></i><span class="nav-text">Focus Lab</span></a>
-    <a href="#planner" data-view="planner" data-tooltip="Task Planner" title="Task Planner"><i class="fas fa-list-check"></i><span class="nav-text">Task Planner</span></a>
-    <a href="#schedule" data-view="schedule" data-tooltip="Schedule & Timetable" title="Schedule & Timetable"><i class="fas fa-calendar-days"></i><span class="nav-text">Schedule & Timetable</span></a>
-    <a href="#wellness" data-view="wellness" data-tooltip="Mind & Mood" title="Mind & Mood"><i class="fas fa-heart-pulse"></i><span class="nav-text">Mind & Mood</span></a>
-    <a href="#learn" data-view="learn" data-tooltip="Learn & Play" title="Learn & Play"><i class="fas fa-gamepad"></i><span class="nav-text">Learn & Play</span></a>
-    <a href="#science" data-view="science" data-tooltip="Science Lab" title="PhET Interactive Science Lab"><i class="fas fa-flask-vial"></i><span class="nav-text">Science Lab</span></a>
-    <a href="#calculator" data-view="calculator" data-tooltip="Scientific Calculator" title="Scientific Calculator"><i class="fas fa-calculator"></i><span class="nav-text">Calculator</span></a>
-    <a href="#flashcards" data-view="flashcards" data-tooltip="Flashcards" title="Flashcards"><i class="fas fa-clone"></i><span class="nav-text">Flashcards</span></a>
-    <a href="#store" data-view="store" data-tooltip="Store" title="Store"><i class="fas fa-store"></i><span class="nav-text">Store</span></a>
-    <a href="#resources" data-view="resources" data-tooltip="Resources" title="Resources"><i class="fas fa-book-open"></i><span class="nav-text">Resources</span></a>
-    <a href="#progress" data-view="progress" data-tooltip="Progress" title="Progress"><i class="fas fa-chart-line"></i><span class="nav-text">Progress</span></a>
-    <a href="#settings" data-view="settings" data-tooltip="Settings" title="Settings"><i class="fas fa-cog"></i><span class="nav-text">Settings</span></a>
+    <a href="#dashboard" data-view="dashboard" class="active" data-tooltip="Dashboard" title="Dashboard"><i class="fas fa-home"></i><span class="nav-text" data-i18n="nav_dashboard">Dashboard</span></a>
+    <a href="#focus" data-view="focus" data-tooltip="Focus Lab" title="Focus Lab"><i class="fas fa-bullseye"></i><span class="nav-text" data-i18n="nav_focus">Focus Lab</span></a>
+    <a href="#planner" data-view="planner" data-tooltip="Task Planner" title="Task Planner"><i class="fas fa-list-check"></i><span class="nav-text" data-i18n="nav_planner">Task Planner</span></a>
+    <a href="#schedule" data-view="schedule" data-tooltip="Schedule & Timetable" title="Schedule & Timetable"><i class="fas fa-calendar-days"></i><span class="nav-text" data-i18n="nav_schedule">Schedule & Timetable</span></a>
+    <a href="#wellness" data-view="wellness" data-tooltip="Mind & Mood" title="Mind & Mood"><i class="fas fa-heart-pulse"></i><span class="nav-text" data-i18n="nav_wellness">Mind & Mood</span></a>
+    <a href="#learn" data-view="learn" data-tooltip="Learn & Play" title="Learn & Play"><i class="fas fa-gamepad"></i><span class="nav-text" data-i18n="nav_learn">Learn & Play</span></a>
+    <a href="#science" data-view="science" data-tooltip="Science Lab" title="PhET Interactive Science Lab"><i class="fas fa-flask-vial"></i><span class="nav-text" data-i18n="nav_science">Science Lab</span></a>
+    <a href="#calculator" data-view="calculator" data-tooltip="Scientific Calculator" title="Scientific Calculator"><i class="fas fa-calculator"></i><span class="nav-text" data-i18n="nav_calculator">Calculator</span></a>
+    <a href="#flashcards" data-view="flashcards" data-tooltip="Flashcards" title="Flashcards"><i class="fas fa-clone"></i><span class="nav-text" data-i18n="nav_flashcards">Flashcards</span></a>
+    <a href="#store" data-view="store" data-tooltip="Store" title="Store"><i class="fas fa-store"></i><span class="nav-text" data-i18n="nav_store">Store</span></a>
+    <a href="#resources" data-view="resources" data-tooltip="Resources" title="Resources"><i class="fas fa-book-open"></i><span class="nav-text" data-i18n="nav_resources">Resources</span></a>
+    <a href="#progress" data-view="progress" data-tooltip="Progress" title="Progress"><i class="fas fa-chart-line"></i><span class="nav-text" data-i18n="nav_progress">Progress</span></a>
+    <a href="#settings" data-view="settings" data-tooltip="Settings" title="Settings"><i class="fas fa-cog"></i><span class="nav-text" data-i18n="nav_settings">Settings</span></a>
   </nav>
   <div class="user-panel" id="user-panel"></div>
   <div class="sidebar-footer">
     <button id="sidebar-footer-toggle" class="sidebar-footer-toggle-btn" title="Collapse sidebar (Ctrl+B)" aria-label="Toggle sidebar collapse">
       <i class="fas fa-angles-left" id="sidebar-footer-icon"></i>
-      <span class="footer-btn-text">Collapse</span>
+      <span class="footer-btn-text" data-i18n="collapse">Collapse</span>
     </button>
   </div>
 </aside>
@@ -78,10 +81,15 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
       </div>
     </div>
     <div class="topbar-right">
+      <!-- Full Arabic / English Language Toggle -->
+      <button class="btn btn-sm lang-toggle-btn" id="lang-toggle-btn" onclick="toggleLanguage()" title="Switch Language / تغيير اللغة">
+        <i class="fas fa-globe" style="color:var(--teal);"></i>
+        <span id="lang-toggle-label" style="font-weight:700;">العربية</span>
+      </button>
       <div class="topbar-date" id="topbar-date"></div>
       <div class="topbar-streak" id="topbar-streak"></div>
       <button class="btn btn-sm btn-ghost" id="topbar-focus-quickbtn" onclick="navigate('focus')" title="Quick Focus Session" style="border:1px solid var(--border); font-size:12px; gap:6px;">
-        <i class="fas fa-bullseye" style="color:var(--teal);"></i> <span>Focus</span>
+        <i class="fas fa-bullseye" style="color:var(--teal);"></i> <span id="topbar-focus-text" data-i18n="focus_quick">Focus</span>
       </button>
     </div>
   </header>
@@ -106,10 +114,10 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
 <div id="sticky-notes-layer"></div>
 <div id="sticky-dock">
   <div class="sticky-dock-menu" id="sticky-dock-menu" style="display:none;">
-    <button onclick="createNewStickyNote()"><i class="fas fa-plus" style="color:var(--accent);"></i> New Sticky Note</button>
-    <button onclick="scatterStickyNotes()"><i class="fas fa-arrows-spin" style="color:var(--teal);"></i> Scatter Notes</button>
-    <button onclick="stackStickyNotes()"><i class="fas fa-layer-group" style="color:var(--blue);"></i> Cascade Stack</button>
-    <button onclick="toggleStickyNotesVisibility()"><i class="fas fa-eye-slash" style="color:var(--text2);"></i> <span id="sticky-vis-text">Hide All</span></button>
+    <button onclick="createNewStickyNote()"><i class="fas fa-plus" style="color:var(--accent);"></i> <span data-i18n="sticky_new">New Sticky Note</span></button>
+    <button onclick="scatterStickyNotes()"><i class="fas fa-arrows-spin" style="color:var(--teal);"></i> <span data-i18n="sticky_scatter">Scatter Notes</span></button>
+    <button onclick="stackStickyNotes()"><i class="fas fa-layer-group" style="color:var(--blue);"></i> <span data-i18n="sticky_stack">Cascade Stack</span></button>
+    <button onclick="toggleStickyNotesVisibility()"><i class="fas fa-eye-slash" style="color:var(--text2);"></i> <span id="sticky-vis-text" data-i18n="sticky_hide">Hide All</span></button>
   </div>
   <button class="sticky-main-btn" id="sticky-main-btn" onclick="toggleStickyDockMenu()" title="Sticky Notes (Click to Open Menu)">
     <i class="fas fa-sticky-note"></i>
@@ -119,6 +127,7 @@ tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka'],body:['Nunito']}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script>if (!window.Tone) document.write('<script src="/node_modules/tone/build/Tone.js"><\/script>');</script>
+<script src="i18n.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

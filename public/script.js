@@ -149,7 +149,8 @@ const Ambient = {
     const activeCount = Object.values(this.sounds).filter(s => s.playing).length;
     const badge = document.getElementById('amb-active-count');
     if (badge) {
-      badge.textContent = activeCount > 0 ? `${activeCount} active` : 'Off';
+      const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+      badge.textContent = activeCount > 0 ? (isAr ? `${activeCount} نشط` : `${activeCount} active`) : (isAr ? 'متوقف' : 'Off');
     }
   },
 
@@ -373,35 +374,55 @@ const Ambient = {
   },
 
   renderSoundscapeCard() {
+    const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
     const activeCount = Object.values(this.sounds).filter(s => s.playing).length;
+    const title = isAr ? 'أصوات وخلفيات التركيز' : 'Focus Soundscape';
+    const statusText = activeCount > 0 ? (isAr ? `${activeCount} نشط` : `${activeCount} active`) : (isAr ? 'متوقف' : 'Off');
+    const muteText = isAr ? 'كتم الجميع' : 'Mute All';
+    const presetsLabel = isAr ? 'الأوضاع الجاهزة:' : 'Presets:';
+    const volTitle = isAr ? 'مستوى الصوت' : 'Volume';
+
+    const soundNamesAr = {
+      lofi: 'لو-فاي هادئ',
+      brown: 'ضوضاء بنية',
+      pink: 'ضوضاء وردية',
+      white: 'ضوضاء بيضاء',
+      rain: 'مطر وعواصف',
+      binaural: 'موجات بيتا للتركيز',
+      ocean: 'أمواج البحر',
+      wind: 'نسيم الأشجار',
+      cafe: 'أجواء المقهى'
+    };
+
     return `
       <div class="card" style="margin-bottom:16px; padding:16px; background:var(--card);">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <i class="fas fa-headphones" style="color:var(--teal); font-size:16px;"></i>
-            <span style="font-weight:700; font-size:14px;">Focus Soundscape</span>
-            <span class="tag" style="background:var(--teal-g); color:var(--teal); font-size:11px;" id="amb-active-count">${activeCount > 0 ? `${activeCount} active` : 'Off'}</span>
+            <span style="font-weight:700; font-size:14px;">${title}</span>
+            <span class="tag" style="background:var(--teal-g); color:var(--teal); font-size:11px;" id="amb-active-count">${statusText}</span>
           </div>
           <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
             <i class="fas fa-volume-high" style="color:var(--text2); font-size:12px;"></i>
-            <input type="range" min="0" max="100" value="${Math.round(this.volume * 100)}" class="amb-slider" id="amb-vol" oninput="Ambient.setVolume(this.value/100)" title="Volume" style="width:80px;">
-            <button class="btn btn-sm btn-ghost" onclick="Ambient.stopAll(); SFX.click();" style="border:1px solid var(--border); font-size:11px; padding:4px 8px;">Mute All</button>
+            <input type="range" min="0" max="100" value="${Math.round(this.volume * 100)}" class="amb-slider" id="amb-vol" oninput="Ambient.setVolume(this.value/100)" title="${volTitle}" style="width:80px;">
+            <button class="btn btn-sm btn-ghost" onclick="Ambient.stopAll(); SFX.click();" style="border:1px solid var(--border); font-size:11px; padding:4px 8px;">${muteText}</button>
           </div>
         </div>
 
         <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px;" class="no-scrollbar">
-          <span style="font-size:11px; color:var(--text2); display:flex; align-items:center; font-weight:700; padding-right:4px;">Presets:</span>
-          <button class="amb-btn" onclick="Ambient.applyPreset('adhd'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-brain" style="color:var(--accent);"></i> ADHD Focus</button>
-          <button class="amb-btn" onclick="Ambient.applyPreset('lofi'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-music" style="color:#D8B4FE;"></i> Cozy Lo-Fi</button>
-          <button class="amb-btn" onclick="Ambient.applyPreset('nature'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-tree" style="color:var(--green);"></i> Nature</button>
-          <button class="amb-btn" onclick="Ambient.applyPreset('cafe'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-mug-hot" style="color:var(--teal);"></i> Cafe</button>
+          <span style="font-size:11px; color:var(--text2); display:flex; align-items:center; font-weight:700; padding-right:4px;">${presetsLabel}</span>
+          <button class="amb-btn" onclick="Ambient.applyPreset('adhd'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-brain" style="color:var(--accent);"></i> ${isAr ? 'تركيز ADHD' : 'ADHD Focus'}</button>
+          <button class="amb-btn" onclick="Ambient.applyPreset('lofi'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-music" style="color:#D8B4FE;"></i> ${isAr ? 'لو-فاي مريح' : 'Cozy Lo-Fi'}</button>
+          <button class="amb-btn" onclick="Ambient.applyPreset('nature'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-tree" style="color:var(--green);"></i> ${isAr ? 'أصوات الطبيعة' : 'Nature'}</button>
+          <button class="amb-btn" onclick="Ambient.applyPreset('cafe'); SFX.click();" style="font-size:11px; padding:4px 10px;"><i class="fas fa-mug-hot" style="color:var(--teal);"></i> ${isAr ? 'أجواء المقهى' : 'Cafe'}</button>
         </div>
 
         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap:8px;">
           ${Object.keys(this.sounds).map(k => {
             const s = this.sounds[k];
+            const displayName = isAr && soundNamesAr[k] ? soundNamesAr[k] : s.name;
             return `<button class="amb-btn ${s.playing ? 'active' : ''}" id="amb-${k}" onclick="Ambient.toggle('${k}'); SFX.click();" style="justify-content:center; padding:8px 6px; font-size:12px;">
-              <i class="fas ${s.icon}"></i> ${s.name}
+              <i class="fas ${s.icon}"></i> ${displayName}
             </button>`;
           }).join('')}
         </div>
@@ -465,6 +486,7 @@ const Store={
           { id: 'p_burst', name: 'Quick Burst', focusMin: 10, breakMin: 2, soundscape: 'cafe', icon: 'fa-fire' }
         ];
       }
+      if(!this._d.lang) this._d.lang = 'ar';
       if(!this._d.settings.dailyGoalMin) this._d.settings.dailyGoalMin = 30;
       if(!this._d.moodLogs) this._d.moodLogs = [];
       if(!this._d.journalLogs) this._d.journalLogs = [];
@@ -744,57 +766,258 @@ const PAUSE_MSGS=[
 ];
 
 // ======================== TOAST / MODAL ========================
-function toast(m,t='success'){const e=document.createElement('div');e.className=`toast toast-${t}`;const i={success:'fa-check-circle',info:'fa-info-circle',warn:'fa-exclamation-triangle',bonus:'fa-gift'};e.innerHTML=`<i class="fas ${i[t]||i.info}"></i>${m}`;document.getElementById('toast-container').appendChild(e);setTimeout(()=>e.remove(),t==='bonus'?4000:3000);}
-function showModal(h){document.getElementById('modal-root').innerHTML=`<div class="modal-overlay" id="modal-overlay"><div class="modal">${h}</div></div>`;document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});}
+function toast(m,t='success'){
+  if (typeof translateString === 'function' && currentLang() === 'ar') {
+    m = translateString(m);
+  }
+  const e=document.createElement('div');
+  e.className=`toast toast-${t}`;
+  const i={success:'fa-check-circle',info:'fa-info-circle',warn:'fa-exclamation-triangle',bonus:'fa-gift'};
+  e.innerHTML=`<i class="fas ${i[t]||i.info}"></i>${m}`;
+  document.getElementById('toast-container').appendChild(e);
+  setTimeout(()=>e.remove(),t==='bonus'?4000:3000);
+}
+function showModal(h){
+  const root = document.getElementById('modal-root');
+  root.innerHTML=`<div class="modal-overlay" id="modal-overlay"><div class="modal">${h}</div></div>`;
+  document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});
+  if (currentLang() === 'ar' && typeof localizeDOM === 'function') {
+    localizeDOM(root);
+  }
+}
 function closeModal(){document.getElementById('modal-root').innerHTML='';}
 
 // ======================== TASK BREAKER ========================
 function breakDownTask(task){
   const t=task.toLowerCase();
-  const m={homework:['Get your supplies ready','Read the instructions carefully','Start with the first question','Work through each problem','Check your answers','Put everything in your folder'],read:['Find your book or article','Get comfortable and focused','Open to the right page','Read the first paragraph','Keep reading at your own pace','Write down one thing you learned'],write:['Open your notebook or document','Write the title or heading','Write the first sentence — any sentence','Add a few more details','Read what you wrote so far','Fix any spelling or mistakes'],math:['Get your pencil and paper ready','Look at the first problem carefully','Write down what you know','Solve it step by step','Check your answer makes sense','Move to the next problem'],study:['Gather your notes and materials','Review the main ideas first','Close your notes and test yourself','Mark anything you forgot','Review the weak spots again','Take a short break'],project:['Read the project requirements','Brainstorm a few ideas','Pick the best idea','Gather what you need','Work on the first part','Keep building it step by step'],default:['Get everything you need ready','Figure out the very first small step','Do just that one step','Look at what comes next','Keep going one step at a time','Review what you did']};
+  const isAr = currentLang() === 'ar';
+  const mEn={
+    homework:['Get your supplies ready','Read the instructions carefully','Start with the first question','Work through each problem','Check your answers','Put everything in your folder'],
+    read:['Find your book or article','Get comfortable and focused','Open to the right page','Read the first paragraph','Keep reading at your own pace','Write down one thing you learned'],
+    write:['Open your notebook or document','Write the title or heading','Write the first sentence — any sentence','Add a few more details','Read what you wrote so far','Fix any spelling or mistakes'],
+    math:['Get your pencil and paper ready','Look at the first problem carefully','Write down what you know','Solve it step by step','Check your answer makes sense','Move to the next problem'],
+    study:['Gather your notes and materials','Review the main ideas first','Close your notes and test yourself','Mark anything you forgot','Review the weak spots again','Take a short break'],
+    project:['Read the project requirements','Brainstorm a few ideas','Pick the best idea','Gather what you need','Work on the first part','Keep building it step by step'],
+    default:['Get everything you need ready','Figure out the very first small step','Do just that one step','Look at what comes next','Keep going one step at a time','Review what you did']
+  };
+  const mAr={
+    homework:['جهّز أدواتك ودفاترك للبدء','اقرأ التعليمات بعناية وهدوء','ابدأ بالسؤال الأول فورًا','حل كل مسألة خطوة بخطوة','راجع إجاباتك جيدًا للتأكد','رتّب أوراقك وضعها في مكانها'],
+    read:['أحضر كتابك أو المقال المطلوب','اجلس في مكان هادئ ومريح للعين','افتح الصفحة المحددة بدقة','اقرأ الفقرة الأولى بتركيز واستيعاب','واصل القراءة بالسرعة التي تريحك','دوّن فكرة رئيسية واحدة تعلمتها'],
+    write:['افتح دفترك أو مستند الكتابة','اكتب العنوان الرئيسي بوضوح','اكتب الجملة الأولى — أي جملة لبدء التدفق','أضف بضع تفاصيل وأفكار داعمة','اقرأ ما كتبته حتى الآن بنظرة سريعة','صحح أي أخطاء لغوية أو إملائية'],
+    math:['جهّز الورقة والقلم والمسودة','افحص المسألة الأولى وافهم المطلوب','اكتب المعطيات والقانون المناسب','ابدأ الحل الرياضي خطوة بخطوة','تأكد من منطقية وصحة الناتج النهائي','انتقل إلى المسألة التالية بثقة'],
+    study:['اجمع ملخصاتك وأوراق المذاكرة','راجع الأفكار والمفاهيم الرئيسية أولاً','أغلق الملخص واختبر نفسك شفهيًا','حدد أي نقطة نسيتها لوضع علامة عليها','أعد مراجعة النقاط التي تحتاج تثبيتًا','خذ استراحة قصيرة مستحقة لتجديد نشاطك'],
+    project:['اقرأ متطلبات ومعايير المشروع بعناية','اكتب عصفًا ذهنيًا لعدة أفكار إبداعية','اختر الفكرة الأوضح والأكثر إتقانًا','اجمع المواد والمعلومات التي ستحتاجها','ابدأ في الجزء الأول فورًا دون تردد','واصل إنجاز باقي الأجزاء خطوة بخطوة'],
+    default:['جهّز كل ما تحتاجه للبدء في مكان هادئ','حدد أصغر خطوة أولى ممكنة للمهمة','أنجز هذه الخطوة الواحدة فقط الآن','انظر إلى الخطوة التالية وابدأ بها','واصل التقدم خطوة بخطوة بهدوء','راجع ما أنجزته واحتفل بتقدمك']
+  };
+  const m = isAr ? mAr : mEn;
   let k='default';
-  if(t.includes('homework')||t.includes('hw'))k='homework';else if(t.includes('read')||t.includes('book')||t.includes('chapter'))k='read';else if(t.includes('write')||t.includes('essay')||t.includes('paragraph')||t.includes('story'))k='write';else if(t.includes('math')||t.includes('calculate')||t.includes('multiply')||t.includes('divide'))k='math';else if(t.includes('study')||t.includes('review')||t.includes('memorize')||t.includes('practice'))k='study';else if(t.includes('project')||t.includes('poster')||t.includes('presentation'))k='project';
+  if(t.includes('homework')||t.includes('hw')||t.includes('واجب')||t.includes('حل'))k='homework';
+  else if(t.includes('read')||t.includes('book')||t.includes('chapter')||t.includes('قراءة')||t.includes('كتاب')||t.includes('فصل'))k='read';
+  else if(t.includes('write')||t.includes('essay')||t.includes('paragraph')||t.includes('story')||t.includes('كتابة')||t.includes('مقال')||t.includes('تعبير'))k='write';
+  else if(t.includes('math')||t.includes('calculate')||t.includes('multiply')||t.includes('divide')||t.includes('رياضيات')||t.includes('حساب')||t.includes('مسألة'))k='math';
+  else if(t.includes('study')||t.includes('review')||t.includes('memorize')||t.includes('practice')||t.includes('مذاكرة')||t.includes('مراجعة')||t.includes('حفظ'))k='study';
+  else if(t.includes('project')||t.includes('poster')||t.includes('presentation')||t.includes('مشروع')||t.includes('بحث'))k='project';
   return[...m[k]];
 }
+
+// ======================== I18N & LOCALIZATION SYSTEM ========================
+function currentLang() {
+  try {
+    if (typeof Store !== 'undefined' && Store.get) {
+      return Store.get('lang') || 'ar';
+    }
+  } catch(e) {}
+  return 'ar';
+}
+
+const I18N = {
+  en: {
+    appName: 'Manara',
+    appFullName: 'Manara — Learning, Focus & Cognitive Platform',
+    brandTitle: 'Manara',
+    brandSub: 'Learn & Focus',
+    nav_dashboard: 'Dashboard',
+    nav_focus: 'Focus Lab',
+    nav_planner: 'Task Planner',
+    nav_schedule: 'Schedule & Timetable',
+    nav_wellness: 'Mind & Mood',
+    nav_learn: 'Learn & Play',
+    nav_science: 'Science Lab',
+    nav_calculator: 'Calculator',
+    nav_flashcards: 'Flashcards',
+    nav_store: 'Store',
+    nav_resources: 'Resources',
+    nav_progress: 'Progress',
+    nav_settings: 'Settings',
+    collapse: 'Collapse',
+    expand: 'Expand',
+    focus_quick: 'Focus',
+    sticky_new: 'New Sticky Note',
+    sticky_scatter: 'Scatter Notes',
+    sticky_stack: 'Cascade Stack',
+    sticky_hide: 'Hide All',
+    sticky_show: 'Show All',
+    welcome_back: 'Welcome back',
+    xp_total: 'XP total',
+    daily_goal: 'Daily Focus Goal',
+    open_planner: 'Open Planner',
+    today_schedule: "Today's Timetable & Classes",
+    full_schedule: 'Full Timetable',
+    quests_title: "Daily Quests",
+    all_quests_bonus: "All daily quests done! +50 XP bonus!",
+    quest_done: "Quest completed!"
+  },
+  ar: {
+    appName: 'منارة',
+    appFullName: 'منارة — منصة التعلّم والتركيز والعلوم وإعادة الصياغة الإدراكية',
+    brandTitle: 'منارة',
+    brandSub: 'منصة التعلّم والتركيز',
+    nav_dashboard: 'لوحة التحكم',
+    nav_focus: 'مختبر التركيز',
+    nav_planner: 'منظّم المهام',
+    nav_schedule: 'الجدول والمواعيد',
+    nav_wellness: 'الراحة والمزاج',
+    nav_learn: 'تعلّم والعب',
+    nav_science: 'مختبر العلوم',
+    nav_calculator: 'الآلة الحاسبة',
+    nav_flashcards: 'البطاقات التعليمية',
+    nav_store: 'المتجر',
+    nav_resources: 'مصادر التعلّم',
+    nav_progress: 'مستوى التقدم',
+    nav_settings: 'الإعدادات',
+    collapse: 'طي القائمة',
+    expand: 'توسيع القائمة',
+    focus_quick: 'تركيز سريع',
+    sticky_new: 'ملاحظة لاصقة جديدة',
+    sticky_scatter: 'بعثرة الملاحظات',
+    sticky_stack: 'ترتيب متتالي',
+    sticky_hide: 'إخفاء الكل',
+    sticky_show: 'إظهار الكل',
+    welcome_back: 'مرحبًا بعودتك',
+    xp_total: 'إجمالي نقاط الخبرة',
+    daily_goal: 'هدف التركيز اليومي',
+    open_planner: 'فتح المنظّم',
+    today_schedule: 'جدول الحصص والمواعيد لليوم',
+    full_schedule: 'الجدول الكامل',
+    quests_title: 'مهام اليوم الإضافية',
+    all_quests_bonus: 'أُنجزت مهام اليوم بالكامل! +50 نقطة خبرة!',
+    quest_done: 'تم إكمال المهمة!'
+  }
+};
+
+function t(key, fallback = '') {
+  const lang = currentLang();
+  if (I18N[lang] && I18N[lang][key] !== undefined) return I18N[lang][key];
+  if (I18N['en'] && I18N['en'][key] !== undefined) return I18N['en'][key];
+  if (lang === 'ar' && typeof translateString === 'function') {
+    return translateString(fallback || key);
+  }
+  return fallback || key;
+}
+
+function setLanguage(lang) {
+  if (lang !== 'ar' && lang !== 'en') lang = 'ar';
+  Store.set('lang', lang);
+  const isAr = lang === 'ar';
+
+  document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+  if (isAr) {
+    document.body.classList.add('rtl');
+  } else {
+    document.body.classList.remove('rtl');
+  }
+
+  const langLabel = document.getElementById('lang-toggle-label');
+  if (langLabel) langLabel.textContent = isAr ? 'English' : 'العربية';
+
+  const subEl = document.getElementById('logo-subtitle');
+  if (subEl) subEl.textContent = isAr ? 'منصة التعلّم والتركيز' : 'Learn & Focus';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (I18N[lang] && I18N[lang][k]) {
+      el.textContent = I18N[lang][k];
+    }
+  });
+
+  document.querySelectorAll('#nav a').forEach(a => {
+    const v = a.dataset.view;
+    if (VIEW_INFO[v]) {
+      const title = isAr && VIEW_INFO[v].titleAr ? VIEW_INFO[v].titleAr : VIEW_INFO[v].title;
+      a.setAttribute('data-tooltip', title);
+      a.setAttribute('title', title);
+    }
+  });
+
+  updateCollapseIcons(document.body.classList.contains('sidebar-collapsed'));
+  updateTopBar();
+  updateUserPanel();
+  renderView(currentView);
+
+  if (isAr && typeof localizeDOM === 'function') {
+    localizeDOM(document.body);
+  }
+
+  toast(isAr ? 'تم تفعيل واجهة منارة باللغة العربية (RTL)' : 'Manara interface switched to English', 'info');
+}
+
+function toggleLanguage() {
+  const current = currentLang();
+  setLanguage(current === 'ar' ? 'en' : 'ar');
+  if (window.SFX && typeof SFX.click === 'function') {
+    try { SFX.click(); } catch(e) {}
+  }
+}
+window.setLanguage = setLanguage;
+window.toggleLanguage = toggleLanguage;
 
 // ======================== ROUTER & SIDEBAR ========================
 let currentView = 'dashboard';
 const VN = ['dashboard','focus','planner','schedule','wellness','learn','science','calculator','flashcards','store','resources','progress','settings'];
 
 const VIEW_INFO = {
-  dashboard: { title: 'Dashboard', icon: 'fa-home' },
-  focus: { title: 'Focus Lab', icon: 'fa-bullseye' },
-  planner: { title: 'Task Planner', icon: 'fa-list-check' },
-  schedule: { title: 'Schedule & Timetable', icon: 'fa-calendar-days' },
-  wellness: { title: 'Mind & Mood', icon: 'fa-heart-pulse' },
-  learn: { title: 'Learn & Play', icon: 'fa-gamepad' },
-  science: { title: 'Science Lab (PhET)', icon: 'fa-flask-vial' },
-  calculator: { title: 'Scientific Calculator', icon: 'fa-calculator' },
-  flashcards: { title: 'Flashcards', icon: 'fa-clone' },
-  store: { title: 'Store', icon: 'fa-store' },
-  resources: { title: 'Resources', icon: 'fa-book-open' },
-  progress: { title: 'Progress', icon: 'fa-chart-line' },
-  settings: { title: 'Settings', icon: 'fa-cog' }
+  dashboard: { title: 'Dashboard', titleAr: 'لوحة التحكم', icon: 'fa-home' },
+  focus: { title: 'Focus Lab', titleAr: 'مختبر التركيز', icon: 'fa-bullseye' },
+  planner: { title: 'Task Planner', titleAr: 'منظّم المهام', icon: 'fa-list-check' },
+  schedule: { title: 'Schedule & Timetable', titleAr: 'الجدول والمواعيد', icon: 'fa-calendar-days' },
+  wellness: { title: 'Mind & Mood', titleAr: 'الراحة والمزاج', icon: 'fa-heart-pulse' },
+  learn: { title: 'Learn & Play', titleAr: 'تعلّم والعب', icon: 'fa-gamepad' },
+  science: { title: 'Science Lab (PhET)', titleAr: 'مختبر العلوم (PhET)', icon: 'fa-flask-vial' },
+  calculator: { title: 'Scientific Calculator', titleAr: 'الآلة الحاسبة العلمية', icon: 'fa-calculator' },
+  flashcards: { title: 'Flashcards', titleAr: 'البطاقات التعليمية', icon: 'fa-clone' },
+  store: { title: 'Store', titleAr: 'المتجر', icon: 'fa-store' },
+  resources: { title: 'Resources', titleAr: 'مصادر التعلّم', icon: 'fa-book-open' },
+  progress: { title: 'Progress', titleAr: 'مستوى التقدم', icon: 'fa-chart-line' },
+  settings: { title: 'Settings', titleAr: 'الإعدادات', icon: 'fa-cog' }
 };
 
 function updateTopBar() {
-  const info = VIEW_INFO[currentView] || { title: 'Spark', icon: 'fa-fire' };
+  const isAr = currentLang() === 'ar';
+  const info = VIEW_INFO[currentView] || { title: 'Manara', titleAr: 'منارة', icon: 'fa-landmark' };
   const iconEl = document.getElementById('topbar-view-icon');
   const titleEl = document.getElementById('topbar-view-title');
   if (iconEl) iconEl.innerHTML = `<i class="fas ${info.icon}"></i>`;
-  if (titleEl) titleEl.textContent = info.title;
+  if (titleEl) titleEl.textContent = isAr && info.titleAr ? info.titleAr : info.title;
 
   const dateEl = document.getElementById('topbar-date');
   if (dateEl) {
     const now = new Date();
-    dateEl.textContent = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    dateEl.textContent = now.toLocaleDateString(isAr ? 'ar-EG' : undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   }
 
   const streakEl = document.getElementById('topbar-streak');
   if (streakEl) {
     const s = (typeof Store !== 'undefined' && Store.get('streak')) || 0;
-    streakEl.innerHTML = `<i class="fas fa-fire" style="color:var(--accent)"></i> <span>${s}d streak</span>`;
+    const streakLabel = isAr ? `${s} يوم متواصل` : `${s}d streak`;
+    streakEl.innerHTML = `<i class="fas fa-fire" style="color:var(--accent)"></i> <span>${streakLabel}</span>`;
   }
+
+  const quickBtnText = document.getElementById('topbar-focus-text');
+  if (quickBtnText) quickBtnText.textContent = isAr ? 'تركيز سريع' : 'Focus';
+
+  const langLabel = document.getElementById('lang-toggle-label');
+  if (langLabel) langLabel.textContent = isAr ? 'English' : 'العربية';
 }
 
 let _lastToggleTime = 0;
@@ -837,6 +1060,7 @@ function closeSidebarMobile(e) {
 }
 
 function updateCollapseIcons(isCollapsed) {
+  const isAr = currentLang() === 'ar';
   const collapseIcon = document.getElementById('sidebar-collapse-icon');
   const footerIcon = document.getElementById('sidebar-footer-icon');
   const footerText = document.querySelector('.footer-btn-text');
@@ -845,24 +1069,35 @@ function updateCollapseIcons(isCollapsed) {
   const footerBtn = document.getElementById('sidebar-footer-toggle');
 
   if (collapseIcon) {
-    collapseIcon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+    if (isAr) {
+      collapseIcon.className = isCollapsed ? 'fas fa-chevron-left' : 'fas fa-chevron-right';
+    } else {
+      collapseIcon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+    }
   }
+  const expandLabel = isAr ? 'توسيع القائمة' : 'Expand sidebar';
+  const collapseLabel = isAr ? 'طي القائمة' : 'Collapse sidebar';
+
   if (collapseBtn) {
-    collapseBtn.setAttribute('title', isCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)');
-    collapseBtn.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    collapseBtn.setAttribute('title', isCollapsed ? `${expandLabel} (Ctrl+B)` : `${collapseLabel} (Ctrl+B)`);
+    collapseBtn.setAttribute('aria-label', isCollapsed ? expandLabel : collapseLabel);
   }
   if (footerIcon) {
-    footerIcon.className = isCollapsed ? 'fas fa-angles-right' : 'fas fa-angles-left';
+    if (isAr) {
+      footerIcon.className = isCollapsed ? 'fas fa-angles-left' : 'fas fa-angles-right';
+    } else {
+      footerIcon.className = isCollapsed ? 'fas fa-angles-right' : 'fas fa-angles-left';
+    }
   }
   if (footerBtn) {
-    footerBtn.setAttribute('title', isCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)');
-    footerBtn.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    footerBtn.setAttribute('title', isCollapsed ? `${expandLabel} (Ctrl+B)` : `${collapseLabel} (Ctrl+B)`);
+    footerBtn.setAttribute('aria-label', isCollapsed ? expandLabel : collapseLabel);
   }
   if (footerText) {
-    footerText.textContent = isCollapsed ? 'Expand' : 'Collapse';
+    footerText.textContent = isCollapsed ? (isAr ? 'توسيع' : 'Expand') : (isAr ? 'طي' : 'Collapse');
   }
   if (topbarBtn) {
-    topbarBtn.setAttribute('title', isCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)');
+    topbarBtn.setAttribute('title', isCollapsed ? `${expandLabel} (Ctrl+B)` : `${collapseLabel} (Ctrl+B)`);
   }
 }
 window.toggleSidebarCollapse = toggleSidebarCollapse;
@@ -900,6 +1135,10 @@ function renderView(v) {
     progress: renderProgress,
     settings: renderSettings
   })[v]?.();
+
+  if (currentLang() === 'ar' && typeof window.localizeDOM === 'function') {
+    window.localizeDOM(document.getElementById('view-' + v));
+  }
 }
 
 // ======================== USER PANEL ========================
@@ -907,8 +1146,11 @@ function updateUserPanel() {
   const u = Store.get('user'), inv = Store.get('inventory'), p = document.getElementById('user-panel');
   if (!u) { if (p) p.innerHTML = ''; return; }
   const s = Store.get('streak') || 0;
+  const isAr = currentLang() === 'ar';
   const av = CATALOG.avatars.find(a => a.id === inv.equipped.avatar) || CATALOG.avatars[0];
   const safeName = String(u.name || 'Student').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const gradeLabel = isAr && window.GRADE_NAMES_AR && window.GRADE_NAMES_AR[u.grade] ? window.GRADE_NAMES_AR[u.grade] : `Grade ${u.grade}`;
+  const streakText = isAr ? `${s} يوم متواصل` : `${s} day streak`;
   if (p) {
     p.innerHTML = `<div class="user-panel-inner" style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:50%;background:${u.color};display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;flex-shrink:0;">
@@ -916,12 +1158,12 @@ function updateUserPanel() {
       </div>
       <div class="user-info">
         <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;">${safeName}</div>
-        <div style="font-size:12px;color:var(--text2)">Grade ${u.grade}</div>
+        <div style="font-size:12px;color:var(--text2)">${gradeLabel}</div>
       </div>
     </div>
-    <div class="streak-badge" title="${s} day streak">
+    <div class="streak-badge" title="${streakText}">
       <i class="fas fa-fire"></i>
-      <span class="streak-text">${s} day streak</span>
+      <span class="streak-text">${streakText}</span>
     </div>`;
   }
   updateTopBar();
@@ -938,6 +1180,7 @@ document.addEventListener('keydown',e=>{if(e.target.id==='thought-input'&&e.key=
 // ======================== DASHBOARD ========================
 function renderDashboard(){
   const u=Store.get('user');if(!u)return;Store.updateStreak();updateUserPanel();
+  const isArDash = typeof currentLang === 'function' && currentLang() === 'ar';
   const q=getTodayQuests(),ws=Store.getSessionStats(7),tfm=ws.reduce((s,x)=>s+x.duration,0);
   const wg=Store.get('games').filter(g=>new Date(g.date).getTime()>Date.now()-7*86400000),wxp=wg.reduce((s,g)=>s+g.xp,0);
   const ts=Store.get('sessions').filter(s=>new Date(s.date).toDateString()===new Date().toDateString()),ttf=ts.reduce((s,x)=>s+x.duration,0);
@@ -953,24 +1196,32 @@ function renderDashboard(){
   const todayScheduledTasks = (Store.get('tasks') || []).filter(t => t.scheduledDate === todayDateStr && !t.completed);
 
   document.getElementById('view-dashboard').innerHTML=`<div style="max-width:960px;margin:0 auto">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px"><div><h1 style="font-size:28px;font-weight:700;margin-bottom:4px">Welcome back, ${u.name}</h1><p style="color:var(--text2);font-size:15px">Here's what's on your plate today. Just pick one thing to start.</p></div><div class="tag" style="background:rgba(255,140,66,.12);color:var(--accent);font-size:14px;padding:6px 14px"><i class="fas fa-bolt"></i> ${Store.get('totalXP')} XP total</div></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px">
+      <div>
+        <h1 style="font-size:28px;font-weight:700;margin-bottom:4px">${isArDash ? `مرحباً بعودتك، ${escHtml(u.name)}` : `Welcome back, ${escHtml(u.name)}`}</h1>
+        <p style="color:var(--text2);font-size:15px">${isArDash ? 'إليك جدولك ومهامك لليوم. اختر شيئاً واحداً فقط وابدأ به بهدوء.' : "Here's what's on your plate today. Just pick one thing to start."}</p>
+      </div>
+      <div class="tag" style="background:rgba(255,140,66,.12);color:var(--accent);font-size:14px;padding:6px 14px">
+        <i class="fas fa-bolt"></i> ${Store.get('totalXP')} ${isArDash ? 'مجموع نقاط XP' : 'XP total'}
+      </div>
+    </div>
 
     <!-- Daily Goal & Active Tasks Widget -->
     <div class="card" style="margin-bottom:24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
         <h3 style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
-          <i class="fas fa-list-check" style="color:var(--teal);"></i> Task Planner & Daily Goal
+          <i class="fas fa-list-check" style="color:var(--teal);"></i> ${isArDash ? 'مخطط المهام والهدف اليومي' : 'Task Planner & Daily Goal'}
         </h3>
         <button class="btn btn-sm btn-ghost" onclick="navigate('planner')" style="font-size:12px;border:1px solid var(--border);">
-          Open Planner <i class="fas fa-arrow-right"></i>
+          ${isArDash ? 'فتح المخطط' : 'Open Planner'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
         </button>
       </div>
 
       <!-- Goal Mini Progress Bar -->
       <div style="margin-bottom:16px;padding:12px 14px;background:var(--bg);border-radius:10px;">
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
-          <span style="font-weight:700;">Daily Focus Goal</span>
-          <span style="color:var(--teal);font-weight:700;">${ttf} / ${dailyGoal} mins (${goalPct}%)</span>
+          <span style="font-weight:700;">${isArDash ? 'هدف التركيز اليومي' : 'Daily Focus Goal'}</span>
+          <span style="color:var(--teal);font-weight:700;">${ttf} / ${dailyGoal} ${isArDash ? 'دقيقة' : 'mins'} (${goalPct}%)</span>
         </div>
         <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
           <div style="height:100%;width:${goalPct}%;background:var(--teal);border-radius:3px;transition:width 0.4s ease;"></div>
@@ -980,7 +1231,7 @@ function renderDashboard(){
       <!-- Quick Tasks -->
       ${!activeTasks.length?`
         <div style="text-align:center;padding:12px;color:var(--text2);font-size:13px;">
-          No active tasks right now. <button class="btn btn-sm btn-teal" onclick="showAddTaskModal()" style="margin-left:8px;"><i class="fas fa-plus"></i> Add a Task</button>
+          ${isArDash ? 'لا توجد مهام نشطة حالياً.' : 'No active tasks right now.'} <button class="btn btn-sm btn-teal" onclick="showAddTaskModal()" style="margin-${isArDash ? 'right' : 'left'}:8px;"><i class="fas fa-plus"></i> ${isArDash ? 'إضافة مهمة' : 'Add a Task'}</button>
         </div>
       `:`
         <div style="display:flex;flex-direction:column;gap:8px;">
@@ -990,7 +1241,7 @@ function renderDashboard(){
                 <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(t.title)}</div>
                 <div style="font-size:12px;color:var(--text2);">${t.category||'Personal'} &middot; ~${t.estMin}m &middot; ${t.steps?t.steps.filter(st=>st.done).length:0}/${t.steps?t.steps.length:0} steps</div>
               </div>
-              <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> Focus</button>
+              <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> ${isArDash ? 'تركيز' : 'Focus'}</button>
             </div>
           `).join('')}
         </div>
@@ -1001,19 +1252,19 @@ function renderDashboard(){
     <div class="card" style="margin-bottom:24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
         <h3 style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
-          <i class="fas fa-calendar-day" style="color:var(--accent);"></i> Today's Timetable & Classes
+          <i class="fas fa-calendar-day" style="color:var(--accent);"></i> ${isArDash ? 'جدول الحصص والدروس اليومية' : "Today's Timetable & Classes"}
         </h3>
         <div style="display:flex; gap:8px;">
           <button class="btn btn-sm btn-teal" onclick="navigate('schedule')" style="font-size:12px;">
-            Full Timetable <i class="fas fa-arrow-right"></i>
+            ${isArDash ? 'الجدول الكامل' : 'Full Timetable'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
           </button>
         </div>
       </div>
 
       ${(todayEvents.length === 0 && todayScheduledTasks.length === 0) ? `
         <div style="text-align:center;padding:12px;color:var(--text2);font-size:13px;">
-          No classes or scheduled study tasks today.
-          <button class="btn btn-sm btn-teal" onclick="navigate('schedule')" style="margin-left:8px;"><i class="fas fa-calendar-plus"></i> Open Schedule</button>
+          ${isArDash ? 'لا توجد حصص أو مهام دراسية مجدولة لهذا اليوم.' : 'No classes or scheduled study tasks today.'}
+          <button class="btn btn-sm btn-teal" onclick="navigate('schedule')" style="margin-${isArDash ? 'right' : 'left'}:8px;"><i class="fas fa-calendar-plus"></i> ${isArDash ? 'فتح الجدول' : 'Open Schedule'}</button>
         </div>
       ` : `
         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -1033,7 +1284,7 @@ function renderDashboard(){
                 <div style="font-weight:700;font-size:14px;"><i class="fas fa-list-check" style="color:var(--teal); margin-right:6px;"></i> ${escHtml(t.title)}</div>
                 <div style="font-size:12px;color:var(--text2);"><i class="fas fa-clock"></i> ${t.scheduledTime || '16:00'} (~${t.estMin || 15}m)</div>
               </div>
-              <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> Focus</button>
+              <button class="btn btn-sm btn-teal" onclick="launchFocusForTask('${t.id}')"><i class="fas fa-play"></i> ${isArDash ? 'تركيز' : 'Focus'}</button>
             </div>
           `).join('')}
         </div>
@@ -1041,44 +1292,52 @@ function renderDashboard(){
     </div>
 
     <!-- Mind & Mood Wellness Card -->
-    <div class="card card-glow" style="margin-bottom:24px; background:linear-gradient(135deg, var(--card) 0%, rgba(78,205,196,0.08) 100%);">
-      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-        <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-heart-pulse" style="color:var(--teal);"></i> Mind & Emotional Health Check-In
-        </h3>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-sm btn-ghost" onclick="wellnessTab='reframes'; setCbtSubTab('worksheet'); navigate('wellness');" style="border:1px solid var(--border); font-size:12px;">
-            <i class="fas fa-brain" style="color:var(--teal);"></i> CBT Reframing
-          </button>
-          <button class="btn btn-sm btn-teal" onclick="navigate('wellness')" style="font-size:12px;">
-            Wellness Hub <i class="fas fa-arrow-right"></i>
-          </button>
+    ${(() => {
+      return `
+      <div class="card card-glow" style="margin-bottom:24px; background:linear-gradient(135deg, var(--card) 0%, rgba(78,205,196,0.08) 100%);">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+          <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-heart-pulse" style="color:var(--teal);"></i> ${isArDash ? 'تفقّد المزاج والراحة النفسية' : 'Mind & Emotional Health Check-In'}
+          </h3>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-sm btn-ghost" onclick="wellnessTab='reframes'; setCbtSubTab('worksheet'); navigate('wellness');" style="border:1px solid var(--border); font-size:12px;">
+              <i class="fas fa-brain" style="color:var(--teal);"></i> ${isArDash ? 'إعادة الصياغة الإدراكية' : 'CBT Reframing'}
+            </button>
+            <button class="btn btn-sm btn-teal" onclick="navigate('wellness')" style="font-size:12px;">
+              ${isArDash ? 'واحة الراحة والمزاج' : 'Wellness Hub'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
+            </button>
+          </div>
+        </div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">${isArDash ? 'كيف تشعر في هذه اللحظة؟ تخصيص 30 ثانية لتفقّد مشاعرك يقلل التوتر ويزيد التركيز.' : 'How are you feeling right now? Taking 30 seconds to check in helps reduce task anxiety.'}</p>
+        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
+          <button class="preset-chip" onclick="quickLogMood('great')"><span>🌟 ${isArDash ? 'رائع' : 'Great'}</span></button>
+          <button class="preset-chip" onclick="quickLogMood('calm')"><span>🌿 ${isArDash ? 'هادئ' : 'Calm'}</span></button>
+          <button class="preset-chip" onclick="quickLogMood('focused')"><span>🎯 ${isArDash ? 'مُركّز' : 'Focused'}</span></button>
+          <button class="preset-chip" onclick="quickLogMood('low_energy')"><span>🔋 ${isArDash ? 'طاقة منخفضة' : 'Low Energy'}</span></button>
+          <button class="preset-chip" onclick="quickLogMood('overwhelmed')"><span>😫 ${isArDash ? 'مُثقَل / مشتت' : 'Overwhelmed'}</span></button>
+          <button class="preset-chip" onclick="quickLogMood('anxious')"><span>😰 ${isArDash ? 'قلق ومتوتر' : 'Anxious'}</span></button>
         </div>
       </div>
-      <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">How are you feeling right now? Taking 30 seconds to check in helps reduce task anxiety.</p>
-      <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
-        <button class="preset-chip" onclick="quickLogMood('great')"><span>🌟 Great</span></button>
-        <button class="preset-chip" onclick="quickLogMood('calm')"><span>🌿 Calm</span></button>
-        <button class="preset-chip" onclick="quickLogMood('focused')"><span>🎯 Focused</span></button>
-        <button class="preset-chip" onclick="quickLogMood('low_energy')"><span>🔋 Low Energy</span></button>
-        <button class="preset-chip" onclick="quickLogMood('overwhelmed')"><span>😫 Overwhelmed</span></button>
-        <button class="preset-chip" onclick="quickLogMood('anxious')"><span>😰 Anxious</span></button>
-      </div>
-    </div>
+      `;
+    })()}
 
-    <div class="card" style="margin-bottom:24px"><h3 style="font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-scroll" style="color:var(--accent)"></i> Daily Quests</h3><div style="display:flex;flex-direction:column;gap:8px">${[{k:'focus',t:'Complete a focus session',d:'Even 10 minutes counts',l:'Start',v:'focus'},{k:'game',t:'Play a learning game',d:'Practice makes progress',l:'Play',v:'learn'},{k:'resource',t:'Explore a resource',d:'Find something new to learn from',l:'Explore',v:'resources'}].map(qi=>`<div class="quest-item ${getTodayQuests()[qi.k]?'completed':''}" onclick="${getTodayQuests()[qi.k]?'':`navigate('${qi.v}')`}"><div class="quest-check">${getTodayQuests()[qi.k]?'<i class="fas fa-check" style="font-size:12px"></i>':''}</div><div><div style="font-weight:700;font-size:14px">${qi.t}</div><div style="font-size:12px;color:var(--text2)">${qi.d}</div></div>${getTodayQuests()[qi.k]?'':`<div style="margin-left:auto"><span class="btn btn-sm btn-primary">${qi.l}</span></div>`}</div>`).join('')}</div></div>
+    <div class="card" style="margin-bottom:24px"><h3 style="font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-scroll" style="color:var(--accent)"></i> ${isArDash ? 'المهام والتحديات اليومية' : 'Daily Quests'}</h3><div style="display:flex;flex-direction:column;gap:8px">${[
+      {k:'focus',t:isArDash ? 'إكمال جلسة تركيز' : 'Complete a focus session',d:isArDash ? 'حتى 10 دقائق تصنع فارقاً حقيقياً' : 'Even 10 minutes counts',l:isArDash ? 'ابدأ' : 'Start',v:'focus'},
+      {k:'game',t:isArDash ? 'لعب لعبة تعليمية' : 'Play a learning game',d:isArDash ? 'الممارسة المستمرة سر التقدّم' : 'Practice makes progress',l:isArDash ? 'العب' : 'Play',v:'learn'},
+      {k:'resource',t:isArDash ? 'استكشاف مصادر التعلّم' : 'Explore a resource',d:isArDash ? 'اكتشف محتوى جديداً ومفيداً لدراستك' : 'Find something new to learn from',l:isArDash ? 'استكشف' : 'Explore',v:'resources'}
+    ].map(qi=>`<div class="quest-item ${getTodayQuests()[qi.k]?'completed':''}" onclick="${getTodayQuests()[qi.k]?'':`navigate('${qi.v}')`}"><div class="quest-check">${getTodayQuests()[qi.k]?'<i class="fas fa-check" style="font-size:12px"></i>':''}</div><div><div style="font-weight:700;font-size:14px">${qi.t}</div><div style="font-size:12px;color:var(--text2)">${qi.d}</div></div>${getTodayQuests()[qi.k]?'':`<div style="margin-${isArDash?'right':'left'}:auto"><span class="btn btn-sm btn-primary">${qi.l}</span></div>`}</div>`).join('')}</div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px">
-      <div class="card card-glow" style="cursor:pointer" onclick="navigate('focus')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:var(--teal-g);display:flex;align-items:center;justify-content:center"><i class="fas fa-bullseye" style="color:var(--teal);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Focus Lab</div><div style="font-size:12px;color:var(--text2)">${ttf>0?ttf+'m done today':'Start your first session'}</div></div></div><div class="btn btn-teal btn-sm" style="width:100%;justify-content:center">Just 10 Minutes <i class="fas fa-arrow-right"></i></div></div>
-      <div class="card" style="cursor:pointer" onclick="navigate('learn')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(255,140,66,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-gamepad" style="color:var(--accent);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Math Adventure</div><div style="font-size:12px;color:var(--text2)">Primary (Grades 1–6)</div></div></div><div class="btn btn-primary btn-sm" style="width:100%;justify-content:center">Play Now <i class="fas fa-arrow-right"></i></div></div>
-      <div class="card" style="cursor:pointer" onclick="navigate('calculator')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(78,205,196,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-calculator" style="color:var(--teal);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Calculator</div><div style="font-size:12px;color:var(--text2)">GeoGebra & Scientific</div></div></div><div class="btn btn-teal btn-sm" style="width:100%;justify-content:center">Calculate <i class="fas fa-arrow-right"></i></div></div>
-      <div class="card" style="cursor:pointer" onclick="navigate('flashcards')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(88,166,255,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-clone" style="color:var(--blue);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Flashcards</div><div style="font-size:12px;color:var(--text2)">Spaced repetition review</div></div></div><div class="btn btn-sm btn-secondary" style="width:100%;justify-content:center">Study <i class="fas fa-arrow-right"></i></div></div>
-      <div class="card" style="cursor:pointer" onclick="navigate('store')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(216,180,254,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-store" style="color:#D8B4FE;size:18px"></i></div><div><div style="font-weight:700;font-size:15px">Store</div><div style="font-size:12px;color:var(--text2)">Spend your XP</div></div></div><div class="btn btn-sm" style="width:100%;justify-content:center;border:1px solid var(--text2);background:transparent">Shop <i class="fas fa-arrow-right"></i></div></div>
+      <div class="card card-glow" style="cursor:pointer" onclick="navigate('focus')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:var(--teal-g);display:flex;align-items:center;justify-content:center"><i class="fas fa-bullseye" style="color:var(--teal);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">${isArDash ? 'مختبر التركيز' : 'Focus Lab'}</div><div style="font-size:12px;color:var(--text2)">${ttf>0?(isArDash?`${ttf} دقيقة منجزة اليوم`:`${ttf}m done today`):(isArDash?'ابدأ جلستك الأولى':'Start your first session')}</div></div></div><div class="btn btn-teal btn-sm" style="width:100%;justify-content:center">${isArDash ? '10 دقائق فقط' : 'Just 10 Minutes'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('learn')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(255,140,66,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-gamepad" style="color:var(--accent);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">${isArDash ? 'مغامرة الرياضيات' : 'Math Adventure'}</div><div style="font-size:12px;color:var(--text2)">${isArDash ? 'المرحلة الابتدائية (1–6)' : 'Primary (Grades 1–6)'}</div></div></div><div class="btn btn-primary btn-sm" style="width:100%;justify-content:center">${isArDash ? 'العب الآن' : 'Play Now'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('calculator')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(78,205,196,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-calculator" style="color:var(--teal);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">${isArDash ? 'الآلة الحاسبة' : 'Calculator'}</div><div style="font-size:12px;color:var(--text2)">${isArDash ? 'بيانية وعلمية متطورة' : 'GeoGebra & Scientific'}</div></div></div><div class="btn btn-teal btn-sm" style="width:100%;justify-content:center">${isArDash ? 'احسب الآن' : 'Calculate'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('flashcards')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(88,166,255,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-clone" style="color:var(--blue);font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">${isArDash ? 'البطاقات التعليمية' : 'Flashcards'}</div><div style="font-size:12px;color:var(--text2)">${isArDash ? 'مراجعة بالتكرار المتباعد' : 'Spaced repetition review'}</div></div></div><div class="btn btn-sm btn-secondary" style="width:100%;justify-content:center">${isArDash ? 'ذاكر الآن' : 'Study'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('store')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:12px;background:rgba(216,180,254,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-store" style="color:#D8B4FE;font-size:18px"></i></div><div><div style="font-weight:700;font-size:15px">${isArDash ? 'المتجر' : 'Store'}</div><div style="font-size:12px;color:var(--text2)">${isArDash ? 'أنفق نقاط خبرتك وتسوّق' : 'Spend your XP'}</div></div></div><div class="btn btn-sm" style="width:100%;justify-content:center;border:1px solid var(--text2);background:transparent">${isArDash ? 'تسوّق الآن' : 'Shop'} <i class="fas ${isArDash ? 'fa-arrow-left' : 'fa-arrow-right'}"></i></div></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px">
-      <div class="card stat-card"><div class="stat-num" style="color:var(--teal)">${tfm}m</div><div class="stat-label">Focus this week</div></div>
-      <div class="card stat-card"><div class="stat-num" style="color:var(--accent)">${wxp}</div><div class="stat-label">XP this week</div></div>
-      <div class="card stat-card"><div class="stat-num" style="color:var(--green)">${ws.length}</div><div class="stat-label">Sessions</div></div>
-      <div class="card stat-card"><div class="stat-num" style="color:var(--blue)">${wg.length}</div><div class="stat-label">Games played</div></div>
+      <div class="card stat-card"><div class="stat-num" style="color:var(--teal)">${tfm}m</div><div class="stat-label">${isArDash ? 'دقائق التركيز هذا الأسبوع' : 'Focus this week'}</div></div>
+      <div class="card stat-card"><div class="stat-num" style="color:var(--accent)">${wxp}</div><div class="stat-label">${isArDash ? 'نقاط XP هذا الأسبوع' : 'XP this week'}</div></div>
+      <div class="card stat-card"><div class="stat-num" style="color:var(--green)">${ws.length}</div><div class="stat-label">${isArDash ? 'جلسات مكتملة' : 'Sessions'}</div></div>
+      <div class="card stat-card"><div class="stat-num" style="color:var(--blue)">${wg.length}</div><div class="stat-label">${isArDash ? 'ألعاب ملعوبة' : 'Games played'}</div></div>
     </div></div>`;
 }
 
@@ -1182,9 +1441,48 @@ function getTimerSVG(type, ratio) {
 let focusState={timer:null,seconds:0,totalSeconds:0,task:'',steps:[],currentStep:0,distractions:0,running:false,phase:'setup',accumulatedDuration:0,mode:'focus'};
 let pauseReminderTO=null,bodyDoubleTOs=[],focusXPTO=null;
 function cleanupFocus(){if(focusState.timer){clearInterval(focusState.timer);focusState.timer=null;}if(pauseReminderTO){clearTimeout(pauseReminderTO);pauseReminderTO=null;}bodyDoubleTOs.forEach(t=>clearTimeout(t));bodyDoubleTOs=[];if(focusXPTO){clearTimeout(focusXPTO);focusXPTO=null;}focusState.running=false;Ambient.stopAll();window.onbeforeunload=null;}
-function startPauseReminder(){stopPauseReminder();pauseReminderTO=setTimeout(()=>{const m=PAUSE_MSGS[Math.floor(Math.random()*PAUSE_MSGS.length)];SFX.nudge();showModal(`<div class="nudge-pulse" style="text-align:center;border-radius:16px;padding:8px"><div style="font-size:40px;margin-bottom:12px"><i class="fas fa-hand-holding-heart" style="color:var(--teal)"></i></div><h2 style="font-size:20px;margin-bottom:6px">${m.t}</h2><p style="color:var(--text2);margin-bottom:20px;line-height:1.5">${m.b}</p><div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-secondary" onclick="closeModal();focusState.phase='setup';navigate('focus')">I'm done for now</button><button class="btn btn-teal" onclick="closeModal();resumeFocus()"><i class="fas fa-play"></i> Let's keep going</button></div></div>`);},120000+Math.random()*30000);}
+function startPauseReminder(){
+  stopPauseReminder();
+  pauseReminderTO=setTimeout(()=>{
+    const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+    const PAUSE_MSGS_AR = [
+      {t:"هل ما زلت هنا؟",b:"دعنا ننهي هذه الخطوة الأخيرة لتأخذ استراحة مريحة وهانئة دون أي شعور بالذنب."},
+      {t:"مرحباً بعودتك",b:"شرد ذهنك قليلاً — وهذا طبيعي ومفهوم تماماً. خطوة واحدة متبقية ثم ترتاح فعلاً."},
+      {t:"تفقد سريع ولطيف",b:"أصعب جزء أنجزته بالفعل — لقد بدأت! دعنا نتجاوز هذه الخطوة معاً."},
+      {t:"أنت تبلي بلاءً رائعاً",b:"التوقف المؤقت ثم العودة هو مهارة حقيقية بحد ذاتها. لنكمل ما بدأناه."},
+      {t:"تذكير خفيف ولطيف",b:"قد يبحث عقلك عن شيء أسهل الآن، وهذا طبيعي. لكنك ستشعر براحة وفخر أكبر عند إتمام الخطوة."},
+      {t:"لفتة صغيرة",b:"لست مضطراً لفعل كل شيء دفعة واحدة — ركّز على هذه الخطوة الصغيرة التالية فقط."},
+      {t:"معك خطوة بخطوة",b:"من الطبيعي أن تتوقف لحظات. المهم دائماً أنك تعود. هل أنت مستعد لخطوة أخرى؟"}
+    ];
+    const pool = isAr ? PAUSE_MSGS_AR : PAUSE_MSGS;
+    const m = pool[Math.floor(Math.random()*pool.length)];
+    SFX.nudge();
+    showModal(`
+      <div class="nudge-pulse" style="text-align:center;border-radius:16px;padding:8px">
+        <div style="font-size:40px;margin-bottom:12px"><i class="fas fa-hand-holding-heart" style="color:var(--teal)"></i></div>
+        <h2 style="font-size:20px;margin-bottom:6px">${m.t}</h2>
+        <p style="color:var(--text2);margin-bottom:20px;line-height:1.5">${m.b}</p>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button class="btn btn-secondary" onclick="closeModal();focusState.phase='setup';navigate('focus')">${isAr ? 'سأكتفي بهذا القدر الآن' : "I'm done for now"}</button>
+          <button class="btn btn-teal" onclick="closeModal();resumeFocus()"><i class="fas fa-play"></i> ${isAr ? 'هيا لنواصل معاً' : "Let's keep going"}</button>
+        </div>
+      </div>
+    `);
+  },120000+Math.random()*30000);
+}
 function stopPauseReminder(){if(pauseReminderTO){clearTimeout(pauseReminderTO);pauseReminderTO=null;}}
-function scheduleFocusXP(){if(focusXPTO)clearTimeout(focusXPTO);focusXPTO=setTimeout(()=>{if(!focusState.running||focusState.phase!=='active')return;const a=2+Math.floor(Math.random()*4);Store.addXP(a);toast(`+${a} XP for staying focused`,'bonus');SFX.click();scheduleFocusXP();},45000+Math.random()*60000);}
+function scheduleFocusXP(){
+  if(focusXPTO)clearTimeout(focusXPTO);
+  focusXPTO=setTimeout(()=>{
+    if(!focusState.running||focusState.phase!=='active')return;
+    const a=2+Math.floor(Math.random()*4);
+    Store.addXP(a);
+    const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+    toast(isAr ? `+${a} نقطة خبرة لمواصلة التركيز!` : `+${a} XP for staying focused`,'bonus');
+    SFX.click();
+    scheduleFocusXP();
+  },45000+Math.random()*60000);
+}
 
 function startBodyDouble(){
   bodyDoubleTOs.forEach(t=>clearTimeout(t));bodyDoubleTOs=[];
@@ -1217,22 +1515,41 @@ function renderFocusSetup(){
   const s=Store.get('settings'),rt=Store.get('sessions').slice(-5).reverse();
   const presets=Store.get('focusPresets')||[];
   const tasks=(Store.get('tasks')||[]).filter(t=>!t.completed);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
 
-  return`<h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Focus Lab</h1><p style="color:var(--text2);margin-bottom:28px">The hardest part is starting. We'll make it as easy as possible.</p>
+  const PRESET_NAMES_AR = {
+    p_pomo: 'بومودورو كلاسيكي',
+    p_deep: 'عمل عميق ومركز',
+    p_adhd: 'سباق تركيز ADHD',
+    p_burst: 'انطلاقة خاطفة'
+  };
+
+  const quickTasks = isAr 
+    ? ['حل واجب الرياضيات', 'قراءة فصل دراسي', 'كتابة واجب تعبير', 'المذاكرة للاختبار', 'مراجعة الكلمات والمسائل']
+    : ['Do math homework','Read a chapter','Write an assignment','Study for a test','Practice spelling'];
+
+  const placeholderText = isAr 
+    ? 'مثال: حل واجب الرياضيات، قراءة الفصل الثالث...'
+    : 'e.g. Do math homework, Read chapter 3...';
+
+  return`<h1 style="font-size:26px;font-weight:700;margin-bottom:6px">${isAr ? 'مختبر التركيز' : 'Focus Lab'}</h1>
+    <p style="color:var(--text2);margin-bottom:28px">${isAr ? 'أصعب خطوة هي البداية دائماً. سنجعلها أسهل وأبسط ما يمكن.' : "The hardest part is starting. We'll make it as easy as possible."}</p>
 
     <!-- Presets & Interval Schedules -->
     <div class="card" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <label style="font-weight:700;font-size:14px;"><i class="fas fa-sliders" style="color:var(--teal);"></i> Focus Presets & Interval Schedules</label>
-        <button class="btn btn-sm btn-ghost" onclick="showCreatePresetModal()" style="font-size:11px;border:1px solid var(--border);color:var(--teal);"><i class="fas fa-plus"></i> Custom Preset</button>
+        <label style="font-weight:700;font-size:14px;"><i class="fas fa-sliders" style="color:var(--teal);"></i> ${isAr ? 'قوالب التركيز وجداول الفترات' : 'Focus Presets & Interval Schedules'}</label>
+        <button class="btn btn-sm btn-ghost" onclick="showCreatePresetModal()" style="font-size:11px;border:1px solid var(--border);color:var(--teal);"><i class="fas fa-plus"></i> ${isAr ? 'قالب مخصص' : 'Custom Preset'}</button>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
         ${presets.map(p=>{
           const isSel=s.focusDuration===p.focusMin && s.breakDuration===p.breakMin;
+          const pName = isAr && PRESET_NAMES_AR[p.id] ? PRESET_NAMES_AR[p.id] : p.name;
+          const unit = isAr ? 'د' : 'm';
           return`
             <div class="preset-chip ${isSel?'active':''}" onclick="applyFocusPreset('${p.id}')">
               <i class="fas ${p.icon||'fa-clock'}"></i>
-              <span>${p.name} (${p.focusMin}/${p.breakMin}m)</span>
+              <span>${pName} (${p.focusMin}/${p.breakMin}${unit})</span>
               ${p.custom?`<i class="fas fa-times" style="font-size:10px;margin-left:4px;opacity:0.6;" onclick="event.stopPropagation();deleteCustomPreset('${p.id}');"></i>`:''}
             </div>
           `;
@@ -1243,25 +1560,75 @@ function renderFocusSetup(){
     <!-- Active Tasks Picker from Planner -->
     ${tasks.length?`
       <div class="card" style="margin-bottom:20px;background:var(--bg);">
-        <label style="font-weight:700;font-size:13px;color:var(--text2);display:block;margin-bottom:8px;"><i class="fas fa-list-check" style="color:var(--teal);"></i> Pick an Active Task from your Planner:</label>
+        <label style="font-weight:700;font-size:13px;color:var(--text2);display:block;margin-bottom:8px;"><i class="fas fa-list-check" style="color:var(--teal);"></i> ${isAr ? 'اختر مهمة نشطة من منظّم المهام:' : 'Pick an Active Task from your Planner:'}</label>
         <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;" class="no-scrollbar">
           ${tasks.map(t=>`
             <button class="btn btn-sm btn-ghost" onclick="launchFocusForTask('${t.id}')" style="border:1px solid var(--border);font-size:12px;white-space:nowrap;background:var(--card);">
-              <i class="fas fa-bullseye" style="color:var(--teal);"></i> ${escHtml(t.title)} (${t.estMin}m)
+              <i class="fas fa-bullseye" style="color:var(--teal);"></i> ${escHtml(t.title)} (${t.estMin}${isAr ? ' د' : 'm'})
             </button>
           `).join('')}
         </div>
       </div>
     `:''}
 
-    <div class="card" style="margin-bottom:20px"><label style="font-weight:700;font-size:14px;display:block;margin-bottom:8px">What do you need to do?</label><input type="text" class="input" id="focus-task-input" placeholder="e.g. Do math homework, Read chapter 3..." style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:6px">${['Do math homework','Read a chapter','Write an assignment','Study for a test','Practice spelling'].map(t=>`<button class="btn btn-sm btn-ghost" style="border:1px solid var(--border);font-size:12px" onclick="document.getElementById('focus-task-input').value='${t}';SFX.click()">${t}</button>`).join('')}</div></div>
-    <div class="card" style="margin-bottom:20px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><label style="font-weight:700;font-size:14px">We'll break it into small steps</label><span style="font-size:12px;color:var(--text2)">(edit if you want)</span></div><div id="steps-list"><div style="color:var(--text2);font-size:14px;padding:8px 0">Type a task above to see the steps...</div></div></div>
-    <div class="card" style="margin-bottom:24px"><label style="font-weight:700;font-size:14px;display:block;margin-bottom:12px">Session length</label><div style="display:flex;gap:8px;flex-wrap:wrap">${[5,10,15,20,25,30,45,60].map(m=>`<button class="grade-pill ${m===s.focusDuration?'selected':''}" onclick="Store.get('settings').focusDuration=${m};Store.save();SFX.click();renderFocus()">${m} min</button>`).join('')}</div><p style="font-size:12px;color:var(--text2);margin-top:8px"><i class="fas fa-lightbulb" style="color:var(--accent)"></i> Current interval schedule: ${s.focusDuration}m focus / ${s.breakDuration||3}m break.</p></div>
-    <div style="text-align:center"><button class="btn btn-lg btn-teal" onclick="startFocusSession()"><i class="fas fa-play"></i> Just Start — ${s.focusDuration} Minutes</button><p style="font-size:13px;color:var(--text2);margin-top:10px">That's it. No setup, no planning paralysis. Just start.</p></div>
-    ${rt.length?`<div style="margin-top:32px"><h3 style="font-size:15px;color:var(--text2);margin-bottom:12px">Recent sessions</h3><div style="display:flex;flex-direction:column;gap:8px">${rt.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-radius:10px;font-size:13px"><i class="fas ${s.completed?'fa-check-circle':'fa-clock'}" style="color:${s.completed?'var(--green)':'var(--text2)'}"></i><span style="flex:1">${escHtml(s.task)}</span><span style="color:var(--text2)">${s.duration}m</span></div>`).join('')}</div></div>`:''}`;
+    <div class="card" style="margin-bottom:20px">
+      <label style="font-weight:700;font-size:14px;display:block;margin-bottom:8px">${isAr ? 'ما الذي تريد إنجازه والتركيز عليه الآن؟' : 'What do you need to do?'}</label>
+      <input type="text" class="input" id="focus-task-input" placeholder="${placeholderText}" style="margin-bottom:12px">
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${quickTasks.map(t=>`<button class="btn btn-sm btn-ghost" style="border:1px solid var(--border);font-size:12px" onclick="document.getElementById('focus-task-input').value='${t}';document.getElementById('focus-task-input').dispatchEvent(new Event('input'));SFX.click()">${t}</button>`).join('')}
+      </div>
+    </div>
+    
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <label style="font-weight:700;font-size:14px">${isAr ? 'سنقسم المهمة إلى خطوات صغيرة ومحددة' : "We'll break it into small steps"}</label>
+        <span style="font-size:12px;color:var(--text2)">${isAr ? '(يمكنك التعديل عليها بحرية)' : '(edit if you want)'}</span>
+      </div>
+      <div id="steps-list">
+        <div style="color:var(--text2);font-size:14px;padding:8px 0">${isAr ? 'اكتب المهمة في الأعلى لرؤية الخطوات المقترحة...' : 'Type a task above to see the steps...'}</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px">
+      <label style="font-weight:700;font-size:14px;display:block;margin-bottom:12px">${isAr ? 'مدة جلسة التركيز' : 'Session length'}</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${[5,10,15,20,25,30,45,60].map(m=>`<button class="grade-pill ${m===s.focusDuration?'selected':''}" onclick="Store.get('settings').focusDuration=${m};Store.save();SFX.click();renderFocus()">${m} ${isAr ? 'دقيقة' : 'min'}</button>`).join('')}
+      </div>
+      <p style="font-size:12px;color:var(--text2);margin-top:8px">
+        <i class="fas fa-lightbulb" style="color:var(--accent)"></i> ${isAr 
+          ? `نظام الفترات الحالي: ${s.focusDuration} دقيقة تركيز / ${s.breakDuration||3} دقيقة استراحة.` 
+          : `Current interval schedule: ${s.focusDuration}m focus / ${s.breakDuration||3}m break.`}
+      </p>
+    </div>
+
+    <div style="text-align:center">
+      <button class="btn btn-lg btn-teal" onclick="startFocusSession()">
+        <i class="fas fa-play"></i> ${isAr ? `ابدأ الآن فقط — ${s.focusDuration} دقيقة` : `Just Start — ${s.focusDuration} Minutes`}
+      </button>
+      <p style="font-size:13px;color:var(--text2);margin-top:10px">
+        ${isAr ? 'هذا كل شيء! دون تعقيد أو حيرة في التخطيط. ابدأ فوراً.' : "That's it. No setup, no planning paralysis. Just start."}
+      </p>
+    </div>
+
+    ${rt.length?`
+      <div style="margin-top:32px">
+        <h3 style="font-size:15px;color:var(--text2);margin-bottom:12px">${isAr ? 'جلسات التركيز الأخيرة' : 'Recent sessions'}</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${rt.map(s=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-radius:10px;font-size:13px">
+              <i class="fas ${s.completed?'fa-check-circle':'fa-clock'}" style="color:${s.completed?'var(--green)':'var(--text2)'}"></i>
+              <span style="flex:1">${escHtml(s.task)}</span>
+              <span style="color:var(--text2)">${s.duration}${isAr ? ' د' : 'm'}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:''}
+  `;
 }
 
 function renderFocusActive(){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const m=Math.floor(focusState.seconds/60),s=focusState.seconds%60,ts=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
   if(focusState.mode==='break'){
@@ -1271,16 +1638,16 @@ function renderFocusActive(){
           <div class="breathe-ring">
             <i class="fas fa-leaf" style="font-size:36px;color:var(--teal);"></i>
           </div>
-          <h2 style="font-size:24px;font-weight:700;margin-bottom:6px;">Rest & Recharge Break</h2>
+          <h2 style="font-size:24px;font-weight:700;margin-bottom:6px;">${isAr ? 'استراحة لتجديد النشاط والراحة' : 'Rest & Recharge Break'}</h2>
           <p style="color:var(--text2);font-size:14px;margin-bottom:20px;">
-            Great work! Step away from your screen, stretch your back, take 3 deep breaths, or grab water.
+            ${isAr ? 'عمل رائع ومتقن! ابتعد عن الشاشة قليلاً، تمطط، خذ 3 أنفاس عميقة واشرب بعض الماء.' : 'Great work! Step away from your screen, stretch your back, take 3 deep breaths, or grab water.'}
           </p>
           <div style="font-family:Fredoka;font-size:52px;font-weight:700;color:var(--teal);margin-bottom:24px;" id="focus-time-display">
             ${ts}
           </div>
           <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-            <button class="btn btn-teal" onclick="skipBreakToFocus()"><i class="fas fa-play"></i> Next Focus Interval (${Store.get('settings').focusDuration}m)</button>
-            <button class="btn btn-secondary" onclick="confirmEndSession()"><i class="fas fa-flag-checkered"></i> Finish Session</button>
+            <button class="btn btn-teal" onclick="skipBreakToFocus()"><i class="fas fa-play"></i> ${isAr ? `فترة التركيز التالية (${Store.get('settings').focusDuration} د)` : `Next Focus Interval (${Store.get('settings').focusDuration}m)`}</button>
+            <button class="btn btn-secondary" onclick="confirmEndSession()"><i class="fas fa-flag-checkered"></i> ${isAr ? 'إنهاء الجلسة' : 'Finish Session'}</button>
           </div>
         </div>
       </div>
@@ -1289,9 +1656,25 @@ function renderFocusActive(){
 
   const p=focusState.totalSeconds>0?((focusState.totalSeconds-focusState.seconds)/focusState.totalSeconds)*100:0;
   const ratio=focusState.totalSeconds>0?(focusState.seconds/focusState.totalSeconds):1;
-  const el=focusState.totalSeconds-focusState.seconds,es=el>=60?Math.floor(el/60)+' minute'+(Math.floor(el/60)>1?'s':''):el+' seconds';
+  const el=focusState.totalSeconds-focusState.seconds;
+  let es = '';
+  if (isAr) {
+    es = el >= 60 ? `${Math.floor(el / 60)} دقيقة` : `${el} ثانية`;
+  } else {
+    es = el>=60?Math.floor(el/60)+' minute'+(Math.floor(el/60)>1?'s':''):el+' seconds';
+  }
   const comp=Store.get('inventory').equipped.companion;
   const equippedTimer=Store.get('inventory').equipped.timer||'classic';
+
+  const phaseLabel = focusState.running 
+    ? (isAr ? 'واصل التركيز بثبات...' : 'Stay focused...') 
+    : (isAr ? 'موقوف مؤقتاً' : 'Paused');
+
+  const distractLabel = isAr 
+    ? (focusState.distractions === 0 ? 'لا يوجد تشتت' : focusState.distractions === 1 ? 'تشتت واحد' : `${focusState.distractions} تشتتات`)
+    : `${focusState.distractions} distraction${focusState.distractions!==1?'s':''}`;
+
+  const elapsedText = isAr ? `مضى ${es} &middot; ${distractLabel}` : `${es} in &middot; ${distractLabel}`;
 
   return`<div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap"><div style="flex:1;min-width:300px">
     <div style="text-align:center;margin-bottom:20px">
@@ -1302,28 +1685,39 @@ function renderFocusActive(){
           </div>
           <div style="text-align:center; position:relative; z-index:2; pointer-events:none;">
             <div style="font-family:Fredoka;font-size:42px;font-weight:700;color:var(--text); line-height:1.1;" id="focus-time-display">${ts}</div>
-            <div style="font-size:12px;color:var(--text2)" id="focus-phase-label">${focusState.running?'Stay focused...':'Paused'}</div>
+            <div style="font-size:12px;color:var(--text2)" id="focus-phase-label">${phaseLabel}</div>
           </div>
         </div>
       </div>
     <div style="max-width:400px;margin:0 auto 20px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:3px;transition:width .5s;width:${p}%"></div></div>
-    <div style="font-weight:700;font-size:18px;margin-bottom:4px">${escHtml(focusState.task)}</div><div style="font-size:13px;color:var(--text2)">${es} in &middot; ${focusState.distractions} distraction${focusState.distractions!==1?'s':''}</div></div>
+    <div style="font-weight:700;font-size:18px;margin-bottom:4px">${escHtml(focusState.task)}</div><div style="font-size:13px;color:var(--text2)">${elapsedText}</div></div>
     ${Ambient.renderSoundscapeCard()}
-    <div class="card" style="margin-bottom:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">Your steps</div><div style="display:flex;flex-direction:column;gap:4px">${focusState.steps.map((st,i)=>{let c=i<focusState.currentStep?'done-step':i===focusState.currentStep?'active-step':'';return`<div class="step-item ${c}"><div class="step-num">${i<focusState.currentStep?'<i class="fas fa-check" style="font-size:10px"></i>':i+1}</div><span>${escHtml(st)}</span></div>`;}).join('')}</div></div>
-    <div class="card" style="margin-bottom:16px;position:relative;overflow:visible"><div style="font-weight:700;font-size:13px;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="fas fa-cloud" style="color:var(--teal)"></i> Thought Dump <span style="font-weight:400;font-size:11px;color:var(--text2)">— brain going wild? Park it here and let it go.</span></div><div style="display:flex;gap:8px"><input class="input" id="thought-input" placeholder="Type the thought, hit Enter to release it..." style="font-size:13px"><button class="btn btn-sm btn-ghost" onclick="dumpThought()" style="border:1px solid var(--border);flex-shrink:0;color:var(--teal)"><i class="fas fa-arrow-up"></i></button></div><div id="thought-float-area" style="position:relative;height:0;overflow:visible"></div></div>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
-      <button class="btn btn-ghost" onclick="logDistraction()" style="border:1px solid var(--border);color:var(--accent)"><i class="fas fa-arrow-right-from-bracket"></i> I got distracted</button>
-      <button class="btn btn-ghost" onclick="advanceStep()"><i class="fas fa-arrow-down"></i> Next step</button>
-      ${focusState.running?`<button class="btn btn-secondary" onclick="pauseFocus()"><i class="fas fa-pause"></i> Pause</button>`:`<button class="btn btn-teal" onclick="resumeFocus()"><i class="fas fa-play"></i> Resume</button>`}
+    <div class="card" style="margin-bottom:16px"><div style="font-weight:700;font-size:14px;margin-bottom:12px">${isAr ? 'خطواتك المحددة' : 'Your steps'}</div><div style="display:flex;flex-direction:column;gap:4px">${focusState.steps.map((st,i)=>{let c=i<focusState.currentStep?'done-step':i===focusState.currentStep?'active-step':'';return`<div class="step-item ${c}"><div class="step-num">${i<focusState.currentStep?'<i class="fas fa-check" style="font-size:10px"></i>':i+1}</div><span>${escHtml(st)}</span></div>`;}).join('')}</div></div>
+    <div class="card" style="margin-bottom:16px;position:relative;overflow:visible">
+      <div style="font-weight:700;font-size:13px;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <i class="fas fa-cloud" style="color:var(--teal)"></i> ${isAr ? 'تفريغ الأفكار العابرة (Thought Dump)' : 'Thought Dump'} 
+        <span style="font-weight:400;font-size:11px;color:var(--text2)">${isAr ? '— عقلك مشتت؟ أفرغ الفكرة هنا وتخلص من تشويشها فوراً.' : '— brain going wild? Park it here and let it go.'}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="input" id="thought-input" placeholder="${isAr ? 'اكتب الفكرة المشوشة واضغط Enter لتحرير عقلك منها...' : 'Type the thought, hit Enter to release it...'}" style="font-size:13px">
+        <button class="btn btn-sm btn-ghost" onclick="dumpThought()" style="border:1px solid var(--border);flex-shrink:0;color:var(--teal)"><i class="fas fa-arrow-up"></i></button>
+      </div>
+      <div id="thought-float-area" style="position:relative;height:0;overflow:visible"></div>
     </div>
-    <div style="text-align:center"><button class="btn btn-primary" onclick="confirmEndSession()" style="background:var(--green)"><i class="fas fa-flag-checkered"></i> ${p>=100?'Finish Session':'End Early — Still Counts'}</button><p style="font-size:12px;color:var(--text2);margin-top:6px">Ending early is not failing. Starting was the win.</p></div>
-  </div><div style="width:140px;flex-shrink:0;text-align:center"><div class="card" style="padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:4px"><div class="bd-wrap">${bdSVG(comp)}</div><div class="bd-label">Studying with<br>you right now</div></div></div></div>`;
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
+      <button class="btn btn-ghost" onclick="logDistraction()" style="border:1px solid var(--border);color:var(--accent)"><i class="fas fa-arrow-right-from-bracket"></i> ${isAr ? 'تشتت انتباهي' : 'I got distracted'}</button>
+      <button class="btn btn-ghost" onclick="advanceStep()"><i class="fas fa-arrow-down"></i> ${isAr ? 'الخطوة التالية' : 'Next step'}</button>
+      ${focusState.running?`<button class="btn btn-secondary" onclick="pauseFocus()"><i class="fas fa-pause"></i> ${isAr ? 'إيقاف مؤقت' : 'Pause'}</button>`:`<button class="btn btn-teal" onclick="resumeFocus()"><i class="fas fa-play"></i> ${isAr ? 'استئناف' : 'Resume'}</button>`}
+    </div>
+    <div style="text-align:center"><button class="btn btn-primary" onclick="confirmEndSession()" style="background:var(--green)"><i class="fas fa-flag-checkered"></i> ${p>=100 ? (isAr ? 'إنهاء الجلسة' : 'Finish Session') : (isAr ? 'إنهاء مبكر — يُحتسب لك' : 'End Early — Still Counts')}</button><p style="font-size:12px;color:var(--text2);margin-top:6px">${isAr ? 'الإنهاء المبكر ليس فشلاً أبداً. مجرد البدء كان هو الفوز الحقيقي.' : 'Ending early is not failing. Starting was the win.'}</p></div>
+  </div><div style="width:140px;flex-shrink:0;text-align:center"><div class="card" style="padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:4px"><div class="bd-wrap">${bdSVG(comp)}</div><div class="bd-label">${isAr ? 'يذاكر معك<br>الآن خطوة بخطوة' : 'Studying with<br>you right now'}</div></div></div></div>`;
 }
 
 function startFocusSession(){
   SFX.click();
   const ti=document.getElementById('focus-task-input'),task=ti?ti.value.trim():'';
-  if(!task){toast('Type what you need to do first','warn');return;}
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  if(!task){toast(isAr ? 'اكتب ما تود إنجازه أولاً' : 'Type what you need to do first','warn');return;}
   const steps=breakDownTask(task);
   const se=document.querySelectorAll('#steps-list .step-item input');
   if(se.length)se.forEach((el,i)=>{if(el.value.trim())steps[i]=el.value.trim();});
@@ -1345,9 +1739,12 @@ function startFocusSession(){
   };
   renderFocus();
   if(Store.get('settings').strictMode){
-    window.onbeforeunload = function(){ return "Focus session is running. Are you sure you want to leave?"; };
+    window.onbeforeunload = function(){ 
+      return isAr ? "جلسة التركيز جارية الآن. هل أنت متأكد من مغادرة الصفحة؟" : "Focus session is running. Are you sure you want to leave?"; 
+    };
   }
 }
+
 function startFocusTick() {
   if (focusState.timer) clearInterval(focusState.timer);
   if (!focusState.mode) focusState.mode = 'focus'; 
@@ -1373,7 +1770,12 @@ function startFocusTick() {
         d.textContent = formattedTime;
       }
       const label = d.nextElementSibling;
-      if (label) label.textContent = focusState.mode === 'focus' ? 'Stay with it...' : 'Take a breather...';
+      if (label) {
+        const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+        label.textContent = focusState.mode === 'focus' 
+          ? (isAr ? 'واصل التركيز بثبات...' : 'Stay with it...') 
+          : (isAr ? 'استرح والتقط أنفاسك...' : 'Take a breather...');
+      }
 
       // Butter-smooth dynamic visual SVG update (refreshes 10x per second)
       const timerSvgDiv = document.getElementById('visual-timer-svg');
@@ -1396,9 +1798,10 @@ function startFocusTick() {
     
     if (currentSeconds <= 0) {
       clearInterval(focusState.timer);
+      const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
       if (focusState.mode === 'focus') {
         SFX.complete(); 
-        toast('Focus complete! Time for a short break.', 'bonus');
+        toast(isAr ? 'اكتملت جلسة التركيز! حان وقت استراحة قصيرة ممتعة.' : 'Focus complete! Time for a short break.', 'bonus');
         focusState.accumulatedDuration += (Store.get('settings').focusDuration * 60); 
         focusState.mode = 'break';
         focusState.seconds = Store.get('settings').breakDuration * 60;
@@ -1407,7 +1810,7 @@ function startFocusTick() {
         startFocusTick();
       } else {
         SFX.nudge(); 
-        toast('Break is over! Let\'s focus.', 'info');
+        toast(isAr ? 'انتهت الاستراحة! لنعد للتركيز بهمة ونشاط.' : 'Break is over! Let\'s focus.', 'info');
         focusState.mode = 'focus';
         focusState.seconds = Store.get('settings').focusDuration * 60;
         focusState.totalSeconds = focusState.seconds;
@@ -1417,6 +1820,7 @@ function startFocusTick() {
     }
   }, 100); // Ticks smoothly every 100ms
 }
+
 function pauseFocus(){focusState.running=false;SFX.click();stopPauseReminder();if(focusXPTO){clearTimeout(focusXPTO);focusXPTO=null;}renderFocus();startPauseReminder();window.onbeforeunload=null;}
 function resumeFocus(){
   focusState.running=true;
@@ -1430,13 +1834,20 @@ function resumeFocus(){
   renderFocus();
   scheduleFocusXP();
   if(Store.get('settings').strictMode){
-    window.onbeforeunload = function(){ return "Focus session is running. Are you sure you want to leave?"; };
+    const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+    window.onbeforeunload = function(){ 
+      return isAr ? "جلسة التركيز جارية الآن. هل أنت متأكد من مغادرة الصفحة؟" : "Focus session is running. Are you sure you want to leave?"; 
+    };
   }
 }
+
 function logDistraction(force=false){
   focusState.distractions++;SFX.click();
-  toast(force?'Tab switch detected!':'Logged. Now gently come back.','info');renderFocus();
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  toast(force ? (isAr ? 'تم رصد تبديل علامة التبويب!' : 'Tab switch detected!') : (isAr ? 'تم تسجيل التشتت. والآن عُد لتركيزك بكل هدوء ولطف.' : 'Logged. Now gently come back.'), 'info');
+  renderFocus();
 }
+
 function advanceStep(){if(focusState.currentStep<focusState.steps.length-1){focusState.currentStep++;SFX.click();renderFocus();}}
 
 // Strict Mode Logic
@@ -1447,12 +1858,13 @@ function confirmEndSession(){
     endFocusSession();
     return;
   }
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   showModal(`
     <div style="text-align:center">
-      <h2 style="color:var(--red);margin-bottom:10px"><i class="fas fa-exclamation-triangle"></i> Wait!</h2>
-      <p>Strict mode is on. You must wait 5 seconds before giving up.</p>
+      <h2 style="color:var(--red);margin-bottom:10px"><i class="fas fa-exclamation-triangle"></i> ${isAr ? 'انتظر لحظة!' : 'Wait!'}</h2>
+      <p>${isAr ? 'وضع الانضباط الصارم مفعّل. عليك الانتظار 5 ثوانٍ قبل التراجع.' : 'Strict mode is on. You must wait 5 seconds before giving up.'}</p>
       <div id="strict-timer" style="font-size:32px;font-weight:700;margin:20px 0;color:var(--accent)">5</div>
-      <button class="btn btn-sm btn-ghost" onclick="cancelStrictEnd()">Cancel</button>
+      <button class="btn btn-sm btn-ghost" onclick="cancelStrictEnd()">${isAr ? 'إلغاء' : 'Cancel'}</button>
     </div>
   `);
   let left=5;
@@ -1483,55 +1895,194 @@ function endFocusSession(auto=false){
   const sessions=Store.get('sessions');sessions.push(session);Store.set('sessions',sessions);
   const baseXP=min*2;Store.addXP(baseXP);completeQuest('focus');SFX.complete();
   let bonusXP=0;if(Math.random()<.35){bonusXP=20+Math.floor(Math.random()*31);Store.addXP(bonusXP);SFX.bonus();}
-  showModal(`<div style="text-align:center"><div style="font-size:48px;margin-bottom:12px">${auto?'<i class="fas fa-trophy" style="color:#FFD93D"></i>':'<i class="fas fa-seedling" style="color:var(--green)"></i>'}</div><h2 style="font-size:22px;margin-bottom:4px">${auto?'Session Complete!':'Great Start!'}</h2><p style="color:var(--text2);margin-bottom:20px">${auto?'You stayed focused the whole time. Amazing.':'You showed up and tried. That matters more than you think.'}</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:${bonusXP>0?'12px':'20px'}"><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:24px;color:var(--teal)">${min}m</div><div style="font-size:12px;color:var(--text2)">Focused</div></div><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:24px;color:var(--accent)">${focusState.distractions}</div><div style="font-size:12px;color:var(--text2)">Distractions</div></div><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:24px;color:var(--green)">+${baseXP}</div><div style="font-size:12px;color:var(--text2)">XP</div></div></div>
-    ${bonusXP>0?`<div class="card bonus-card bonus-pop" style="margin-bottom:20px;padding:16px;border:1px solid rgba(216,180,254,.3)"><div style="display:flex;align-items:center;gap:12px;justify-content:center"><i class="fas fa-gift" style="font-size:24px;color:#D8B4FE"></i><div style="text-align:left"><div style="font-weight:800;font-size:16px;color:#D8B4FE">Surprise Bonus!</div><div style="font-size:13px;color:var(--text2)">Nice work! Here's an extra +${bonusXP} XP</div></div></div></div>`:''}
-    <button class="btn btn-primary" onclick="closeModal();focusState.phase='setup';navigate('focus')">Done</button></div>`);
+
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const title = auto 
+    ? (isAr ? 'اكتملت الجلسة بنجاح!' : 'Session Complete!') 
+    : (isAr ? 'بداية رائعة وموفقة!' : 'Great Start!');
+  const subtitle = auto 
+    ? (isAr ? 'حافظت على كامل تركيزك طوال الوقت. أداء مذهل ومبهر!' : 'You stayed focused the whole time. Amazing.') 
+    : (isAr ? 'لقد حضرت وحاولت بجد. هذا الإنجاز يعني الكثير وأكبر مما تتخيل.' : 'You showed up and tried. That matters more than you think.');
+  const focusedLabel = isAr ? 'وقت التركيز' : 'Focused';
+  const distractionsLabel = isAr ? 'تشتتات' : 'Distractions';
+  const xpLabel = isAr ? 'نقاط خبرة' : 'XP';
+  const surpriseBonus = isAr ? 'مكافأة غير متوقعة!' : 'Surprise Bonus!';
+  const surpriseDesc = isAr ? `عمل متقن! إليك +${bonusXP} نقطة خبرة إضافية` : `Nice work! Here's an extra +${bonusXP} XP`;
+  const doneBtn = isAr ? 'تم' : 'Done';
+
+  showModal(`<div style="text-align:center"><div style="font-size:48px;margin-bottom:12px">${auto?'<i class="fas fa-trophy" style="color:#FFD93D"></i>':'<i class="fas fa-seedling" style="color:var(--green)"></i>'}</div><h2 style="font-size:22px;margin-bottom:4px">${title}</h2><p style="color:var(--text2);margin-bottom:20px">${subtitle}</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:${bonusXP>0?'12px':'20px'}"><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:24px;color:var(--teal)">${min}${isAr ? ' د' : 'm'}</div><div style="font-size:12px;color:var(--text2)">${focusedLabel}</div></div><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:24px;color:var(--accent)">${focusState.distractions}</div><div style="font-size:12px;color:var(--text2)">${distractionsLabel}</div></div><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:24px;color:var(--green)">+${baseXP}</div><div style="font-size:12px;color:var(--text2)">${xpLabel}</div></div></div>
+    ${bonusXP>0?`<div class="card bonus-card bonus-pop" style="margin-bottom:20px;padding:16px;border:1px solid rgba(216,180,254,.3)"><div style="display:flex;align-items:center;gap:12px;justify-content:center"><i class="fas fa-gift" style="font-size:24px;color:#D8B4FE"></i><div style="text-align:left"><div style="font-weight:800;font-size:16px;color:#D8B4FE">${surpriseBonus}</div><div style="font-size:13px;color:var(--text2)">${surpriseDesc}</div></div></div></div>`:''}
+    <button class="btn btn-primary" onclick="closeModal();focusState.phase='setup';navigate('focus')">${doneBtn}</button></div>`);
 }
 
-document.addEventListener('input',e=>{if(e.target.id==='focus-task-input'){const task=e.target.value.trim(),list=document.getElementById('steps-list');if(!list)return;if(!task){list.innerHTML='<div style="color:var(--text2);font-size:14px;padding:8px 0">Type a task above to see the steps...</div>';return;}const steps=breakDownTask(task);list.innerHTML=steps.map((s,i)=>`<div class="step-item" style="padding:6px 10px"><div class="step-num" style="width:20px;height:20px;font-size:11px">${i+1}</div><input class="input" value="${s}" style="border:none;background:transparent;padding:2px 4px;font-size:13px" data-step-idx="${i}"></div>`).join('');}});
+document.addEventListener('input',e=>{
+  if(e.target.id==='focus-task-input'){
+    const task=e.target.value.trim(),list=document.getElementById('steps-list');
+    if(!list)return;
+    const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+    if(!task){
+      list.innerHTML=`<div style="color:var(--text2);font-size:14px;padding:8px 0">${isAr ? 'اكتب المهمة في الأعلى لرؤية الخطوات المقترحة...' : 'Type a task above to see the steps...'}</div>`;
+      return;
+    }
+    const steps=breakDownTask(task);
+    list.innerHTML=steps.map((s,i)=>`<div class="step-item" style="padding:6px 10px"><div class="step-num" style="width:20px;height:20px;font-size:11px">${i+1}</div><input class="input" value="${s}" style="border:none;background:transparent;padding:2px 4px;font-size:13px" data-step-idx="${i}"></div>`).join('');
+  }
+});
 
-// ======================== STORE ========================
-function renderStore(){updateUserPanel();
-  const xp=Store.get('totalXP'),inv=Store.get('inventory');
-  document.getElementById('view-store').innerHTML=`<div style="max-width:900px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Store</h1><p style="color:var(--text2);margin-bottom:20px">Spend your XP to customize your experience.</p>
-  
-  <div class="card" style="margin-bottom:24px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center; gap:10px">
-      <i class="fas fa-coins" style="color:#FFD93D; font-size:24px"></i>
-      <span style="font-weight:700; font-size:20px">${xp} XP Available</span>
-    </div>
-    <div style="font-size:13px; color:var(--text2)">Equip items to use them</div>
-  </div>
+// ======================== STORE & REWARDS SYSTEM ========================
+const STORE_ARABIC_DATA = {
+  categories: {
+    avatars: 'الصور الرمزية (الأفاتار)',
+    companions: 'رفقاء الدراسة والتحفيز',
+    timers: 'المؤقتات البصرية التفاعلية',
+    colors: 'ألوان المظهر والواجهة',
+    themes: 'السمات والمظهر العام'
+  },
+  items: {
+    'avatar:default': { name: 'طالب مجتهد', desc: 'الشخصية الرمزية الافتراضية لطالب يسعى للتفوق والمذاكرة الذكية.' },
+    'avatar:wizard': { name: 'الساحر العبقري', desc: 'ساحر المعرفة الذي يحول أصعب المسائل إلى حلول وإنجازات.' },
+    'avatar:robot': { name: 'الروبوت الذكي', desc: 'مساعد رقمي فائق الدقة لحل المسائل المعقدة والتنظيم.' },
+    'avatar:alien': { name: 'رائد الفضاء', desc: 'مستكشف يغوص في أعماق المعرفة الكونية وحب الاستطلاع.' },
+    'avatar:cat': { name: 'القط المستكشف', desc: 'رفيق هادئ وفضولي يعشق التركيز والمذاكرة في هدوء.' },
+    'avatar:ghost': { name: 'الشبح اللطيف', desc: 'شبح مرح يطرد التشتت والملل والمماطلة من غرفتك.' },
+    'companion:default': { name: 'رفيق المذاكرة', desc: 'صديقك الوفي يشجعك أثناء فترات التركيز المستمر.' },
+    'companion:robot_friend': { name: 'الصديق الآلي', desc: 'روبوت ودود يمنحك نصائح دورية للتركيز والاستيعاب.' },
+    'companion:magic_cat': { name: 'القط السحري', desc: 'قط محفز بطاقة إيجابية وهدوء تام لتخفيف التوتر الدراسي.' },
+    'timer:classic': { name: 'قرص المؤقت الكلاسيكي', desc: 'قرص دائري أحمر على طراز Time Timer ينكمش تدريجياً لتقليل قلق الوقت.' },
+    'timer:donut': { name: 'حلقة الدونات العصرية', desc: 'حلقة دائرية نظيفة وأنيقة تفرغ باتجاه عقارب الساعة بهدوء.' },
+    'timer:hourglass': { name: 'الساعة الرملية الهادئة', desc: 'حبيبات رملية متساقطة تراقب تقدمك بأسلوب مهدئ وخالٍ من التوتر.' },
+    'timer:retro': { name: 'مؤشر الطاقة (ريترو)', desc: 'أشرطة طاقة عمودية تستنزف بمرور الوقت بأسلوب ألعاب الفيديو الكلاسيكية.' },
+    'color:#FF8C42': { name: 'برتقالي ناري', desc: 'لون ناري مفعم بالحيوية والنشاط الذهني.' },
+    'color:#4ECDC4': { name: 'تركواز هادئ', desc: 'درجة مهدئة للأعصاب ومريحة لتركيز طويل المدى.' },
+    'color:#FF6B6B': { name: 'أحمر قرمزي', desc: 'لون قرمزي يمنحك حضوراً ملفتاً وثقة عالية.' },
+    'color:#58A6FF': { name: 'أزرق نيون', desc: 'أزرق عصري واضح ومريح للقراءة والمتابعة.' },
+    'color:#A855F7': { name: 'بنفسجي ملكي', desc: 'درجة ملكية مميزة تحفز الإبداع والخيال العلمي.' },
+    'color:#22C55E': { name: 'أخضر زمردي', desc: 'لون زمردي يرمز للنجاح والنمو والتطوير الذاتي.' },
+    'color:#EC4899': { name: 'وردي زاهٍ', desc: 'لون مشرق مبهج يبعث التفاؤل والإيجابية.' },
+    'color:#FBBF24': { name: 'أصفر شمسي', desc: 'أصفر مشع يرفع النشاط الذهني والانتباه.' },
+    'theme:default': { name: 'الوضع الداكن (الليلي)', desc: 'ألوان داكنة مريحة للعينين في الإضاءة الخافتة وتقليل التشتت.' },
+    'theme:light': { name: 'الوضع الفاتح المريح', desc: 'تباين عالي ومظهر ساطع ومريح للمذاكرة في النهار.' },
+    'theme:forest': { name: 'أخضر الغابة الهادئ', desc: 'درجات الطبيعة والأشجار لتعزيز الهدوء وصفاء الذهن.' },
+    'theme:ocean': { name: 'أزرق المحيط العميق', desc: 'درجات بحرية عميقة تحفز التركيز العميق والاسترخاء.' }
+  }
+};
 
-  <h3 style="margin-bottom:12px; font-size:18px; color:var(--accent)">User Avatars</h3>
-  <div class="store-grid" style="margin-bottom:32px">${CATALOG.avatars.map(a=>renderStoreItem('avatar', a, inv)).join('')}</div>
+function getStoreItemDetails(type, item, isAr) {
+  if (!isAr) return { name: item.name, desc: item.desc || '' };
+  const key = `${type}:${item.id}`;
+  const hit = STORE_ARABIC_DATA.items[key];
+  if (hit) return hit;
+  return { name: item.name, desc: item.desc || '' };
+}
 
-  <h3 style="margin-bottom:12px; font-size:18px; color:var(--teal)">Study Companions</h3>
-  <div class="store-grid" style="margin-bottom:32px">${CATALOG.companions.map(c=>renderStoreItem('companion', c, inv)).join('')}</div>
+function renderStore(){
+  updateUserPanel();
+  const xp = Store.get('totalXP') || 0, inv = Store.get('inventory');
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const cNames = isAr ? STORE_ARABIC_DATA.categories : {
+    avatars: 'User Avatars',
+    companions: 'Study Companions',
+    timers: 'Visual Timers',
+    colors: 'Profile Colors',
+    themes: 'Themes'
+  };
 
-  <h3 style="margin-bottom:12px; font-size:18px; color:var(--red)">Visual Timers</h3>
-  <div class="store-grid" style="margin-bottom:32px">${CATALOG.timers.map(t=>renderStoreItem('timer', t, inv)).join('')}</div>
+  document.getElementById('view-store').innerHTML = `
+    <div style="max-width:900px;margin:0 auto" ${isAr ? 'dir="rtl"' : ''}>
+      <div style="margin-bottom:20px">
+        <h1 style="font-size:26px;font-weight:700;margin-bottom:6px">
+          ${isAr ? '<i class="fas fa-store" style="color:#D8B4FE;margin-left:8px"></i> متجر التخصيص والمكافآت' : 'Store'}
+        </h1>
+        <p style="color:var(--text2);margin-bottom:0">
+          ${isAr ? 'أنفق نقاط خبرتك (XP) لتخصيص تجربتك، وفتح شخصيات ومؤقتات بصرية وألوان وسمات جديدة.' : 'Spend your XP to customize your experience.'}
+        </p>
+      </div>
+      
+      <!-- XP Balance Card -->
+      <div class="card" style="margin-bottom:24px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:linear-gradient(135deg, var(--card) 0%, rgba(216,180,254,0.08) 100%); border:1px solid rgba(216,180,254,0.25);">
+        <div style="display:flex; align-items:center; gap:12px">
+          <div style="width:44px; height:44px; border-radius:12px; background:rgba(255,217,61,0.15); display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-coins" style="color:#FFD93D; font-size:22px"></i>
+          </div>
+          <div>
+            <div style="font-weight:800; font-size:22px; color:var(--text); line-height:1.2;">
+              ${xp} <span style="font-size:14px; font-weight:600; color:var(--accent);">${isAr ? 'نقطة خبرة (XP) متوفرة' : 'XP Available'}</span>
+            </div>
+            <div style="font-size:12px; color:var(--text2); margin-top:2px;">
+              ${isAr ? 'انقر على أي عنصر لشرائه أو تفعيله فوراً' : 'Equip items to use them'}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-ghost" onclick="navigate('focus')" style="border:1px solid var(--border); font-size:12px;">
+            <i class="fas fa-bullseye" style="color:var(--teal); margin-${isAr?'left':'right'}:6px"></i> ${isAr ? 'اكسب المزيد في مختبر التركيز' : 'Earn in Focus Lab'}
+          </button>
+        </div>
+      </div>
 
-  <h3 style="margin-bottom:12px; font-size:18px; color:var(--accent)">Profile Colors</h3>
-  <div class="store-grid" style="margin-bottom:32px">${CATALOG.colors.map(c=>renderStoreItem('color', c, inv)).join('')}</div>
+      <!-- Categories -->
+      <h3 style="margin-bottom:12px; font-size:17px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-user-circle"></i> ${cNames.avatars}
+      </h3>
+      <div class="store-grid" style="margin-bottom:32px">${CATALOG.avatars.map(a=>renderStoreItem('avatar', a, inv)).join('')}</div>
 
-  <h3 style="margin-bottom:12px; font-size:18px; color:var(--blue)">Themes</h3>
-  <div class="store-grid" style="margin-bottom:32px">${CATALOG.themes.map(t=>renderStoreItem('theme', t, inv)).join('')}</div>
-  </div>`;
+      <h3 style="margin-bottom:12px; font-size:17px; font-weight:700; color:var(--teal); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-user-friends"></i> ${cNames.companions}
+      </h3>
+      <div class="store-grid" style="margin-bottom:32px">${CATALOG.companions.map(c=>renderStoreItem('companion', c, inv)).join('')}</div>
+
+      <h3 style="margin-bottom:12px; font-size:17px; font-weight:700; color:var(--red); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-clock"></i> ${cNames.timers}
+      </h3>
+      <div class="store-grid" style="margin-bottom:32px">${CATALOG.timers.map(t=>renderStoreItem('timer', t, inv)).join('')}</div>
+
+      <h3 style="margin-bottom:12px; font-size:17px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-palette"></i> ${cNames.colors}
+      </h3>
+      <div class="store-grid" style="margin-bottom:32px">${CATALOG.colors.map(c=>renderStoreItem('color', c, inv)).join('')}</div>
+
+      <h3 style="margin-bottom:12px; font-size:17px; font-weight:700; color:var(--blue); display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-brush"></i> ${cNames.themes}
+      </h3>
+      <div class="store-grid" style="margin-bottom:32px">${CATALOG.themes.map(t=>renderStoreItem('theme', t, inv)).join('')}</div>
+
+      <!-- Educational / Motivational XP Info Card -->
+      <div class="card" style="margin-top:16px; margin-bottom:32px; padding:16px 20px; background:linear-gradient(135deg, rgba(255,140,66,0.06) 0%, rgba(78,205,196,0.06) 100%); border:1px solid rgba(255,140,66,0.25);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+          <i class="fas fa-award" style="color:var(--accent); font-size:20px"></i>
+          <span style="font-weight:700; font-size:15px">
+            ${isAr ? 'كيف تكسب المزيد من نقاط الخبرة (XP)؟' : 'How to earn more XP?'}
+          </span>
+        </div>
+        <p style="font-size:13px; color:var(--text2); line-height:1.6; margin:0">
+          ${isAr 
+            ? 'تحصل على نقطة خبرة مقابل كل دقيقة تركيز في <strong>مختبر التركيز</strong>، ونقاط إضافية عند حل التحديات في <strong>مغامرة الرياضيات</strong>، ومكافأة <strong>+50 نقطة XP</strong> يومياً عند إنجاز مهام اليوم الثلاث، ومكافآت مستمرة مع كل جلسة مراجعة في <strong>البطاقات التعليمية</strong> ومحاكاة <strong>مختبر العلوم</strong>!' 
+            : 'Earn 1 XP per minute of focus in <strong>Focus Lab</strong>, win bonus XP in <strong>Math Adventure</strong> challenges, claim <strong>+50 XP daily bonus</strong> by completing your three daily quests, and review <strong>Flashcards</strong>!'}
+        </p>
+      </div>
+    </div>`;
 }
 
 function renderStoreItem(type, item, inv){
-  const owned=inv[type+'s'].includes(item.id);
-  const equipped=inv.equipped[type]===item.id;
-  const canAfford=Store.get('totalXP')>=item.cost;
-  const cls=`store-item ${owned?'owned':''} ${equipped?'equipped':''}`;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const info = getStoreItemDetails(type, item, isAr);
+  const owned = inv[type+'s'].includes(item.id);
+  const equipped = inv.equipped[type]===item.id;
+  const canAfford = Store.get('totalXP')>=item.cost;
+  const cls = `store-item ${owned?'owned':''} ${equipped?'equipped':''}`;
   
   // Keep the background circle neutral for Colors so they don't blend into their own swatches
   const iconBg = (equipped && type !== 'color') ? 'var(--accent)' : 'var(--card)';
   const iconColor = (equipped && type !== 'color') ? '#fff' : 'var(--text2)';
 
-  return `<div class="${cls}" onclick="handleStoreClick('${type}','${item.id}')">
+  const statusLabel = (owned && equipped)
+    ? `<span style="font-size:12px; color:var(--green); font-weight:700"><i class="fas fa-check-circle" style="margin-${isAr?'left':'right'}:4px"></i>${isAr ? 'مُفعّل الآن' : 'Equipped'}</span>`
+    : owned
+    ? `<span style="font-size:12px; color:var(--text2)"><i class="fas fa-box-open" style="margin-${isAr?'left':'right'}:4px"></i>${isAr ? 'تم الشراء' : 'Owned'}</span>`
+    : `<span class="cost"><i class="fas fa-coins" style="font-size:10px; margin-${isAr?'left':'right'}:4px"></i>${isAr ? `${item.cost} نقطة XP` : `${item.cost} XP`}</span>`;
+
+  return `<div class="${cls}" onclick="handleStoreClick('${type}','${item.id}')" title="${info.desc || info.name}">
     <div class="icon-wrap" style="background:${iconBg}; color:${iconColor}; transition: background 0.2s;">
       ${type==='avatar'?`<i class="fas ${item.icon}"></i>`:
        type==='companion'?`<i class="fas fa-user-friends"></i>`:
@@ -1545,49 +2096,67 @@ function renderStoreItem(type, item, inv){
        type==='color'?`<div style="width:24px;height:24px;border-radius:50%;background:${item.id};border:2px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.15)"></div>`:
        '<i class="fas fa-palette"></i>'}
     </div>
-    <div style="font-weight:700; font-size:14px">${item.name}</div>
-    ${owned && equipped?'<span style="font-size:12px; color:var(--green); font-weight:700">Equipped</span>':
-      owned?'<span style="font-size:12px; color:var(--text2)">Owned</span>':
-      `<span class="cost">${item.cost} XP</span>`}
+    <div style="font-weight:700; font-size:14px; margin-bottom:2px">${info.name}</div>
+    ${statusLabel}
   </div>`;
 }
 
 function handleStoreClick(type, id){
-  const inv=Store.get('inventory'), cat=CATALOG[type+'s'];
-  const item=cat.find(i=>i.id===id);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const inv = Store.get('inventory'), cat = CATALOG[type+'s'];
+  const item = cat.find(i=>i.id===id);
+  if (!item) return;
+  const info = getStoreItemDetails(type, item, isAr);
+
   if(inv.equipped[type]===id){
-    toast('Already equipped','info');return;
+    toast(isAr ? 'هذا العنصر مُفعّل وقيد الاستخدام بالفعل!' : 'Already equipped', 'info');
+    return;
   }
   if(inv[type+'s'].includes(id)){
-  inv.equipped[type]=id;
-  if (type === 'color') {
-    const u = Store.get('user');
-    if (u) { u.color = id; Store.set('user', u); }
-    applyAccentColor(id);
+    inv.equipped[type]=id;
+    if (type === 'color') {
+      const u = Store.get('user');
+      if (u) { u.color = id; Store.set('user', u); }
+      applyAccentColor(id);
+    }
+    Store.set('inventory',inv);
+    SFX.click();
+    if(type==='theme')applyTheme(item);
+    updateUserPanel();
+    renderStore();
+    toast(isAr ? `تم تفعيل "${info.name}" بنجاح!` : `${item.name} equipped!`, 'success');
   }
-  Store.set('inventory',inv);
-  SFX.click();
-  if(type==='theme')applyTheme(item);
-  updateUserPanel();
-  renderStore();
-  toast(`${item.name} equipped!`,'success');
-}
- else {
-    if(Store.get('totalXP')>=item.cost){
-      showModal(`<h3 style="margin-bottom:10px">Buy ${item.name}?</h3><p style="color:var(--text2);margin-bottom:20px">Cost: ${item.cost} XP. You have ${Store.get('totalXP')} XP.</p>
-        <div style="display:flex;gap:10px;justify-content:center">
-          <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-primary" onclick="buyItem('${type}','${id}')">Buy</button>
-        </div>`);
+  else {
+    const currentXp = Store.get('totalXP') || 0;
+    if(currentXp >= item.cost){
+      showModal(`
+        <div style="${isAr ? 'direction:rtl;text-align:right;' : ''}">
+          <h3 style="margin-bottom:10px; font-size:18px;">${isAr ? `شراء وتفعيل "${info.name}"؟` : `Buy ${item.name}?`}</h3>
+          <p style="color:var(--text2);margin-bottom:12px; font-size:14px; line-height:1.6;">
+            ${isAr 
+              ? `التكلفة: <strong style="color:var(--accent)">${item.cost} نقطة XP</strong>.<br>رصيدك الحالي: <strong>${currentXp} نقطة</strong> (المتبقي بعد الشراء: ${currentXp - item.cost} نقطة).`
+              : `Cost: <strong style="color:var(--accent)">${item.cost} XP</strong>.<br>You have <strong>${currentXp} XP</strong>.`}
+          </p>
+          ${info.desc ? `<div style="padding:10px 14px; border-radius:10px; background:rgba(78,205,196,0.08); border:1px solid rgba(78,205,196,0.25); font-size:13px; color:var(--text2); margin-bottom:18px;"><i class="fas fa-sparkles" style="color:var(--teal); margin-${isAr?'left':'right'}:6px"></i>${info.desc}</div>` : ''}
+          <div style="display:flex;gap:10px;justify-content:${isAr ? 'flex-start' : 'flex-end'}">
+            <button class="btn btn-secondary" onclick="closeModal()">${isAr ? 'إلغاء' : 'Cancel'}</button>
+            <button class="btn btn-primary" onclick="buyItem('${type}','${id}')"><i class="fas fa-shopping-bag" style="margin-${isAr?'left':'right'}:6px"></i>${isAr ? 'تأكيد الشراء' : 'Buy'}</button>
+          </div>
+        </div>
+      `);
     } else {
-      toast('Not enough XP!','warn');
+      toast(isAr ? 'عفواً، رصيدك من نقاط الخبرة (XP) غير كافٍ لشراء هذا العنصر!' : 'Not enough XP!', 'warn');
     }
   }
 }
 
 function buyItem(type,id){
-  const inv=Store.get('inventory'), cat=CATALOG[type+'s'];
-  const item=cat.find(i=>i.id===id);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const inv = Store.get('inventory'), cat = CATALOG[type+'s'];
+  const item = cat.find(i=>i.id===id);
+  if (!item) return;
+  const info = getStoreItemDetails(type, item, isAr);
+
   Store.set('totalXP',Store.get('totalXP')-item.cost);
   inv[type+'s'].push(id);
   inv.equipped[type]=id;
@@ -1602,7 +2171,7 @@ function buyItem(type,id){
   if(type==='theme')applyTheme(item);
   updateUserPanel();
   renderStore();
-  toast(`Purchased ${item.name}!`,'success');
+  toast(isAr ? `تهانينا! تم شراء وتفعيل "${info.name}" بنجاح!` : `Purchased ${item.name}!`, 'success');
 }
 
 function applyTheme(item){
@@ -1630,29 +2199,58 @@ function generateNumericOptions(ans){
 
 function genQ(grade){
   let q,ans,opts;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+
   if(grade===1){
     const types=['compare','add_sub','before_after','days'];
     const type=types[Math.floor(Math.random()*types.length)];
     if(type==='compare'){
       const a=Math.floor(Math.random()*90)+10;let b=Math.floor(Math.random()*90)+10;while(b===a)b=Math.floor(Math.random()*90)+10;
-      ans=a>b?`${a} is greater`:`${b} is greater`;
-      q=`Which is greater: ${a} or ${b}?`;
-      const w1=a<b?`${a} is greater`:`${b} is greater`;const w2='They are equal';
-      opts=[ans,w1,w2,`${Math.min(a,b)} is less`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Neither');opts=shuffle(opts);
+      if (isAr) {
+        ans = a > b ? `${a} هو الأكبر` : `${b} هو الأكبر`;
+        q = `أي العددين أكبر: ${a} أم ${b}؟`;
+        const w1 = a < b ? `${a} هو الأكبر` : `${b} هو الأكبر`;
+        const w2 = 'العددان متساويان';
+        opts = [ans, w1, w2, `${Math.min(a,b)} هو الأصغر`].filter((v,i,a)=>a.indexOf(v)===i);
+        while(opts.length<4) opts.push('غير ذلك');
+      } else {
+        ans=a>b?`${a} is greater`:`${b} is greater`;
+        q=`Which is greater: ${a} or ${b}?`;
+        const w1=a<b?`${a} is greater`:`${b} is greater`;const w2='They are equal';
+        opts=[ans,w1,w2,`${Math.min(a,b)} is less`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Neither');
+      }
+      opts=shuffle(opts);
     }else if(type==='add_sub'){
       if(Math.random()>.5){const a=Math.floor(Math.random()*10)+1,b=Math.floor(Math.random()*(20-a))+1;ans=a+b;q=`${a} + ${b} = ?`;}
       else{const a=Math.floor(Math.random()*10)+5,b=Math.floor(Math.random()*(a-1))+1;ans=a-b;q=`${a} - ${b} = ?`;}
       opts=generateNumericOptions(ans);
     }else if(type==='before_after'){
       const n=Math.floor(Math.random()*90)+10;
-      if(Math.random()>.5){q=`What number comes after ${n}?`;ans=n+1;}else{q=`What number comes before ${n}?`;ans=n-1;}
+      if(Math.random()>.5){
+        q = isAr ? `ما العدد الذي يلي ${n} مباشرة؟` : `What number comes after ${n}?`;
+        ans=n+1;
+      }else{
+        q = isAr ? `ما العدد الذي يسبق ${n} مباشرة؟` : `What number comes before ${n}?`;
+        ans=n-1;
+      }
       opts=generateNumericOptions(ans);
     }else{
-      const days=['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday'];
+      const daysEn=['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday'];
+      const daysAr=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+      const days = isAr ? daysAr : daysEn;
       const today=days[Math.floor(Math.random()*7)],idx=days.indexOf(today),r=Math.random();
-      if(r<.33){q=`If today is ${today}, what was yesterday?`;ans=days[(idx+6)%7];}
-      else if(r<.66){q=`If today is ${today}, what is tomorrow?`;ans=days[(idx+1)%7];}
-      else{q=`If today is ${today}, what day comes after 2 days?`;ans=days[(idx+2)%7];}
+      if(r<.33){
+        q = isAr ? `إذا كان اليوم هو ${today}، فماذا كان الأمس؟` : `If today is ${today}, what was yesterday?`;
+        ans=days[(idx+6)%7];
+      }
+      else if(r<.66){
+        q = isAr ? `إذا كان اليوم هو ${today}، فماذا يكون الغد؟` : `If today is ${today}, what is tomorrow?`;
+        ans=days[(idx+1)%7];
+      }
+      else{
+        q = isAr ? `إذا كان اليوم هو ${today}، فما هو اليوم بعد يومين؟` : `If today is ${today}, what day comes after 2 days?`;
+        ans=days[(idx+2)%7];
+      }
       opts=[ans];while(opts.length<4){const w=days[Math.floor(Math.random()*7)];if(!opts.includes(w))opts.push(w);}opts=shuffle(opts);
     }
   }else if(grade===2){
@@ -1662,28 +2260,51 @@ function genQ(grade){
       const a=Math.floor(Math.random()*50)+30,b=Math.floor(Math.random()*50)+30;ans=a+b;q=`${a} + ${b} = ?`;opts=generateNumericOptions(ans);
     }else if(type==='place_value'){
       const num=Math.floor(Math.random()*900)+100,str=String(num),pos=Math.floor(Math.random()*3);
-      const digit=parseInt(str[pos]),placeNames=['hundreds','tens','ones'],placeVals=[100,10,1];
-      ans=digit*placeVals[pos];q=`What is the value of the digit ${digit} in ${num}?`;opts=generateNumericOptions(ans);
+      const digit=parseInt(str[pos]),placeVals=[100,10,1];
+      ans=digit*placeVals[pos];
+      q = isAr ? `ما القيمة المكانية للرقم ${digit} في العدد ${num}؟` : `What is the value of the digit ${digit} in ${num}?`;
+      opts=generateNumericOptions(ans);
     }else if(type==='money'){
       const h=Math.floor(Math.random()*5),t=Math.floor(Math.random()*9),o=Math.floor(Math.random()*9);ans=h*100+t*10+o;
-      const parts=[];if(h)parts.push(`${h} x 100 LE`);if(t)parts.push(`${t} x 10 LE`);if(o)parts.push(`${o} x 1 LE`);
-      q=`You have ${parts.join(', ')}. How much money do you have?`;opts=generateNumericOptions(ans);
+      const parts=[];
+      if (isAr) {
+        if(h)parts.push(`${h} × 100 جنيه`);if(t)parts.push(`${t} × 10 جنيهات`);if(o)parts.push(`${o} × 1 جنيه`);
+        q=`لديك: ${parts.join('، و ')}. كم مجموع المبلغ؟`;
+      } else {
+        if(h)parts.push(`${h} x 100 LE`);if(t)parts.push(`${t} x 10 LE`);if(o)parts.push(`${o} x 1 LE`);
+        q=`You have ${parts.join(', ')}. How much money do you have?`;
+      }
+      opts=generateNumericOptions(ans);
     }else{
       const a=Math.floor(Math.random()*900)+100;let b=Math.floor(Math.random()*900)+100;while(b===a)b=Math.floor(Math.random()*900)+100;
-      ans=Math.max(a,b);q=`Which is greater: ${a} or ${b}?`;opts=generateNumericOptions(ans);
+      ans=Math.max(a,b);
+      q = isAr ? `أيهما أكبر: ${a} أم ${b}؟` : `Which is greater: ${a} or ${b}?`;
+      opts=generateNumericOptions(ans);
     }
   }else if(grade===3){
     const types=['repeated_add','perimeter','area','mass'];
     const type=types[Math.floor(Math.random()*types.length)];
     if(type==='repeated_add'){
-      const g=Math.floor(Math.random()*5)+2,p=Math.floor(Math.random()*5)+2;ans=g*p;q=`${g} groups of ${p} = ?`;opts=generateNumericOptions(ans);
+      const g=Math.floor(Math.random()*5)+2,p=Math.floor(Math.random()*5)+2;ans=g*p;
+      q = isAr ? `${g} مجموعات من ${p} = ؟` : `${g} groups of ${p} = ?`;
+      opts=generateNumericOptions(ans);
     }else if(type==='perimeter'){
-      const l=Math.floor(Math.random()*8)+3,w=Math.floor(Math.random()*8)+3;ans=(l+w)*2;q=`A rectangle has length ${l}cm and width ${w}cm. What is its perimeter?`;opts=generateNumericOptions(ans);
+      const l=Math.floor(Math.random()*8)+3,w=Math.floor(Math.random()*8)+3;ans=(l+w)*2;
+      q = isAr ? `مستطيل طوله ${l} سم وعرضه ${w} سم. ما محيطه؟` : `A rectangle has length ${l}cm and width ${w}cm. What is its perimeter?`;
+      opts=generateNumericOptions(ans);
     }else if(type==='area'){
-      const l=Math.floor(Math.random()*8)+2,w=Math.floor(Math.random()*8)+2;ans=l*w;q=`A rectangle has length ${l}cm and width ${w}cm. What is its area?`;opts=generateNumericOptions(ans);
+      const l=Math.floor(Math.random()*8)+2,w=Math.floor(Math.random()*8)+2;ans=l*w;
+      q = isAr ? `مستطيل طوله ${l} سم وعرضه ${w} سم. ما مساحته؟` : `A rectangle has length ${l}cm and width ${w}cm. What is its area?`;
+      opts=generateNumericOptions(ans);
     }else{
       const kg=Math.floor(Math.random()*5)+1,g=Math.floor(Math.random()*900)+100;
-      if(Math.random()>.5){ans=kg*1000+g;q=`${kg}kg ${g}g = ? grams`;}else{ans=Math.round((kg+g/1000)*1000)/1000;q=`${kg*1000+g}g = ? kg`;}
+      if(Math.random()>.5){
+        ans=kg*1000+g;
+        q = isAr ? `${kg} كجم و ${g} جم = ؟ جرام` : `${kg}kg ${g}g = ? grams`;
+      }else{
+        ans=Math.round((kg+g/1000)*1000)/1000;
+        q = isAr ? `${kg*1000+g} جم = ؟ كجم` : `${kg*1000+g}g = ? kg`;
+      }
       opts=generateNumericOptions(ans);
     }
   }else if(grade===4){
@@ -1695,16 +2316,24 @@ function genQ(grade){
       if(!positions.length)return genQ(4);
       const pos=positions[Math.floor(Math.random()*positions.length)];
       const digit=parseInt(str[pos.idx]);if(!digit)return genQ(4);
-      ans=digit*pos.mult;q=`What is the value of the digit ${digit} in ${num.toLocaleString()}?`;opts=generateNumericOptions(ans);
+      ans=digit*pos.mult;
+      q = isAr ? `ما القيمة المكانية للرقم ${digit} في العدد ${num.toLocaleString('ar-EG')}؟` : `What is the value of the digit ${digit} in ${num.toLocaleString()}?`;
+      opts=generateNumericOptions(ans);
     }else if(type==='unit_convert'){
-      const convs=[{q:v=>`${v} km = ? m`,ans:v=>v*1000,r:[2,20]},{q:v=>`${v*1000} m = ? km`,ans:v=>v,r:[2,15]},{q:v=>`${v} m = ? cm`,ans:v=>v*100,r:[3,20]},{q:v=>`${v} kg = ? g`,ans:v=>v*1000,r:[2,10]},{q:v=>`${v} cm = ? mm`,ans:v=>v*10,r:[3,25]}];
+      const convsEn=[{q:v=>`${v} km = ? m`,ans:v=>v*1000,r:[2,20]},{q:v=>`${v*1000} m = ? km`,ans:v=>v,r:[2,15]},{q:v=>`${v} m = ? cm`,ans:v=>v*100,r:[3,20]},{q:v=>`${v} kg = ? g`,ans:v=>v*1000,r:[2,10]},{q:v=>`${v} cm = ? mm`,ans:v=>v*10,r:[3,25]}];
+      const convsAr=[{q:v=>`${v} كم = ؟ متر`,ans:v=>v*1000,r:[2,20]},{q:v=>`${v*1000} متر = ؟ كم`,ans:v=>v,r:[2,15]},{q:v=>`${v} متر = ؟ سم`,ans:v=>v*100,r:[3,20]},{q:v=>`${v} كجم = ؟ جرام`,ans:v=>v*1000,r:[2,10]},{q:v=>`${v} سم = ؟ ملم`,ans:v=>v*10,r:[3,25]}];
+      const convs = isAr ? convsAr : convsEn;
       const c=convs[Math.floor(Math.random()*convs.length)],v=c.r[0]+Math.floor(Math.random()*(c.r[1]-c.r[0]));
       ans=c.ans(v);q=c.q(v);opts=generateNumericOptions(ans);
     }else if(type==='area_cut'){
       const bL=Math.floor(Math.random()*10)+8,bW=Math.floor(Math.random()*8)+6,cL=Math.floor(Math.random()*3)+2,cW=Math.floor(Math.random()*3)+2;
-      ans=bL*bW-cL*cW;q=`A rectangle of ${bL}m x ${bW}m has a ${cL}m x ${cW}m piece cut from the corner. What is the remaining area?`;opts=generateNumericOptions(ans);
+      ans=bL*bW-cL*cW;
+      q = isAr ? `مستطيل أبعاده ${bL}م × ${bW}م اقتُطعت من ركنه قطعة أبعادها ${cL}م × ${cW}م. ما المساحة المتبقية؟` : `A rectangle of ${bL}m x ${bW}m has a ${cL}m x ${cW}m piece cut from the corner. What is the remaining area?`;
+      opts=generateNumericOptions(ans);
     }else{
-      const problems=[{q:'What is the best way to solve 18 + 7?',ans:'Make 10 (18+2+5)',wrong:['Count on from 18','Double 18 then subtract','Use a number line only']},{q:'What is the best way to solve 25 x 4?',ans:'Double twice (25->50->100)',wrong:['Count by 4s from 0','Multiply normally only','Break 25 into 20+5 then multiply']},{q:'What is the best way to solve 99 + 45?',ans:'Add 100 then subtract 1',wrong:['Count on from 99','Break both numbers apart','Use a number line']},{q:'What is the best way to solve 9 x 6?',ans:'Think 10x6 then subtract 6',wrong:['Count by 9s','Add 9 six times','Memorize it only']}];
+      const problemsEn=[{q:'What is the best way to solve 18 + 7?',ans:'Make 10 (18+2+5)',wrong:['Count on from 18','Double 18 then subtract','Use a number line only']},{q:'What is the best way to solve 25 x 4?',ans:'Double twice (25->50->100)',wrong:['Count by 4s from 0','Multiply normally only','Break 25 into 20+5 then multiply']},{q:'What is the best way to solve 99 + 45?',ans:'Add 100 then subtract 1',wrong:['Count on from 99','Break both numbers apart','Use a number line']},{q:'What is the best way to solve 9 x 6?',ans:'Think 10x6 then subtract 6',wrong:['Count by 9s','Add 9 six times','Memorize it only']}];
+      const problemsAr=[{q:'ما هي أفضل استراتيجية لحساب 18 + 7 ذهنياً؟',ans:'تكوين العدد 10 (18+2+5)',wrong:['العد تصاعدياً على الأصابع','مضاعفة 18 ثم الطرح','استخدام خط الأعداد فقط']},{q:'ما أفضل طريقة ذهنياً لحساب 25 × 4؟',ans:'المضاعفة مرتين (25←50←100)',wrong:['الجمع المتكرر للعدد 4','الضرب العمودي المطول فقط','تفكيك 25 إلى 20+5 فقط']},{q:'ما أسرع طريقة ذهنياً لحساب 99 + 45؟',ans:'إضافة 100 ثم طرح 1',wrong:['العد بالآحاد تصاعدياً','تفكيك كلا العددين','استخدام خط الأعداد']},{q:'ما أسهل طريقة لحساب 9 × 6؟',ans:'حساب 10×6 ثم طرح 6',wrong:['تسميع جدول 9 كاملاً','جمع 9 ست مرات باليد','الحفظ الصم فقط']}];
+      const problems = isAr ? problemsAr : problemsEn;
       const p=problems[Math.floor(Math.random()*problems.length)];q=p.q;ans=p.ans;opts=shuffle([ans,...p.wrong]);
     }
   }else if(grade===5){
@@ -1715,21 +2344,33 @@ function genQ(grade){
       ans=Math.round((a+b)*10)/10;q=`${a} + ${b} = ?`;opts=generateNumericOptions(ans);
     }else if(type==='decimal_money'){
       const price=Math.round((Math.random()*90+10)*10)/10,kg=Math.floor(Math.random()*9)+2;
-      ans=Math.round(price*kg*10)/10;q=`If 1kg of apples costs ${price} LE, how much do ${kg}kg cost?`;opts=generateNumericOptions(ans);
+      ans=Math.round(price*kg*10)/10;
+      q = isAr ? `إذا كان سعر 1 كجم من التفاح ${price} جنيهاً، فكم ثمن ${kg} كجم؟` : `If 1kg of apples costs ${price} LE, how much do ${kg}kg cost?`;
+      opts=generateNumericOptions(ans);
     }else if(type==='power_of_10'){
       const n=Math.floor(Math.random()*4)+2,base=Math.round((Math.random()*9+1)*100)/100;
       ans=Math.round(base*Math.pow(10,n)*100)/100;q=`${base} x 10${'^'.repeat(n)} = ?`;opts=generateNumericOptions(ans);
     }else if(type==='fraction_compare'){
       const dens=[2,3,4,5,6,8,10],d=dens[Math.floor(Math.random()*dens.length)];
       const n1=Math.floor(Math.random()*(d-1))+1;let n2=Math.floor(Math.random()*(d-1))+1;while(n2===n1)n2=Math.floor(Math.random()*(d-1))+1;
-      ans=n1>n2?`${n1}/${d} is greater`:`${n2}/${d} is greater`;
-      q=`Which is greater: ${n1}/${d} or ${n2}/${d}?`;
-      const w1=n1>n2?`${n2}/${d} is greater`:`${n1}/${d} is greater`;
-      opts=[ans,w1,'They are equal',`${Math.min(n1,n2)}/${d} is less`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Cannot compare');opts=shuffle(opts);
+      if (isAr) {
+        ans = n1 > n2 ? `${n1}/${d} هو الأكبر` : `${n2}/${d} هو الأكبر`;
+        q = `أيهما أكبر: ${n1}/${d} أم ${n2}/${d}؟`;
+        const w1 = n1 > n2 ? `${n2}/${d} هو الأكبر` : `${n1}/${d} هو الأكبر`;
+        opts = [ans, w1, 'الكسران متساويان', `${Math.min(n1,n2)}/${d} هو الأصغر`].filter((v,i,a)=>a.indexOf(v)===i);
+        while(opts.length<4) opts.push('لا يمكن المقارنة');
+      } else {
+        ans=n1>n2?`${n1}/${d} is greater`:`${n2}/${d} is greater`;
+        q=`Which is greater: ${n1}/${d} or ${n2}/${d}?`;
+        const w1=n1>n2?`${n2}/${d} is greater`:`${n1}/${d} is greater`;
+        opts=[ans,w1,'They are equal',`${Math.min(n1,n2)}/${d} is less`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Cannot compare');
+      }
+      opts=shuffle(opts);
     }else{
       const dens=[2,3,4,5,6,8,10],d=dens[Math.floor(Math.random()*dens.length)];
       const n1=Math.floor(Math.random()*(d-1))+1,n2=Math.floor(Math.random()*(d-1))+1,numAns=n1+n2;
-      ans=numAns+'/'+d;q=numAns>d?`${n1}/${d} + ${n2}/${d} = ? (improper)`:`${n1}/${d} + ${n2}/${d} = ?`;
+      ans=numAns+'/'+d;
+      q=numAns>d?(isAr?`${n1}/${d} + ${n2}/${d} = ؟ (كسر غير حقيقي)`:`${n1}/${d} + ${n2}/${d} = ? (improper)`):`${n1}/${d} + ${n2}/${d} = ?`;
       opts=[ans];while(opts.length<4){const w=numAns+Math.floor(Math.random()*5)-2;if(w>0&&w!==numAns)opts.push(w+'/'+d);}opts=shuffle(opts);
     }
   }else{
@@ -1737,32 +2378,322 @@ function genQ(grade){
     const type=types[Math.floor(Math.random()*types.length)];
     if(type==='absolute_val'){
       const a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*15)+1,v1=Math.random()>.5?a:-a;
-      ans=Math.abs(v1)>b?`|${v1}| is greater`:`${b} is greater`;
-      q=`Compare: |${v1}| and ${b}`;
-      const w1=Math.abs(v1)>b?`${b} is greater`:`|${v1}| is greater`;
-      opts=[ans,w1,'They are equal',`|${b}|`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Cannot determine');opts=shuffle(opts);
+      if (isAr) {
+        ans = Math.abs(v1) > b ? `|${v1}| هو الأكبر` : `${b} هو الأكبر`;
+        q = `قارن بين: |${v1}| و ${b}`;
+        const w1 = Math.abs(v1) > b ? `${b} هو الأكبر` : `|${v1}| هو الأكبر`;
+        opts = [ans, w1, 'متساويان', `|${b}|`].filter((v,i,a)=>a.indexOf(v)===i);
+        while(opts.length<4) opts.push('غير محدد');
+      } else {
+        ans=Math.abs(v1)>b?`|${v1}| is greater`:`${b} is greater`;
+        q=`Compare: |${v1}| and ${b}`;
+        const w1=Math.abs(v1)>b?`${b} is greater`:`|${v1}| is greater`;
+        opts=[ans,w1,'They are equal',`|${b}|`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Cannot determine');
+      }
+      opts=shuffle(opts);
     }else if(type==='ratio'){
       const pairs=[[250,1000,'1:4'],[150,300,'1:2'],[400,1000,'2:5'],[75,300,'1:4'],[200,500,'2:5'],[120,360,'1:3'],[60,180,'1:3'],[300,500,'3:5'],[40,100,'2:5'],[180,600,'3:10'],[350,700,'1:2']];
       const pair=pairs[Math.floor(Math.random()*pairs.length)];ans=pair[2];
-      q=`Find the ratio of ${pair[0]}g to ${pair[1]}g in simplest form.`;
+      q = isAr ? `أوجد النسبة بين ${pair[0]} جم و ${pair[1]} جم في أبسط صورة:` : `Find the ratio of ${pair[0]}g to ${pair[1]}g in simplest form.`;
       const wrongs=pairs.filter(p=>p[2]!==pair[2]).map(p=>p[2]).filter((v,i,a)=>a.indexOf(v)===i).slice(0,3);
       opts=shuffle([ans,...wrongs]).slice(0,4);while(opts.length<4)opts.push(pair[0]+':'+pair[1]);
     }else if(type==='percent_real'){
-      const scenarios=[{q:'A shirt costs 200 LE and is now 25% off. What is the discount?',ans:50},{q:'A shirt costs 200 LE and is now 25% off. What is the new price?',ans:150},{q:'Ali scored 80 out of 100 on a test. What is his percentage?',ans:80},{q:'A class has 40 students. 60% are girls. How many girls are there?',ans:24},{q:'A class has 40 students. 60% are girls. How many boys are there?',ans:16},{q:'The price went from 100 LE to 120 LE. What is the increase percentage?',ans:20},{q:'A book costs 80 LE. The shop offers 10% discount. How much do you pay?',ans:72},{q:'You need 360 LE and you have saved 75% of it. How much have you saved?',ans:270}];
+      const scenariosEn=[{q:'A shirt costs 200 LE and is now 25% off. What is the discount?',ans:50},{q:'A shirt costs 200 LE and is now 25% off. What is the new price?',ans:150},{q:'Ali scored 80 out of 100 on a test. What is his percentage?',ans:80},{q:'A class has 40 students. 60% are girls. How many girls are there?',ans:24},{q:'A class has 40 students. 60% are girls. How many boys are there?',ans:16},{q:'The price went from 100 LE to 120 LE. What is the increase percentage?',ans:20},{q:'A book costs 80 LE. The shop offers 10% discount. How much do you pay?',ans:72},{q:'You need 360 LE and you have saved 75% of it. How much have you saved?',ans:270}];
+      const scenariosAr=[{q:'قميص سعره 200 جنيه وعليه خصم 25%. ما مقدار الخصم بالجنيه؟',ans:50},{q:'قميص سعره 200 جنيه وعليه خصم 25%. ما السعر الجديد بعد الخصم؟',ans:150},{q:'حصل علي على 80 درجة من 100 في الامتحان. ما نسبته المئوية؟',ans:80},{q:'فصل دراسي به 40 طالباً، 60% منهم بنات. كم عدد البنات؟',ans:24},{q:'فصل دراسي به 40 طالباً، 60% منهم بنات. كم عدد البنين؟',ans:16},{q:'ارتفع سعر سلعة من 100 جنيه إلى 120 جنيهاً. ما نسبة الزيادة؟',ans:20},{q:'كتاب سعره 80 جنيهاً والمكتبة تقدم خصماً 10%. كم تدفع للبائع؟',ans:72},{q:'تحتاج 360 جنيهاً وادخرت منها 75%. كم جنيهاً ادخرت حتى الآن؟',ans:270}];
+      const scenarios = isAr ? scenariosAr : scenariosEn;
       const s=scenarios[Math.floor(Math.random()*scenarios.length)];ans=s.ans;q=s.q;opts=generateNumericOptions(ans);
     }else if(type==='neg_compare'){
-      const a=Math.floor(Math.random()*10)+1,b=Math.floor(Math.random()*10)+1;ans=`${b} is greater`;
-      q=`Which is greater: -${a} or ${b}?`;
-      opts=[`-${a} is greater`,ans,'They are equal',`|-${a}|`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Cannot compare');opts=shuffle(opts);
+      const a=Math.floor(Math.random()*10)+1,b=Math.floor(Math.random()*10)+1;
+      if (isAr) {
+        ans = `${b} هو الأكبر`;
+        q = `أيهما أكبر: -${a} أم ${b}؟`;
+        opts = [`-${a} هو الأكبر`, ans, 'متساويان', `|-${a}|`].filter((v,i,a)=>a.indexOf(v)===i);
+        while(opts.length<4) opts.push('لا يمكن المقارنة');
+      } else {
+        ans=`${b} is greater`;
+        q=`Which is greater: -${a} or ${b}?`;
+        opts=[`-${a} is greater`,ans,'They are equal',`|-${a}|`].filter((v,i,a)=>a.indexOf(v)===i);while(opts.length<4)opts.push('Cannot compare');
+      }
+      opts=shuffle(opts);
     }else{
       const pct=[10,20,25,50,75][Math.floor(Math.random()*5)],base=Math.floor(Math.random()*40)+5;
-      ans=Math.round(base*pct/100);q=`What is ${pct}% of ${base}?`;opts=generateNumericOptions(ans);
+      ans=Math.round(base*pct/100);
+      q = isAr ? `ما هو ${pct}% من العدد ${base}؟` : `What is ${pct}% of ${base}?`;
+      opts=generateNumericOptions(ans);
     }
   }
   return{q,ans,opts};
 }
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ======================== PHET ARABIC LOCALIZATION DATA ========================
+const PHET_ARABIC_DATA = {
+  'circuit-construction-kit-dc': {
+    nameAr: 'بناء الدوائر الكهربائية (التيار المستمر)',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'الكهرباء والتيار والدوائر',
+    descAr: 'بناء وتوصيل دوائر كهربائية بالبطاريات، والمصابيح، والمقاومات، والمفاتيح. قياس شدة التيار وفارق الجهد باستخدام أجهزة الفولتميتر والأميتر الحية.',
+    learningGoalsAr: [
+      'بناء دوائر توالي وتوازي وظيفية مع مراقبة تدفق الإلكترونات',
+      'التحقق من قانون أوم (جـ = ت × م) عبر تغيير المقاومات',
+      'اختبار التوصيل الكهربائي والمقاومة النوعية للمواد المختلفة'
+    ],
+    challengeAr: 'قم ببناء دائرة توازي تحتوي على مصباحين ومفتاح يتحكم في إضاءة مصباح واحد فقط دون إطفاء المصباح الآخر، وقارن شدة التيار في كل فرع.'
+  },
+  'build-an-atom': {
+    nameAr: 'بناء الذرة والنظائر',
+    subjectAr: 'الكيمياء',
+    categoryAr: 'التركيب الذري والنظائر',
+    descAr: 'تجميع البروتونات والنيوترونات والإلكترونات لبناء عناصر الجدول الدوري. فحص الشحنة الكلية، والعدد الكتلي، والاستقرار النووي.',
+    learningGoalsAr: [
+      'ربط عدد البروتونات بهوية العنصر في الجدول الدوري',
+      'حساب الشحنة الكلية للذرة بناءً على الفرق بين البروتونات والإلكترونات',
+      'التمييز بين الذرات المتعادلة والأيونات الموجبة والسالبة'
+    ],
+    challengeAr: 'ابنِ ذرة كربون-12 مستقرة ومتعادلة الشحنة، ثم أضف نيوتروناً لتكوين النظير كربون-13، ثم انزع إلكتروناً لتكوين أيون موجب C⁺.'
+  },
+  'states-of-matter-basics': {
+    nameAr: 'حالات المادة والتحولات الحرارية',
+    subjectAr: 'الكيمياء',
+    categoryAr: 'الديناميكا الحرارية وتغيرات الحالة',
+    descAr: 'تسخين وتبريد وضغط الذرات والجزيئات. راقب تحول النيون، والأرجون، والأكسجين، والماء بين الحالات الصلبة والسائلة والغازية.',
+    learningGoalsAr: [
+      'ربط درجة الحرارة بالطاقة الحركية وسرعة اهتزاز الجزيئات',
+      'مقارنة المسافات البينية وقوى الترابط بين الحالات الثلاث',
+      'ملاحظة تمدد التركيب البلوري للجليد مقارنة بالماء السائل'
+    ],
+    challengeAr: 'سخّن الجليد من الصفر المطلق حتى يتحول تماماً إلى بخار ماء. لاحظ درجات حرارة التحول وتغير سرعة الجزيئات.'
+  },
+  'energy-skate-park-basics': {
+    nameAr: 'حديقة التزلج وقانون حفظ الطاقة',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'الميكانيكا وحفظ الطاقة الميكانيكية',
+    descAr: 'استكشاف حفظ الطاقة الميكانيكية لمتزلج على مسارات ومنحنيات مختلفة. فحص المخططات البيانية اللحظية للطاقة الحركية وطاقة الوضع والطاقة الحرارية.',
+    learningGoalsAr: [
+      'التحقق من ثبوت الطاقة الميكانيكية الكلية عند انعدام الاحتكاك',
+      'تحليل طاقة الوضع عند القمة مقابل الطاقة الحركية عند القاع',
+      'مراقبة تحول الطاقة الميكانيكية إلى حرارة تراكمية بفعل الاحتكاك'
+    ],
+    challengeAr: 'صمم مساراً منحنياً بحلقة دائرية كاملة (Loop) يكملها المتزلج بنجاح بأقل ارتفاع بداية ممكن.'
+  },
+  'balancing-chemical-equations': {
+    nameAr: 'وزن المعادلات الكيميائية',
+    subjectAr: 'الكيمياء',
+    categoryAr: 'الحساب الكيميائي والتفاعلات',
+    descAr: 'وزن تفاعلات التكوين، والتفكك، والاحتراق عبر ضبط المعاملات العددية. استخدام الموازين البصرية للتحقق من قانون بقاء الكتلة.',
+    learningGoalsAr: [
+      'إثبات بقاء المادة في التفاعلات الكيميائية (قانون لافوازييه)',
+      'فهم سبب عدم جواز تعديل الأرقام السفلية للصيغ الكيميائية',
+      'إتقان وزن تفاعلات احتراق الهيدروكربونات مع الأكسجين'
+    ],
+    challengeAr: 'العب تحدي وزن المعادلات الكيميائية وحقق 5/5 نجوم في المستوى الثاني أو الثالث!'
+  },
+  'forces-and-motion-basics': {
+    nameAr: 'القوى والحركة وقوانين نيوتن',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'قوانين نيوتن للحركة',
+    descAr: 'استقصاء محصلة القوى، والاحتكاك، والتسارع بسحب ودفع الصناديق على أسطح مختلفة بقوى مختلفة.',
+    learningGoalsAr: [
+      'ربط القوة المحصلة بالتسارع: ق = ك × ت (قانون نيوتن الثاني)',
+      'استقصاء الفرق بين الاحتكاك السكوني والاحتكاك الحركي',
+      'مراقبة القصور الذاتي والحركة بسرعة ثابتة عند انعدام القوة المحصلة'
+    ],
+    challengeAr: 'احسب وتحقق من القوة الدنيا الدقيقة بالنيوتن اللازمة للتغلب على الاحتكاك السكوني لصندوق كتلته 100 كجم.'
+  },
+  'bending-light': {
+    nameAr: 'انكسار الضوء وانعكاسه الكلي',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'البصريات والموجات الضوئية',
+    descAr: 'استكشاف انكسار وانعكاس أشعة الضوء بين الهواء والماء والزجاج والمناشير. قياس الزوايا بالمنقلة للتحقق من قانون سنيل.',
+    learningGoalsAr: [
+      'إثبات قانون سنيل للانكسار: معامل1 × جا(زاوية1) = معامل2 × جا(زاوية2)',
+      'ملاحظة الانعكاس الكلي الداخلي عند الانتقال لوسط أقل كثافة ضوئية',
+      'استكشاف تشتت الضوء الأبيض لألوان الطيف عبر المنشور الثلاثي'
+    ],
+    challengeAr: 'وجّه شعاع ليزر من الزجاج إلى الهواء وحدد الزاوية الحرجة التي يحدث عندها انعكاس كلي بنسبة 100%.'
+  },
+  'gravity-and-orbits': {
+    nameAr: 'الجاذبية والمدارات الكوكبية',
+    subjectAr: 'علوم الأرض والفضاء',
+    categoryAr: 'علم الفلك وحركة الأجرام',
+    descAr: 'التحكم في الشمس والأرض والقمر والمحطة الفضائية لمعاينة متجهات قوى التجاذب والسرعات المدارية والمسارات الكوكبية.',
+    learningGoalsAr: [
+      'ربط قوة الجاذبية بالكتل والمسافة المدارية (قانون الجذب العام)',
+      'التمييز بين المدارات الدائرية المستقرة والمدارات الإهليلجية ومسارات الإفلات',
+      'استقصاء زمن دورة القمر وديناميكا السقوط المداري'
+    ],
+    challengeAr: 'ضاعف كتلة النجم المركزي واضبط سرعة الأرض للحفاظ على مدار دائري مستقر دون اصطدام.'
+  },
+  'wave-on-a-string': {
+    nameAr: 'الموجات على وتر والرنين',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'حركة الموجات والتذبذب',
+    descAr: 'توليد نبضات أو موجات توافقية متصلة على وتر. التحكم في السعة والتردد والخمود والشد لقياس سرعة الموجة وطولها.',
+    learningGoalsAr: [
+      'التحقق من معادلة انتشار الأمواج: السرعة = التردد × الطول الموجي',
+      'رصد العقد والبطون للموجات الموقوفة والرنين التوافقي',
+      'مقارنة انعكاس الموجة عند الطرف المقيد والطرف الحر'
+    ],
+    challengeAr: 'اضبط التردد على 2.0 هرتز مع صفر خمود واضبط الشد لإنتاج موجة موقوفة ذات 3 عُقد واضحة.'
+  },
+  'natural-selection': {
+    nameAr: 'الانتخاب الطبيعي والتطور البيئي',
+    subjectAr: 'الأحياء',
+    categoryAr: 'الوراثة والتنوع الحيوي والبيئة',
+    descAr: 'محاكاة الانتخاب الطبيعي في أرانب البراري والغابات والقطب الشمالي مع إدخال الطفرات والضواري.',
+    learningGoalsAr: [
+      'ملاحظة كيف تُدخل الطفرات الجينية أليلات جديدة في العشيرة',
+      'تحليل ضغط الافتراس (الذئاب) ونقص الغذاء على البقاء',
+      'تتبع تغير نسب الصفات الظاهرية عبر الأجيال المتعاقبة'
+    ],
+    challengeAr: 'أدخل طفرة الفراء الأبيض في البيئة القطبية مع وجود الذئاب، وراقب كيف يزيد التمويه من تكرار أليل الفراء الأبيض.'
+  },
+  'gene-expression-essentials': {
+    nameAr: 'أساسيات التعبير الجيني وتخليق البروتين',
+    subjectAr: 'الأحياء',
+    categoryAr: 'البيولوجيا الجزيئية والوراثة',
+    descAr: 'محاكاة نسخ الحمض النووي DNA إلى mRNA عبر بوليميراز الرنا وترجمته إلى بروتينات بواسطة الريبوسومات.',
+    learningGoalsAr: [
+      'تتبع ارتباط عوامل النسخ بمحفز الجين',
+      'ملاحظة تخليق الرنا الرسول وترجمته بالريبوسومات السيتوبلازمية',
+      'تحليل اتزان تركيز البروتينات ومعدل تحللها الخلوي'
+    ],
+    challengeAr: 'اضبط قوة المحفز وعوامل النسخ لتخليق أكثر من 50 جزيء بروتين دون تراكم مفرط للرنا الرسول.'
+  },
+  'density': {
+    nameAr: 'الكثافة والطفو وقاعدة أرشميدس',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'ميكانيكا الموائع وخواص المادة',
+    descAr: 'غمر كتل مختلفة في خزانات سوائل لقياس قوة الطفو وإزاحة حجم السائل وحساب الكثافة (الكثافة = الكتلة ÷ الحجم).',
+    learningGoalsAr: [
+      'حساب الكثافة الحجمية للأجسام الصلبة المنتظمة وغير المنتظمة',
+      'تطبيق قاعدة أرشميدس: قوة الطفو تساوي وزن السائل المزاح',
+      'التنبؤ بطفو الأجسام أو غوصها أو تعلّقها بالسوائل'
+    ],
+    challengeAr: 'قِس كتلة الكتل المجهولة الخمس وحجم الماء المزاح لاستنتاج مادة كل كتلة بدقة.'
+  },
+  'ph-scale-basics': {
+    nameAr: 'مقياس الرقم الهيدروجيني (pH)',
+    subjectAr: 'الكيمياء',
+    categoryAr: 'الأحماض والقواعد والمحاليل المائية',
+    descAr: 'اختبار درجة حموضة القهوة والدم وحمض البطارية والماء النقي. إضافة الماء لمراقبة أثر التخفيف على تركيز الأيونات.',
+    learningGoalsAr: [
+      'فهم تدريج مقياس pH من 0 إلى 14 مع نقطة التعادل 7.0',
+      'تصنيف المواد الشائعة إلى أحماض وقواعد قوية وضعيفة',
+      'إثبات كيف يؤدي تخفيف المحلول الحمضي لتقريب الرقم الهيدروجيني من 7'
+    ],
+    challengeAr: 'ضع 0.5 لتر من القهوة (pH 5.0) ثم أضف ماء نقياً حتى يصل الخليط إلى pH 5.5 واحسب نسبة التخفيف.'
+  },
+  'molecule-shapes': {
+    nameAr: 'أشكال الجزيئات ونظرية تنافر الإلكترونات (VSEPR)',
+    subjectAr: 'الكيمياء',
+    categoryAr: 'الروابط الكيميائية والشكل الفراغي',
+    descAr: 'بناء جزيئات ثلاثية الأبعاد بروابط أحادية وثنائية وثلاثية وأزواج إلكترونات حرة وقياس زوايا الروابط في فضاء 3D.',
+    learningGoalsAr: [
+      'التنبؤ بالشكل الهندسي الفراغي: خطي، منحني، مثلث مستوٍ، رباعي الأوجه',
+      'التمييز بين التوزيع الإلكتروني والشكل الفراغي الحقيقي للجزيء',
+      'معاينة كيف يضغط تنافر الأزواج الحرة زوايا الروابط الكيميائية'
+    ],
+    challengeAr: 'ابنِ جزيئات الميثان والنشادر والماء، وقارن كيف تضغط الأزواج الحرة زوايا الروابط من 109.5° حتى 104.5°.'
+  },
+  'pendulum-lab': {
+    nameAr: 'مختبر البندول البسيط والتذبذب',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'الحركة الدورية والاهتزازية',
+    descAr: 'أرجحة بندولين في وقت واحد. اكتشف كيف يعتمد زمن الدورة على طول الخيط وكتلة الثقل وزاوية الإطلاق وعجلة الجاذبية.',
+    learningGoalsAr: [
+      'تحديد العوامل المؤثرة في الزمن الدوري للبندول: ز = 2 ط √(ل / جـ)',
+      'إثبات أن كتلة الثقل لا تؤثر إطلاقاً على زمن دورة البندول البسيط',
+      'مقارنة حركة البندول على الأرض والقمر والمشتري'
+    ],
+    challengeAr: 'اضبط طول خيط البندول بدقة ليكون نصف زمن دورته ثانية واحدة بالضبط (مثل دقة ساعات الحائط الكلاسيكية).'
+  },
+  'faradays-law': {
+    nameAr: 'قانون فاراداي والحث الكهرومغناطيسي',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'الكهرومغناطيسية والتيار الحثي',
+    descAr: 'تحريك مغناطيس دائم داخل ملفات أسلاك لإضاءة مصباح وتحريك مؤشر الفولتميتر والتحقق من قانون لينز.',
+    learningGoalsAr: [
+      'اكتشاف أن تغير التدفق المغناطيسي يولد قوة دافعة كهربائية حثية',
+      'ربط عدد لفات الملف بمقدار الجهد الكهربائي المتولد',
+      'إثبات أن زيادة سرعة حركة المغناطيس تضاعف شدة التيار الحثي'
+    ],
+    challengeAr: 'حرّك المغناطيس في ملف اللفتين مقابل ملف الأربع لفات بنفس السرعة وقارن انحراف المؤشر.'
+  },
+  'greenhouse-effect': {
+    nameAr: 'ظاهرة الاحتباس الحراري والمناخ',
+    subjectAr: 'علوم الأرض والفضاء',
+    categoryAr: 'فيزياء الغلاف الجوي والمناخ',
+    descAr: 'استكشاف كيف تمتص جزيئات الغازات الدفيئة (CO₂، CH₄، H₂O) الفوتونات تحت الحمراء وتدفئ سطح الأرض.',
+    learningGoalsAr: [
+      'التمييز بين الضوء المرئي القادم من الشمس والأشعة تحت الحمراء المنبعثة من الأرض',
+      'مقارنة درجات الحرارة الجوية بين العصر الجليدي وعام 1750 واليوم',
+      'تحليل أثر الغطاء السحابي وتركيز الغازات على ميزانية الطاقة الكوكبية'
+    ],
+    challengeAr: 'زد تركيز الغازات الدفيئة من العصر الجليدي إلى المستويات المعاصرة وسجل مقدار الارتفاع في درجات الحرارة.'
+  },
+  'hookes-law': {
+    nameAr: 'قانون هوك وقوة النابض المرن',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'المرونة وقوة الإرجاع',
+    descAr: 'شد وضغط النوابض المرنة واستكشاف العلاقة المباشرة بين القوة المؤثرة، وقوة الإرجاع، وثابت الصلابة، والإزاحة.',
+    learningGoalsAr: [
+      'التحقق من قانون هوك: ق = - ث × س',
+      'رسم بياني للقوة مقابل الإزاحة لحساب ثابت صلابة النابض',
+      'مقارنة ثوابت الصلابة عند توصيل النوابض على التوالي والتوازي'
+    ],
+    challengeAr: 'اضبط ثابت النابض على 200 نيوتن/متر وطبق قوة إزاحة 60 نيوتن وتحقق من الاستطالة بالمسطرة الافتراضية.'
+  },
+  'color-vision': {
+    nameAr: 'رؤية الألوان ومزج أضواء RGB',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'البصريات والأطوال الموجية وإدراك العين',
+    descAr: 'مزج حزم الأضواء الأساسية الحمراء والخضراء والزرقاء لإنتاج ألوان الطيف. استكشاف خلايا المخاريط البصرية في العين.',
+    learningGoalsAr: [
+      'فهم خلط الألوان الإضافي في الضوء (RGB)',
+      'محاكاة كيف ترسل مستقبلات المخاريط في شبكية العين إشارات الألوان للدماغ',
+      'ملاحظة امتصاص وترشيح الضوء عبر المرشحات اللونية'
+    ],
+    challengeAr: 'امزج الشعاعين الأحمر والأخضر بكثافة 100% مع صفر أزرق لمشاهدة اللون الأصفر النقي.'
+  },
+  'friction': {
+    nameAr: 'الاحتكاك على المستوى الذري',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'الديناميكا الحرارية والشبكة البلورية',
+    descAr: 'حك كتابين ببعضهما وفحص سطح التلامس مجهرياً على مستوى الذرات لمعاينة تحول طاقة الحركة لاحتكاك وحرارة.',
+    learningGoalsAr: [
+      'ملاحظة انتقال الطاقة الحركية الميكانيكية إلى اهتزازات ذرية مجهرية',
+      'ربط سعة اهتزاز الذرات بارتفاع درجة الحرارة',
+      'ملاحظة انفصال الذرات عند تجاوز قوى الاحتكاك للروابط الجزيئية'
+    ],
+    challengeAr: 'قم بحك السطحين بسرعة فائقة حتى تنفصل ذرات فردية عن الشبكة السطحية.'
+  },
+  'under-pressure': {
+    nameAr: 'الضغط الهيدروستاتيكي وتدفق السوائل',
+    subjectAr: 'الفيزياء',
+    categoryAr: 'ميكانيكا الموائع والضغط',
+    descAr: 'استكشاف ضغط الموائع في الماء والبنزين والعسل. اكتشف كيف يتغير الضغط مع كثافة السائل والعمق والجاذبية والضغط الجوي.',
+    learningGoalsAr: [
+      'التحقق من قانون الضغط الهيدروستاتيكي: ض = ض_جوي + ك × جـ × ع',
+      'إثبات أن ضغط السائل يعتمد فقط على العمق وليس على شكل الإناء',
+      'مقارنة الضغط بين كواكب الأرض والمريخ والمشتري'
+    ],
+    challengeAr: 'قِس الضغط عند عمق 3 أمتار في الماء مقابل البنزين والعسل واحسب نسبة الكثافة.'
+  },
+  'concentration': {
+    nameAr: 'تركيز المحاليل والمولارية',
+    subjectAr: 'الكيمياء',
+    categoryAr: 'المحاليل والتركيز المولي',
+    descAr: 'إذابة مساحيق مختلفة في الماء لقياس المولارية (مول/لتر). تبخير الماء أو تخفيفه لمعاينة الوصول لحد التشبع وترسب البلورات.',
+    learningGoalsAr: [
+      'حساب التركيز المولاري: المولارية = عدد المولات ÷ حجم المحلول باللتر',
+      'ملاحظة حدود التشبع التي يبدأ عندها المذاب بالترسب في القاع',
+      'إثبات كيف يؤدي تبخير المذيب لزيادة تركيز المحلول'
+    ],
+    challengeAr: 'أذب المسحوق حتى تصل لحد التشبع التام ثم بخر 0.2 لتر من الماء وراقب بدء تكوّن البلورات المترسبة.'
+  }
+};
 
 // ======================== PHET INTERACTIVE SCIENCE SIMULATIONS ========================
 const PHET_SIMULATIONS = [
@@ -2281,6 +3212,7 @@ function phetOnFrameLoad() {
 // Renders the Science Content (Workbench or Catalog)
 function renderScienceContent(mountEl) {
   if (!mountEl) return;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const user = Store.get('user') || { grade: 2 };
   const userGrade = user.grade || 2;
   const favs = Store.get('phetFavorites') || [];
@@ -2293,44 +3225,50 @@ function renderScienceContent(mountEl) {
     const isCompleted = completedLabs.includes(activeSim.id);
     const savedNotes = (Store.get('phetLabNotes') || {})[activeSim.id] || '';
     const completedGoals = (Store.get('phetCompletedGoals') || {})[activeSim.id] || [];
+    const arData = PHET_ARABIC_DATA[activeSim.id] || {};
+    const simName = (isAr && arData.nameAr) || activeSim.name;
+    const simCategory = (isAr && arData.categoryAr) || activeSim.category;
+    const simSubject = (isAr && arData.subjectAr) || activeSim.subject;
+    const simChallenge = (isAr && arData.challengeAr) || activeSim.challenge;
+    const simGoals = (isAr && arData.learningGoalsAr) || activeSim.learningGoals;
 
     mountEl.innerHTML = `
       <div class="science-workbench">
         <div class="science-workbench-bar">
           <div class="science-wb-title-group">
-            <button class="btn btn-secondary btn-sm" onclick="phetCloseSim()" title="Return to Simulations Catalog">
-              <i class="fas fa-arrow-left"></i> All Labs
+            <button class="btn btn-secondary btn-sm" onclick="phetCloseSim()" title="${isAr ? 'العودة لجميع التجارب والمعامل' : 'Return to Simulations Catalog'}">
+              <i class="fas ${isAr ? 'fa-arrow-right' : 'fa-arrow-left'}"></i> ${isAr ? 'جميع المعامل' : 'All Labs'}
             </button>
             <div style="display:flex; align-items:center; gap:10px;">
               <div class="science-sim-icon-box" style="background:${activeSim.color}22; color:${activeSim.color};">
                 <i class="fas ${activeSim.icon}"></i>
               </div>
               <div>
-                <div style="font-weight:800; font-size:16px;">${escHtml(activeSim.name)}</div>
+                <div style="font-weight:800; font-size:16px;">${escHtml(simName)}</div>
                 <div style="font-size:12px; color:var(--text2); display:flex; align-items:center; gap:8px;">
-                  <span class="tag" style="background:${activeSim.color}1A; color:${activeSim.color}; font-size:10px; padding:1px 6px;">${activeSim.subject}</span>
-                  <span>${activeSim.category}</span>
+                  <span class="tag" style="background:${activeSim.color}1A; color:${activeSim.color}; font-size:10px; padding:1px 6px;">${simSubject}</span>
+                  <span>${simCategory}</span>
                   <span>&middot;</span>
-                  <span>Grades ${activeSim.grades[0]}–${activeSim.grades[activeSim.grades.length - 1]}</span>
+                  <span>${isAr ? `الصفوف ${activeSim.grades[0]}–${activeSim.grades[activeSim.grades.length - 1]}` : `Grades ${activeSim.grades[0]}–${activeSim.grades[activeSim.grades.length - 1]}`}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="science-wb-actions">
-            <button class="btn btn-sm btn-secondary" onclick="phetToggleNotebook()" title="Toggle Inquiry Notebook panel">
-              <i class="fas fa-book-open"></i> <span>${phetShowNotebook ? 'Hide Notebook' : 'Open Notebook'}</span>
+            <button class="btn btn-sm btn-secondary" onclick="phetToggleNotebook()" title="${isAr ? 'إظهار أو إخفاء دفتر المعمل' : 'Toggle Inquiry Notebook panel'}">
+              <i class="fas fa-book-open"></i> <span>${phetShowNotebook ? (isAr ? 'إخفاء الدفتر' : 'Hide Notebook') : (isAr ? 'فتح الدفتر' : 'Open Notebook')}</span>
             </button>
-            <button class="btn btn-sm btn-secondary" onclick="phetReloadSim()" title="Reload simulation state">
-              <i class="fas fa-rotate-right"></i> <span>Reload</span>
+            <button class="btn btn-sm btn-secondary" onclick="phetReloadSim()" title="${isAr ? 'إعادة تحميل المحاكاة' : 'Reload simulation state'}">
+              <i class="fas fa-rotate-right"></i> <span>${isAr ? 'إعادة تحميل' : 'Reload'}</span>
             </button>
-            <button class="btn btn-sm btn-secondary" onclick="phetToggleFullscreen()" title="Fullscreen mode">
-              <i class="fas fa-expand"></i> <span>Fullscreen</span>
+            <button class="btn btn-sm btn-secondary" onclick="phetToggleFullscreen()" title="${isAr ? 'وضع ملء الشاشة' : 'Fullscreen mode'}">
+              <i class="fas fa-expand"></i> <span>${isAr ? 'ملء الشاشة' : 'Fullscreen'}</span>
             </button>
-            <button class="btn btn-sm ${isFav ? 'btn-warning' : 'btn-secondary'}" onclick="phetToggleFavorite('${activeSim.id}')" title="${isFav ? 'Remove bookmark' : 'Bookmark simulation'}">
+            <button class="btn btn-sm ${isFav ? 'btn-warning' : 'btn-secondary'}" onclick="phetToggleFavorite('${activeSim.id}')" title="${isFav ? (isAr ? 'إزالة من المفضلة' : 'Remove bookmark') : (isAr ? 'إضافة للمفضلة' : 'Bookmark simulation')}">
               <i class="fas fa-star" style="${isFav ? 'color:#F59E0B;' : ''}"></i>
             </button>
-            <a href="${activeSim.embedUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-ghost" title="Open directly from PhET (colorado.edu)">
+            <a href="${activeSim.embedUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-ghost" title="${isAr ? 'فتح مباشرة من موقع PhET الرسمي' : 'Open directly from PhET (colorado.edu)'}">
               <i class="fas fa-external-link-alt"></i>
             </a>
           </div>
@@ -2341,8 +3279,8 @@ function renderScienceContent(mountEl) {
           <div class="science-frame-container" id="phet-frame-container">
             <div class="science-iframe-loader" id="phet-loader">
               <div class="spinner"></div>
-              <div style="font-weight:700; font-size:14px;">Loading ${escHtml(activeSim.name)}...</div>
-              <div style="font-size:12px; color:var(--text2);">Interactive PhET HTML5 Simulation</div>
+              <div style="font-weight:700; font-size:14px;">${isAr ? `جاري تحميل ${escHtml(simName)}...` : `Loading ${escHtml(activeSim.name)}...`}</div>
+              <div style="font-size:12px; color:var(--text2);">${isAr ? 'محاكاة تفاعلية من PhET بتقنية HTML5' : 'Interactive PhET HTML5 Simulation'}</div>
             </div>
             <iframe
               id="phet-sim-iframe"
@@ -2350,7 +3288,7 @@ function renderScienceContent(mountEl) {
               allow="fullscreen; autoplay; clipboard-write;"
               allowfullscreen
               onload="phetOnFrameLoad()"
-              title="${escHtml(activeSim.name)}">
+              title="${escHtml(simName)}">
             </iframe>
           </div>
 
@@ -2360,7 +3298,7 @@ function renderScienceContent(mountEl) {
               <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:12px;">
                 <div style="display:flex; align-items:center; gap:8px;">
                   <i class="fas fa-clipboard-check" style="color:var(--teal); font-size:16px;"></i>
-                  <h3 style="font-size:15px; font-weight:800;">Lab Notebook</h3>
+                  <h3 style="font-size:15px; font-weight:800;">${isAr ? 'دفتر المعمل والاستكشاف' : 'Lab Notebook'}</h3>
                 </div>
                 <span id="phet-save-status" style="font-size:11px; color:var(--green); font-weight:700;"></span>
               </div>
@@ -2368,18 +3306,18 @@ function renderScienceContent(mountEl) {
               <!-- Inquiry Challenge Prompt -->
               <div class="card" style="padding:14px; background:rgba(78,205,196,0.08); border:1px solid rgba(78,205,196,0.3); border-radius:12px;">
                 <div style="display:flex; align-items:center; gap:6px; font-weight:800; font-size:12px; color:var(--teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">
-                  <i class="fas fa-flag-checkered"></i> Investigation Challenge
+                  <i class="fas fa-flag-checkered"></i> ${isAr ? 'تحدي الاستكشاف والبحث العلمي' : 'Investigation Challenge'}
                 </div>
-                <div style="font-size:13px; line-height:1.5; color:var(--text);">${escHtml(activeSim.challenge)}</div>
+                <div style="font-size:13px; line-height:1.5; color:var(--text);">${escHtml(simChallenge)}</div>
               </div>
 
               <!-- Learning Goals Checklist -->
               <div>
                 <label style="font-size:12px; font-weight:800; color:var(--text2); display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
-                  Key Concepts & Goals
+                  ${isAr ? 'المفاهيم والأهداف التعليمية' : 'Key Concepts & Goals'}
                 </label>
                 <div class="science-goals-list">
-                  ${activeSim.learningGoals.map((goal, idx) => {
+                  ${simGoals.map((goal, idx) => {
                     const done = completedGoals.includes(idx);
                     return `
                       <label class="science-goal-item ${done ? 'done' : ''}">
@@ -2394,11 +3332,11 @@ function renderScienceContent(mountEl) {
               <!-- Student Lab Notes Area -->
               <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
                 <label style="font-size:12px; font-weight:800; color:var(--text2); display:block; text-transform:uppercase; letter-spacing:0.5px;">
-                  Observations & Hypotheses
+                  ${isAr ? 'الملاحظات والفرضيات والنتائج' : 'Observations & Hypotheses'}
                 </label>
                 <textarea
                   class="science-notes-area"
-                  placeholder="Record your data, observations, hypotheses, and conclusions here..."
+                  placeholder="${isAr ? 'سجل بياناتك وملاحظاتك وفرضياتك واستنتاجاتك هنا...' : 'Record your data, observations, hypotheses, and conclusions here...'}"
                   oninput="phetSaveNotes('${activeSim.id}', this.value)">${escHtml(savedNotes)}</textarea>
               </div>
 
@@ -2406,12 +3344,12 @@ function renderScienceContent(mountEl) {
               <div>
                 ${isCompleted ? `
                   <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:12px; color:var(--green); font-weight:800; font-size:13px;">
-                    <span><i class="fas fa-circle-check" style="margin-right:6px;"></i> Lab Completed</span>
+                    <span><i class="fas fa-circle-check" style="margin-right:6px;"></i> ${isAr ? 'تم إكمال المعمل بنجاح' : 'Lab Completed'}</span>
                     <span class="tag" style="background:var(--green); color:#0F0F14; font-weight:800;">+25 XP</span>
                   </div>
                 ` : `
                   <button class="btn btn-primary" style="width:100%; justify-content:center; gap:8px; padding:12px;" onclick="phetCompleteLab('${activeSim.id}')">
-                    <i class="fas fa-award"></i> Complete Lab & Claim +25 XP
+                    <i class="fas fa-award"></i> ${isAr ? 'إكمال المعمل والحصول على +25 نقطة' : 'Complete Lab & Claim +25 XP'}
                   </button>
                 `}
               </div>
@@ -2436,10 +3374,11 @@ function renderScienceContent(mountEl) {
     }
     if (phetSearchQuery.trim()) {
       const q = phetSearchQuery.toLowerCase();
-      const matchName = sim.name.toLowerCase().includes(q);
-      const matchDesc = sim.desc.toLowerCase().includes(q);
-      const matchCat = sim.category.toLowerCase().includes(q);
-      const matchSubject = sim.subject.toLowerCase().includes(q);
+      const ar = PHET_ARABIC_DATA[sim.id] || {};
+      const matchName = sim.name.toLowerCase().includes(q) || (ar.nameAr && ar.nameAr.toLowerCase().includes(q));
+      const matchDesc = sim.desc.toLowerCase().includes(q) || (ar.descAr && ar.descAr.toLowerCase().includes(q));
+      const matchCat = sim.category.toLowerCase().includes(q) || (ar.categoryAr && ar.categoryAr.toLowerCase().includes(q));
+      const matchSubject = sim.subject.toLowerCase().includes(q) || (ar.subjectAr && ar.subjectAr.toLowerCase().includes(q));
       if (!matchName && !matchDesc && !matchCat && !matchSubject) return false;
     }
     return true;
@@ -2462,19 +3401,19 @@ function renderScienceContent(mountEl) {
           </div>
           <div>
             <h1 style="font-size:24px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:10px;">
-              PhET Interactive Science Labs
-              <span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:11px; font-weight:800;">Embedded Suite</span>
+              ${isAr ? 'مختبر تجارب PhET العلمية التفاعلية' : 'PhET Interactive Science Labs'}
+              <span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:11px; font-weight:800;">${isAr ? 'بيئة مدمجة' : 'Embedded Suite'}</span>
             </h1>
             <p style="color:var(--text2); font-size:14px; margin:0;">
-              Research-backed interactive simulations by University of Colorado Boulder. Explore physics, chemistry, biology, and earth science with real-time feedback.
+              ${isAr ? 'محاكاة تفاعلية مدعومة بالأبحاث العلمية من جامعة كولورادو بولدر. استكشف الفيزياء والكيمياء والأحياء وعلوم الأرض بالفيدباك المباشر والتطبيقات الحية.' : 'Research-backed interactive simulations by University of Colorado Boulder. Explore physics, chemistry, biology, and earth science with real-time feedback.'}
             </p>
           </div>
         </div>
 
         <div style="display:flex; align-items:center; gap:10px;">
           <div class="card" style="padding:8px 14px; display:flex; align-items:center; gap:10px; background:var(--bg); border:1px solid var(--border);">
-            <div style="text-align:right;">
-              <div style="font-size:11px; color:var(--text2);">Completed</div>
+            <div style="text-align:${isAr ? 'left' : 'right'};">
+              <div style="font-size:11px; color:var(--text2);">${isAr ? 'المكتملة' : 'Completed'}</div>
               <div style="font-weight:800; font-size:15px; color:var(--green);">${completedLabs.length} / ${PHET_SIMULATIONS.length}</div>
             </div>
             <i class="fas fa-trophy" style="color:var(--green); font-size:18px;"></i>
@@ -2487,53 +3426,53 @@ function renderScienceContent(mountEl) {
         <!-- Subject Chips -->
         <div class="science-subject-chips">
           <button class="science-subject-chip ${phetSubjectFilter === 'all' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='all'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <i class="fas fa-layer-group"></i> All Labs (${PHET_SIMULATIONS.length})
+            <i class="fas fa-layer-group"></i> ${isAr ? `جميع المعامل (${PHET_SIMULATIONS.length})` : `All Labs (${PHET_SIMULATIONS.length})`}
           </button>
           <button class="science-subject-chip ${phetSubjectFilter === 'Physics' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Physics'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <i class="fas fa-bolt" style="color:#F59E0B;"></i> Physics (${subjectCounts.Physics})
+            <i class="fas fa-bolt" style="color:#F59E0B;"></i> ${isAr ? `الفيزياء (${subjectCounts.Physics})` : `Physics (${subjectCounts.Physics})`}
           </button>
           <button class="science-subject-chip ${phetSubjectFilter === 'Chemistry' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Chemistry'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <i class="fas fa-flask" style="color:#10B981;"></i> Chemistry (${subjectCounts.Chemistry})
+            <i class="fas fa-flask" style="color:#10B981;"></i> ${isAr ? `الكيمياء (${subjectCounts.Chemistry})` : `Chemistry (${subjectCounts.Chemistry})`}
           </button>
           <button class="science-subject-chip ${phetSubjectFilter === 'Biology' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Biology'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <i class="fas fa-dna" style="color:#16A34A;"></i> Biology (${subjectCounts.Biology})
+            <i class="fas fa-dna" style="color:#16A34A;"></i> ${isAr ? `الأحياء (${subjectCounts.Biology})` : `Biology (${subjectCounts.Biology})`}
           </button>
           <button class="science-subject-chip ${phetSubjectFilter === 'Earth & Space' && !phetOnlyFavorites ? 'selected' : ''}" onclick="phetSubjectFilter='Earth & Space'; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <i class="fas fa-earth-americas" style="color:#06B6D4;"></i> Earth & Space (${subjectCounts['Earth & Space']})
+            <i class="fas fa-earth-americas" style="color:#06B6D4;"></i> ${isAr ? `علوم الأرض والفضاء (${subjectCounts['Earth & Space']})` : `Earth & Space (${subjectCounts['Earth & Space']})`}
           </button>
           <button class="science-subject-chip ${phetOnlyFavorites ? 'selected' : ''}" onclick="phetOnlyFavorites=!phetOnlyFavorites; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <i class="fas fa-star" style="color:#F59E0B;"></i> Bookmarks (${favs.length})
+            <i class="fas fa-star" style="color:#F59E0B;"></i> ${isAr ? `المفضلة (${favs.length})` : `Bookmarks (${favs.length})`}
           </button>
         </div>
 
         <!-- Grade & Search Filters -->
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
           <select class="input" style="width:auto; padding:7px 12px; font-size:13px;" onchange="phetGradeFilter=this.value; renderScienceContent(document.getElementById('${mountEl.id}'))">
-            <option value="all" ${phetGradeFilter === 'all' ? 'selected' : ''}>All Grades</option>
-            <optgroup label="Primary Stage">
-              <option value="4" ${phetGradeFilter === '4' ? 'selected' : ''}>Grade 4</option>
-              <option value="5" ${phetGradeFilter === '5' ? 'selected' : ''}>Grade 5</option>
-              <option value="6" ${phetGradeFilter === '6' ? 'selected' : ''}>Grade 6</option>
+            <option value="all" ${phetGradeFilter === 'all' ? 'selected' : ''}>${isAr ? 'جميع الصفوف' : 'All Grades'}</option>
+            <optgroup label="${isAr ? 'المرحلة الابتدائية' : 'Primary Stage'}">
+              <option value="4" ${phetGradeFilter === '4' ? 'selected' : ''}>${isAr ? 'الصف الرابع الابتدائي' : 'Grade 4'}</option>
+              <option value="5" ${phetGradeFilter === '5' ? 'selected' : ''}>${isAr ? 'الصف الخامس الابتدائي' : 'Grade 5'}</option>
+              <option value="6" ${phetGradeFilter === '6' ? 'selected' : ''}>${isAr ? 'الصف السادس الابتدائي' : 'Grade 6'}</option>
             </optgroup>
-            <optgroup label="Preparatory Stage">
-              <option value="7" ${phetGradeFilter === '7' ? 'selected' : ''}>Grade 7</option>
-              <option value="8" ${phetGradeFilter === '8' ? 'selected' : ''}>Grade 8</option>
-              <option value="9" ${phetGradeFilter === '9' ? 'selected' : ''}>Grade 9</option>
+            <optgroup label="${isAr ? 'المرحلة الإعدادية' : 'Preparatory Stage'}">
+              <option value="7" ${phetGradeFilter === '7' ? 'selected' : ''}>${isAr ? 'الصف الأول الإعدادي' : 'Grade 7'}</option>
+              <option value="8" ${phetGradeFilter === '8' ? 'selected' : ''}>${isAr ? 'الصف الثاني الإعدادي' : 'Grade 8'}</option>
+              <option value="9" ${phetGradeFilter === '9' ? 'selected' : ''}>${isAr ? 'الصف الثالث الإعدادي' : 'Grade 9'}</option>
             </optgroup>
-            <optgroup label="Secondary Stage">
-              <option value="10" ${phetGradeFilter === '10' ? 'selected' : ''}>Grade 10</option>
-              <option value="11" ${phetGradeFilter === '11' ? 'selected' : ''}>Grade 11</option>
-              <option value="12" ${phetGradeFilter === '12' ? 'selected' : ''}>Grade 12 (Thanawya)</option>
+            <optgroup label="${isAr ? 'المرحلة الثانوية' : 'Secondary Stage'}">
+              <option value="10" ${phetGradeFilter === '10' ? 'selected' : ''}>${isAr ? 'الصف الأول الثانوي' : 'Grade 10'}</option>
+              <option value="11" ${phetGradeFilter === '11' ? 'selected' : ''}>${isAr ? 'الصف الثاني الثانوي' : 'Grade 11'}</option>
+              <option value="12" ${phetGradeFilter === '12' ? 'selected' : ''}>${isAr ? 'الصف الثالث الثانوي (الثانوية العامة)' : 'Grade 12 (Thanawya)'}</option>
             </optgroup>
           </select>
 
           <div style="position:relative; display:flex; align-items:center;">
-            <i class="fas fa-search" style="position:absolute; left:10px; color:var(--text2); font-size:12px; pointer-events:none;"></i>
+            <i class="fas fa-search" style="position:absolute; ${isAr ? 'right:10px;' : 'left:10px;'} color:var(--text2); font-size:12px; pointer-events:none;"></i>
             <input
               type="text"
               class="input"
-              style="padding-left:30px; width:220px; font-size:13px;"
-              placeholder="Search experiments..."
+              style="${isAr ? 'padding-right:30px; padding-left:12px;' : 'padding-left:30px;'} width:220px; font-size:13px;"
+              placeholder="${isAr ? 'ابحث في التجارب والمفاهيم...' : 'Search experiments...'}"
               value="${escHtml(phetSearchQuery)}"
               oninput="phetSearchQuery=this.value; renderScienceContent(document.getElementById('${mountEl.id}'))">
           </div>
@@ -2547,6 +3486,13 @@ function renderScienceContent(mountEl) {
         ${filtered.map(sim => {
           const isFav = favs.includes(sim.id);
           const isCompleted = completedLabs.includes(sim.id);
+          const ar = PHET_ARABIC_DATA[sim.id] || {};
+          const simName = (isAr && ar.nameAr) || sim.name;
+          const simCategory = (isAr && ar.categoryAr) || sim.category;
+          const simSubject = (isAr && ar.subjectAr) || sim.subject;
+          const simDesc = (isAr && ar.descAr) || sim.desc;
+          const simChallenge = (isAr && ar.challengeAr) || sim.challenge;
+
           return `
             <div class="science-sim-card">
               <div class="science-sim-card-header">
@@ -2555,14 +3501,14 @@ function renderScienceContent(mountEl) {
                     <i class="fas ${sim.icon}"></i>
                   </div>
                   <div>
-                    <div style="font-weight:800; font-size:15px;">${escHtml(sim.name)}</div>
-                    <div style="font-size:11px; color:var(--text2);">${sim.category}</div>
+                    <div style="font-weight:800; font-size:15px;">${escHtml(simName)}</div>
+                    <div style="font-size:11px; color:var(--text2);">${simCategory}</div>
                   </div>
                 </div>
 
                 <div style="display:flex; align-items:center; gap:4px;">
-                  ${isCompleted ? `<span title="Lab Completed" style="color:var(--green); font-size:14px; margin-right:4px;"><i class="fas fa-circle-check"></i></span>` : ''}
-                  <button class="btn btn-sm btn-ghost" style="padding:6px 8px; color:${isFav ? '#F59E0B' : 'var(--text2)'};" onclick="phetToggleFavorite('${sim.id}')" title="${isFav ? 'Remove bookmark' : 'Bookmark'}">
+                  ${isCompleted ? `<span title="${isAr ? 'تم إكمال المعمل' : 'Lab Completed'}" style="color:var(--green); font-size:14px; margin-right:4px;"><i class="fas fa-circle-check"></i></span>` : ''}
+                  <button class="btn btn-sm btn-ghost" style="padding:6px 8px; color:${isFav ? '#F59E0B' : 'var(--text2)'};" onclick="phetToggleFavorite('${sim.id}')" title="${isFav ? (isAr ? 'إزالة من المفضلة' : 'Remove bookmark') : (isAr ? 'حفظ في المفضلة' : 'Bookmark')}">
                     <i class="fas fa-star"></i>
                   </button>
                 </div>
@@ -2570,30 +3516,30 @@ function renderScienceContent(mountEl) {
 
               <div class="science-sim-card-body">
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                  <span class="tag" style="background:${sim.color}18; color:${sim.color}; font-size:10px; font-weight:700;">${sim.subject}</span>
-                  <span class="tag" style="background:var(--bg); border:1px solid var(--border); color:var(--text2); font-size:10px;">Grades ${sim.grades[0]}–${sim.grades[sim.grades.length - 1]}</span>
-                  ${sim.featured ? `<span class="tag" style="background:rgba(255,140,66,0.15); color:var(--accent); font-size:10px; font-weight:700;">★ Popular</span>` : ''}
+                  <span class="tag" style="background:${sim.color}18; color:${sim.color}; font-size:10px; font-weight:700;">${simSubject}</span>
+                  <span class="tag" style="background:var(--bg); border:1px solid var(--border); color:var(--text2); font-size:10px;">${isAr ? `الصفوف ${sim.grades[0]}–${sim.grades[sim.grades.length - 1]}` : `Grades ${sim.grades[0]}–${sim.grades[sim.grades.length - 1]}`}</span>
+                  ${sim.featured ? `<span class="tag" style="background:rgba(255,140,66,0.15); color:var(--accent); font-size:10px; font-weight:700;">${isAr ? '★ مميز وشائع' : '★ Popular'}</span>` : ''}
                 </div>
 
                 <p style="font-size:12px; color:var(--text2); line-height:1.45; margin:0; flex:1;">
-                  ${escHtml(sim.desc)}
+                  ${escHtml(simDesc)}
                 </p>
 
                 <div class="science-sim-challenge-snippet">
                   <div style="font-weight:800; font-size:11px; color:var(--teal); margin-bottom:3px; display:flex; align-items:center; gap:5px;">
-                    <i class="fas fa-compass"></i> Challenge
+                    <i class="fas fa-compass"></i> ${isAr ? 'التحدي العلمي' : 'Challenge'}
                   </div>
                   <div style="font-size:11px; color:var(--text); line-height:1.35; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
-                    ${escHtml(sim.challenge)}
+                    ${escHtml(simChallenge)}
                   </div>
                 </div>
               </div>
 
               <div class="science-sim-card-footer">
                 <button class="btn btn-sm btn-primary" style="flex:1; justify-content:center; gap:8px;" onclick="phetLaunchSim('${sim.id}')">
-                  <i class="fas fa-play"></i> Launch Virtual Lab
+                  <i class="fas fa-play"></i> ${isAr ? 'تشغيل المعمل الافتراضي' : 'Launch Virtual Lab'}
                 </button>
-                <a href="${sim.embedUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" style="padding:6px 10px;" title="Open on PhET Colorado">
+                <a href="${sim.embedUrl}" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" style="padding:6px 10px;" title="${isAr ? 'فتح على موقع PhET كولورادو' : 'Open on PhET Colorado'}">
                   <i class="fas fa-external-link-alt"></i>
                 </a>
               </div>
@@ -2604,10 +3550,10 @@ function renderScienceContent(mountEl) {
     ` : `
       <div class="card" style="text-align:center; padding:50px 20px; color:var(--text2);">
         <i class="fas fa-flask-vial" style="font-size:36px; margin-bottom:12px; opacity:0.4; display:block;"></i>
-        <h3 style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:6px;">No science simulations found</h3>
-        <p style="font-size:13px; margin-bottom:16px;">Try clearing your search query or switching subject and grade filters.</p>
+        <h3 style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:6px;">${isAr ? 'لم يتم العثور على معامل تطابق بحثك' : 'No science simulations found'}</h3>
+        <p style="font-size:13px; margin-bottom:16px;">${isAr ? 'جرّب تعديل كلمات البحث أو تغيير فلاتر المواد والمراحل الدراسية.' : 'Try clearing your search query or switching subject and grade filters.'}</p>
         <button class="btn btn-secondary btn-sm" onclick="phetSubjectFilter='all'; phetGradeFilter='all'; phetSearchQuery=''; phetOnlyFavorites=false; renderScienceContent(document.getElementById('${mountEl.id}'))">
-          Reset Filters
+          ${isAr ? 'إعادة ضبط الفلاتر' : 'Reset Filters'}
         </button>
       </div>
     `}
@@ -2627,6 +3573,7 @@ function renderLearn(){
   updateUserPanel();
   const el = document.getElementById('view-learn');
   if (!el) return;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const u = Store.get('user');
   const grade = u ? u.grade : 2;
 
@@ -2634,10 +3581,10 @@ function renderLearn(){
   const navTabsHtml = `
     <div class="learn-subnav-bar">
       <button class="learn-subnav-btn ${learnActiveTab === 'science' ? 'active' : ''}" onclick="learnActiveTab='science'; SFX.click(); renderLearn();">
-        <i class="fas fa-atom" style="font-size:16px;"></i> PhET Science Simulations
+        <i class="fas fa-atom" style="font-size:16px;"></i> ${isAr ? 'محاكاة العلوم التفاعلية PhET' : 'PhET Science Simulations'}
       </button>
       <button class="learn-subnav-btn ${learnActiveTab === 'math' ? 'active accent' : ''}" onclick="learnActiveTab='math'; SFX.click(); renderLearn();">
-        <i class="fas fa-gamepad" style="font-size:16px;"></i> Math Adventure Game
+        <i class="fas fa-gamepad" style="font-size:16px;"></i> ${isAr ? 'مغامرة الرياضيات المنهجية' : 'Math Adventure Game'}
       </button>
     </div>
   `;
@@ -2662,30 +3609,30 @@ function renderLearn(){
     el.innerHTML = `
       <div style="max-width:680px; margin:0 auto;">
         ${navTabsHtml}
-        <div class="card" style="margin-bottom:24px; text-align:left;">
+        <div class="card" style="margin-bottom:24px; text-align:${isAr ? 'right' : 'left'};">
           <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
             <div class="char-face happy"><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div></div>
             <div>
-              <div style="font-weight:700; font-size:17px;">Math Adventure</div>
-              <div style="font-size:13px; color:var(--text2);">Primary (Grades 1–6) &middot; 10 questions &middot; +10 XP each</div>
+              <div style="font-weight:700; font-size:17px;">${isAr ? 'مغامرة الرياضيات المنهجية' : 'Math Adventure'}</div>
+              <div style="font-size:13px; color:var(--text2);">${isAr ? 'المرحلة الابتدائية (الصفوف 1–6) &middot; 10 أسئلة &middot; +10 نقاط لكل إجابة' : 'Primary (Grades 1–6) &middot; 10 questions &middot; +10 XP each'}</div>
             </div>
           </div>
-          <label style="font-weight:700; font-size:14px; display:block; margin-bottom:10px;">Grade Level</label>
+          <label style="font-weight:700; font-size:14px; display:block; margin-bottom:10px;">${isAr ? 'اختر الصف الدراسي' : 'Grade Level'}</label>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
-            ${[1, 2, 3, 4, 5, 6].map(g => `<button class="grade-pill ${g === grade ? 'selected' : ''}" onclick="gameState.grade=${g}; SFX.click(); renderLearn()">${g}</button>`).join('')}
+            ${[1, 2, 3, 4, 5, 6].map(g => `<button class="grade-pill ${g === (gameState.grade || grade) ? 'selected' : ''}" onclick="gameState.grade=${g}; SFX.click(); renderLearn()">${isAr ? `الصف ${g}` : g}</button>`).join('')}
           </div>
           <button class="btn btn-lg btn-primary" style="width:100%; justify-content:center;" onclick="startMathGame()">
-            <i class="fas fa-play"></i> Start Round
+            <i class="fas fa-play"></i> ${isAr ? 'ابدأ الجولة الآن' : 'Start Round'}
           </button>
-          ${best[gameState.grade] ? `<div style="text-align:center; margin-top:12px; font-size:13px; color:var(--text2);">Best: ${best[gameState.grade].score}/${best[gameState.grade].total} &middot; ${best[gameState.grade].xp} XP</div>` : ''}
+          ${best[gameState.grade || grade] ? `<div style="text-align:center; margin-top:12px; font-size:13px; color:var(--text2);">${isAr ? `أفضل نتيجة: ${best[gameState.grade || grade].score}/${best[gameState.grade || grade].total} &middot; ${best[gameState.grade || grade].xp} نقطة` : `Best: ${best[gameState.grade || grade].score}/${best[gameState.grade || grade].total} &middot; ${best[gameState.grade || grade].xp} XP`}</div>` : ''}
         </div>
-        <div class="card" style="text-align:left;">
-          <h3 style="font-size:15px; margin-bottom:10px;"><i class="fas fa-info-circle" style="color:var(--blue);"></i> Scoring</h3>
-          <div style="font-size:13px; color:var(--text2); display:flex; flex-direction:column; gap:6px;">
-            <div><span style="color:var(--green); font-weight:700;">+10 XP</span> correct answer</div>
-            <div><span style="color:var(--accent); font-weight:700;">Streak bonus</span> 3+ in a row = +5 extra</div>
-            <div><span style="color:#D8B4FE; font-weight:700;">Surprise bonus</span> random bonus after rounds</div>
-            <div><span style="color:var(--text); font-weight:700;">No penalty</span> for wrong answers</div>
+        <div class="card" style="text-align:${isAr ? 'right' : 'left'};">
+          <h3 style="font-size:15px; margin-bottom:10px;"><i class="fas fa-info-circle" style="color:var(--blue);"></i> ${isAr ? 'نظام احتساب النقاط والمكافآت' : 'Scoring'}</h3>
+          <div style="font-size:13px; color:var(--text2); display:flex; flex-direction:column; gap:8px;">
+            <div><span style="color:var(--green); font-weight:700;">+10 XP</span> ${isAr ? 'لكل إجابة صحيحة' : 'correct answer'}</div>
+            <div><span style="color:var(--accent); font-weight:700;">${isAr ? 'مكافأة السلسلة' : 'Streak bonus'}</span> ${isAr ? '3 إجابات متتالية أو أكثر = +5 نقاط إضافية' : '3+ in a row = +5 extra'}</div>
+            <div><span style="color:#D8B4FE; font-weight:700;">${isAr ? 'مكافأة غير متوقعة' : 'Surprise bonus'}</span> ${isAr ? 'نقاط خبرة إضافية عشوائية بعد الجولات' : 'random bonus after rounds'}</div>
+            <div><span style="color:var(--text); font-weight:700;">${isAr ? 'بدون عقوبة' : 'No penalty'}</span> ${isAr ? 'لا يوجد أي خصم للنقاط عند الخطأ' : 'for wrong answers'}</div>
           </div>
         </div>
       </div>
@@ -2695,48 +3642,546 @@ function renderLearn(){
   }
 }
 
-function startMathGame(){SFX.click();gameState={active:true,questions:[],current:0,score:0,streak:0,xp:0,grade:gameState.grade,answered:false};for(let i=0;i<10;i++)gameState.questions.push(genQ(gameState.grade));renderLearn();}
+function startMathGame(){SFX.click();const u=Store.get('user');const curGrade=gameState.grade||(u?u.grade:2);gameState={active:true,questions:[],current:0,score:0,streak:0,xp:0,grade:curGrade,answered:false};for(let i=0;i<10;i++)gameState.questions.push(genQ(curGrade));renderLearn();}
 
-function renderMathQ(el){const q=gameState.questions[gameState.current];el.innerHTML=`<div style="max-width:560px;margin:0 auto"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px"><button class="btn btn-sm btn-ghost" onclick="gameState.active=false;renderLearn()"><i class="fas fa-arrow-left"></i> Quit</button><div style="display:flex;align-items:center;gap:16px;font-size:14px"><span style="color:var(--green);font-weight:700"><i class="fas fa-bolt"></i> ${gameState.xp} XP</span>${gameState.streak>=3?`<span style="color:var(--accent);font-weight:700"><i class="fas fa-fire"></i> ${gameState.streak} streak</span>`:''}</div></div><div style="display:flex;gap:6px;margin-bottom:24px">${gameState.questions.map((_,i)=>{if(i<gameState.current)return'<div class="progress-dot done"></div>';if(i===gameState.current)return'<div class="progress-dot current"></div>';return'<div class="progress-dot"></div>';}).join('')}</div><div style="display:flex;justify-content:center;margin-bottom:16px;position:relative" id="game-char-wrap"><div class="char-face" id="game-char"><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div></div></div><div class="card card-glow" style="text-align:center;margin-bottom:24px;padding:32px 20px"><div style="font-size:14px;color:var(--text2);margin-bottom:8px">Question ${gameState.current+1} of 10</div><div style="font-family:Fredoka;font-size:36px;font-weight:700">${q.q}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px" id="game-options">${q.opts.map(o=>`<button class="btn btn-secondary btn-lg" style="justify-content:center;font-size:22px;font-family:Fredoka" data-answer="${o}" onclick="answerMath('${String(o).replace(/'/g,"\\'")}')">${o}</button>`).join('')}</div></div>`;}
+function renderMathQ(el){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const q=gameState.questions[gameState.current];
+  el.innerHTML=`
+    <div style="max-width:560px;margin:0 auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <button class="btn btn-sm btn-ghost" onclick="gameState.active=false;renderLearn()">
+          <i class="fas ${isAr ? 'fa-arrow-right' : 'fa-arrow-left'}"></i> ${isAr ? 'خروج' : 'Quit'}
+        </button>
+        <div style="display:flex;align-items:center;gap:16px;font-size:14px">
+          <span style="color:var(--green);font-weight:700"><i class="fas fa-bolt"></i> ${gameState.xp} ${isAr ? 'نقطة' : 'XP'}</span>
+          ${gameState.streak>=3?`<span style="color:var(--accent);font-weight:700"><i class="fas fa-fire"></i> ${isAr ? `سلسلة ${gameState.streak}` : `${gameState.streak} streak`}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:24px">
+        ${gameState.questions.map((_,i)=>{
+          if(i<gameState.current)return'<div class="progress-dot done"></div>';
+          if(i===gameState.current)return'<div class="progress-dot current"></div>';
+          return'<div class="progress-dot"></div>';
+        }).join('')}
+      </div>
+      <div style="display:flex;justify-content:center;margin-bottom:16px;position:relative" id="game-char-wrap">
+        <div class="char-face" id="game-char"><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div></div>
+      </div>
+      <div class="card card-glow" style="text-align:center;margin-bottom:24px;padding:32px 20px">
+        <div style="font-size:14px;color:var(--text2);margin-bottom:8px">${isAr ? `السؤال ${gameState.current+1} من 10` : `Question ${gameState.current+1} of 10`}</div>
+        <div style="font-family:'Cairo',Fredoka,sans-serif;font-size:32px;font-weight:700;line-height:1.4">${q.q}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px" id="game-options">
+        ${q.opts.map(o=>`<button class="btn btn-secondary btn-lg" style="justify-content:center;font-size:20px;font-family:'Cairo',Fredoka,sans-serif" data-answer="${o}" onclick="answerMath('${String(o).replace(/'/g,"\\'")}')">${o}</button>`).join('')}
+      </div>
+    </div>
+  `;
+}
 
 function answerMath(chosen){if(gameState.answered)return;gameState.answered=true;const q=gameState.questions[gameState.current];const correct=String(chosen)===String(q.ans);const ch=document.getElementById('game-char'),btns=document.querySelectorAll('#game-options button');btns.forEach(b=>{const v=b.dataset.answer;const match=String(v)===String(q.ans);b.disabled=true;if(match){b.style.background='var(--green)';b.style.color='#0F0F14';b.style.borderColor='var(--green)';}else if(String(v)===String(chosen)&&!correct){b.style.background='var(--red)';b.style.color='#fff';b.style.borderColor='var(--red)';}else b.style.opacity='.4';});if(correct){gameState.score++;gameState.streak++;let xp=10;if(gameState.streak>=3)xp+=5;gameState.xp+=xp;if(ch)ch.className='char-face happy';SFX.correct();spawnP(document.getElementById('game-char-wrap'),['#FFD93D','#FF8C42','#7EE787','#4ECDC4']);}else{gameState.streak=0;if(ch)ch.className='char-face thinking';SFX.wrong();}setTimeout(()=>{gameState.current++;gameState.answered=false;if(gameState.current>=10)endMathGame();else renderLearn();},correct?1000:1800);}
 
 function spawnP(c,cols){if(!c)return;for(let i=0;i<12;i++){const p=document.createElement('div');p.className='particle';const a=(Math.PI*2/12)*i+Math.random()*.5,d=60+Math.random()*40,sz=6+Math.random()*6;p.style.cssText=`left:50%;top:50%;background:${cols[i%cols.length]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;width:${sz}px;height:${sz}px;`;c.appendChild(p);setTimeout(()=>p.remove(),800);}}
 
-function endMathGame(){gameState.active=false;SFX.complete();const gr=gameState.grade,game={id:Date.now(),type:'math',score:gameState.score,total:10,xp:gameState.xp,date:new Date().toISOString(),grade:gr};const games=Store.get('games');games.push(game);Store.set('games',games);Store.addXP(gameState.xp);completeQuest('game');let bx=0;if(Math.random()<.25){bx=20+Math.floor(Math.random()*31);Store.addXP(bx);setTimeout(()=>SFX.bonus(),400);}const st=gameState.score>=9?3:gameState.score>=7?2:gameState.score>=5?1:0;const sh='<i class="fas fa-star" style="color:#FFD93D;font-size:28px;margin:0 4px"></i>'.repeat(st)+'<i class="fas fa-star" style="color:var(--border);font-size:28px;margin:0 4px"></i>'.repeat(3-st);showModal(`<div style="text-align:center"><div style="margin-bottom:12px">${sh}</div><h2 style="font-size:22px;margin-bottom:4px">Round Complete!</h2><p style="color:var(--text2);margin-bottom:20px">Grade ${gr} Math</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:${bx>0?'12px':'20px'}"><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:28px;color:var(--green)">${gameState.score}/10</div><div style="font-size:12px;color:var(--text2)">Correct</div></div><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:28px;color:var(--accent)">+${gameState.xp}</div><div style="font-size:12px;color:var(--text2)">XP Earned</div></div><div class="card" style="padding:12px"><div style="font-family:Fredoka;font-size:28px;color:var(--teal)">${Math.max(...Store.get('games').filter(g=>g.type==='math'&&g.grade===gr).map(g=>g.xp))}</div><div style="font-size:12px;color:var(--text2)">Best XP</div></div></div>${bx>0?`<div class="card bonus-card bonus-pop" style="margin-bottom:20px;padding:16px;border:1px solid rgba(216,180,254,.3)"><div style="display:flex;align-items:center;gap:12px;justify-content:center"><i class="fas fa-gift" style="font-size:24px;color:#D8B4FE"></i><div style="text-align:left"><div style="font-weight:800;font-size:16px;color:#D8B4FE">Surprise Bonus!</div><div style="font-size:13px;color:var(--text2)">You earned an extra +${bx} XP</div></div></div></div>`:''}<div style="display:flex;gap:12px;justify-content:center"><button class="btn btn-secondary" onclick="closeModal();renderLearn()">Back</button><button class="btn btn-primary" onclick="closeModal();startMathGame()">Play Again</button></div></div>`);}
+function endMathGame(){
+  gameState.active=false;
+  SFX.complete();
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const gr=gameState.grade,game={id:Date.now(),type:'math',score:gameState.score,total:10,xp:gameState.xp,date:new Date().toISOString(),grade:gr};
+  const games=Store.get('games');
+  games.push(game);
+  Store.set('games',games);
+  Store.addXP(gameState.xp);
+  completeQuest('game');
+  let bx=0;
+  if(Math.random()<.25){
+    bx=20+Math.floor(Math.random()*31);
+    Store.addXP(bx);
+    setTimeout(()=>SFX.bonus(),400);
+  }
+  const st=gameState.score>=9?3:gameState.score>=7?2:gameState.score>=5?1:0;
+  const sh='<i class="fas fa-star" style="color:#FFD93D;font-size:28px;margin:0 4px"></i>'.repeat(st)+'<i class="fas fa-star" style="color:var(--border);font-size:28px;margin:0 4px"></i>'.repeat(3-st);
+  showModal(`
+    <div style="text-align:center">
+      <div style="margin-bottom:12px">${sh}</div>
+      <h2 style="font-size:22px;margin-bottom:4px">${isAr ? 'اكتملت الجولة بنجاح!' : 'Round Complete!'}</h2>
+      <p style="color:var(--text2);margin-bottom:20px">${isAr ? `رياضيات الصف ${gr}` : `Grade ${gr} Math`}</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:${bx>0?'12px':'20px'}">
+        <div class="card" style="padding:12px">
+          <div style="font-family:Fredoka;font-size:28px;color:var(--green)">${gameState.score}/10</div>
+          <div style="font-size:12px;color:var(--text2)">${isAr ? 'صحيحة' : 'Correct'}</div>
+        </div>
+        <div class="card" style="padding:12px">
+          <div style="font-family:Fredoka;font-size:28px;color:var(--accent)">+${gameState.xp}</div>
+          <div style="font-size:12px;color:var(--text2)">${isAr ? 'نقاط مكتسبة' : 'XP Earned'}</div>
+        </div>
+        <div class="card" style="padding:12px">
+          <div style="font-family:Fredoka;font-size:28px;color:var(--teal)">${Math.max(...Store.get('games').filter(g=>g.type==='math'&&g.grade===gr).map(g=>g.xp))}</div>
+          <div style="font-size:12px;color:var(--text2)">${isAr ? 'أعلى نقاط' : 'Best XP'}</div>
+        </div>
+      </div>
+      ${bx>0?`
+        <div class="card bonus-card bonus-pop" style="margin-bottom:20px;padding:16px;border:1px solid rgba(216,180,254,.3)">
+          <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+            <i class="fas fa-gift" style="font-size:24px;color:#D8B4FE"></i>
+            <div style="text-align:${isAr ? 'right' : 'left'}">
+              <div style="font-weight:800;font-size:16px;color:#D8B4FE">${isAr ? 'مكافأة غير متوقعة!' : 'Surprise Bonus!'}</div>
+              <div style="font-size:13px;color:var(--text2)">${isAr ? `حصلت على +${bx} نقطة خبرة إضافية` : `You earned an extra +${bx} XP`}</div>
+            </div>
+          </div>
+        </div>
+      `:''}
+      <div style="display:flex;gap:12px;justify-content:center">
+        <button class="btn btn-secondary" onclick="closeModal();renderLearn()">${isAr ? 'رجوع' : 'Back'}</button>
+        <button class="btn btn-primary" onclick="closeModal();startMathGame()">${isAr ? 'العب مجددًا' : 'Play Again'}</button>
+      </div>
+    </div>
+  `);
+}
 
-// ======================== RESOURCES ========================
-function renderResources(){updateUserPanel();const el=document.getElementById('view-resources'),u=Store.get('user'),grade=u?u.grade:2;el.innerHTML=`<div style="max-width:900px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Free Learning Resources</h1><p style="color:var(--text2);margin-bottom:24px">Curated for the Egyptian curriculum. All free or free-with-school-email.</p><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px"><div><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Grade</label><select class="input" id="res-grade" style="width:auto;padding:8px 12px" onchange="filterRes()"><option value="all">All Grades</option><optgroup label="Primary">${[1,2,3,4,5,6].map(g=>`<option value="${g}" ${g===grade?'selected':''}>Grade ${g}</option>`).join('')}</optgroup><optgroup label="Preparatory">${[7,8,9].map(g=>`<option value="${g}" ${g===grade?'selected':''}>Grade ${g}</option>`).join('')}</optgroup><optgroup label="Secondary">${[10,11,12].map(g=>`<option value="${g}" ${g===grade?'selected':''}>Grade ${g}</option>`).join('')}</optgroup></select></div><div><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Subject</label><select class="input" id="res-subject" style="width:auto;padding:8px 12px" onchange="filterRes()"><option value="all">All Subjects</option><option value="Math">Math</option><option value="Arabic">Arabic</option><option value="English">English</option><option value="Science">Science</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option><option value="Social Studies">Social Studies</option><option value="History">History</option><option value="Philosophy">Philosophy</option></select></div></div><div id="res-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:16px"></div><div id="res-empty" style="display:none;text-align:center;padding:40px;color:var(--text2)"><i class="fas fa-search" style="font-size:32px;margin-bottom:12px;display:block"></i>No resources match this filter.</div></div>`;filterRes();}
+// ======================== RESOURCES & ARABIC CURRICULUM ========================
+const RESOURCES_ARABIC_DATA = {
+  "MOE E-Learning Portal": {
+    name: "بوابة التعليم الإلكتروني - وزارة التربية والتعليم",
+    desc: "المصدر الرسمي الشامل لتحميل الكتب المدرسية بصيغة PDF وأدلة المعلم وكراسات التمارين والأنشطة التفاعلية لكافة المراحل والصفوف.",
+    badge: "الموقع الرسمي للوزارة"
+  },
+  "Egyptian Knowledge Bank": {
+    name: "بنك المعرفة المصري (EKB)",
+    desc: "أضخم مكتبة رقمية وطنية تفاعلية. يوفر قسم (ذاكر الآن) شروحات فيديو تفاعلية، قواميس، واختبارات قياسية وفق مناهج الوزارة.",
+    badge: "مكتبة رقمية وطنية"
+  },
+  "Madrasetna — Primary": {
+    name: "قناة مدرستنا 1 (المرحلة الابتدائية)",
+    desc: "القناة الرسمية لوزارة التربية والتعليم لشرح مناهج المرحلة الابتدائية بأسلوب مرئي مبسط وشيق مع نخبة من أفضل المعلمين.",
+    badge: "فيديوهات شرح رسمية"
+  },
+  "Madrasetna — Preparatory": {
+    name: "قناة مدرستنا 2 (المرحلة الإعدادية)",
+    desc: "الحصص والدروس التعليمية المرئية الرسمية للمرحلة الإعدادية لمواد العلوم، الرياضيات، اللغات، والدراسات الاجتماعية.",
+    badge: "المنهج الإعدادي الرسمي"
+  },
+  "Madrasetna — Secondary": {
+    name: "قناة مدرستنا (المرحلة الثانوية)",
+    desc: "شروحات مركزة لطلاب الصفوف الثانوية والثانوية العامة تركز على نواتج التعلم وأسئلة الفهم والتطبيق لنظام الامتحانات الحديث.",
+    badge: "شروحات الثانوية العامة"
+  },
+  "Nafham": {
+    name: "منصة نفهم التعليمية (Nafham)",
+    desc: "شروحات فيديو سريعة ومبسطة (من 5 إلى 15 دقيقة) لكل درس في الكتاب المدرسي خطوة بخطوة بأسلوب منظم وسهل الاستيعاب.",
+    badge: "شروحات سريعة وموجزة"
+  },
+  "Khan Academy Arabic": {
+    name: "أكاديمية خان (النسخة العربية)",
+    desc: "منصة عالمية معربة بالكامل تقدم دروس الرياضيات والعلوم وممارسات تفاعلية متدرجة من الصفر حتى الإتقان مع تقييم فوري ومستمر.",
+    badge: "رياضيات وعلوم تفاعلية"
+  },
+  "Learning Passport": {
+    name: "جواز السفر للتعلم (اليونيسف والتعليم)",
+    desc: "منصة تفاعلية بالتعاون بين منظمة اليونيسف ووزارة التربية والتعليم لتنمية مهارات القراءة والكتابة والحساب والمهارات الحياتية.",
+    badge: "تنمية المهارات الأساسية"
+  },
+  "Starfall": {
+    name: "موقع ستار فال (Starfall)",
+    desc: "منصة تفاعلية رائدة لتعليم الصوتيات (Phonics) والقراءة باللغة الإنجليزية للأطفال وصفوف التأسيس بأسلوب كرتوني مرح ومحفز.",
+    badge: "تأسيس إنجليزي وصوتيات"
+  },
+  "ABCya!": {
+    name: "منصة إيه بي سي يا (ABCya!)",
+    desc: "ألعاب تعليمية شيقة مقسمة حسب الصف الدراسي والمهارة تجمع بين التعلم والمرح في مجالات الرياضيات، القراءة، والذكاء.",
+    badge: "ألعاب تفاعلية للصفوف الأولى"
+  },
+  "Math Playground": {
+    name: "ساحة الرياضيات (Math Playground)",
+    desc: "موقع متخصص في ألعاب الحساب الذهني، ألغاز المنطق الرياضي، والمسائل اللفظية الموجهة لطلاب المرحلة الابتدائية.",
+    badge: "حساب ذهني وألغاز"
+  },
+  "Storyline Online": {
+    name: "ستوري لاين أونلاين (Storyline Online)",
+    desc: "مكتبة مرئية يقرأ فيها نجوم وممثلون مشهورون قصص الأطفال المصورة؛ ممتازة لتعزيز مهارة الاستماع والمفردات باللغة الإنجليزية.",
+    badge: "قصص إنجليزية مسموعة"
+  },
+  "SplashLearn": {
+    name: "سبلاش ليرن (SplashLearn)",
+    desc: "برنامج تدريب تفاعلي منظم على الرياضيات واللغة الإنجليزية مصمم بأسلوب شيق وجوائز تحفيزية مستمرة تحبب الطالب في المذاكرة.",
+    badge: "تمارين تحفيزية منظمة"
+  },
+  "PhET Simulations": {
+    name: "محاكاة PhET التفاعلية (مختبر كولورادو)",
+    desc: "معامل افتراضية تفاعلية لمفاهيم الفيزياء والكيمياء والرياضيات، تتيح لك تجربة تركيب الذرات، بناء الدوائر الكهربائية، واكتشاف القوانين بنفسك.",
+    badge: "معامل ومحاكاة علمية"
+  },
+  "Ducksters": {
+    name: "داكسترز الموسوعي (Ducksters)",
+    desc: "مقالات علمية وتاريخية وجغرافية مبسطة وموثوقة مصممة لأبحاث المدارس مع خرائط توضيحية واختبارات تقييم ذاتي شيقة.",
+    badge: "أبحاث تاريخ وجغرافيا"
+  },
+  "CrashCourse Kids": {
+    name: "كراش كورس للصغار (CrashCourse Kids)",
+    desc: "سلسلة فيديوهات رسوم متحركة ممتعة تشرح بطريقة مشوقة مفاهيم علوم الأرض، الفضاء، دورة المياه، وأساسيات الفيزياء الحيوية.",
+    badge: "علوم مبسطة للأطفال"
+  },
+  "GeoGebra": {
+    name: "جيوجيبرا (GeoGebra)",
+    desc: "حزمة أدوات هندسية وحاسبة بيانية تفاعلية مجانية عالمية لا غنى عنها لدروس الجبر، الهندسة الفراغية، وحساب المثلثات.",
+    badge: "رسم بياني وهندسة"
+  },
+  "Hessas Misr": {
+    name: "منصة حصص مصر",
+    desc: "موقع تعليمي معتمد يقدم دروساً تفاعلية وتدريبات ونماذج امتحانات مطابقة للمواصفات الحديثة، مجانية لطلاب المدارس بالبريد الموحد.",
+    badge: "نماذج امتحانات وتدريبات"
+  },
+  "The Organic Chemistry Tutor": {
+    name: "معلم الكيمياء والفيزياء (Organic Chem Tutor)",
+    desc: "القناة الأولى عالمياً في حل آلاف مسائل وتمارين الفيزياء والرياضيات والكيمياء خطوة بخطوة بالإنجليزية وبوضوح استثنائي.",
+    badge: "حل مسائل تفصيلي"
+  },
+  "CrashCourse": {
+    name: "كراش كورس (CrashCourse)",
+    desc: "شروحات سريعة وعالية الإنتاجية لدروس الفلسفة، التاريخ العالمي، الأحياء، والفيزياء للمرحلتين الإعدادية والثانوية.",
+    badge: "مفاهيم متقدمة وشاملة"
+  },
+  "Flipping Physics": {
+    name: "فيزياء بالتجارب الحية (Flipping Physics)",
+    desc: "شروحات فيزيائية ممتعة مدعومة بتجارب حقيقية ورسوم توضيحية، تشرح مفاهيم الميكانيكا وقوانين نيوتن وحركة المقذوفات.",
+    badge: "تجارب واقعية للفيزياء"
+  },
+  "MIT OpenCourseWare": {
+    name: "كورسات معهد ماساتشوستس (MIT OCW)",
+    desc: "مواد ومحاضرات دراسية جامعية مجانية من معهد MIT المرموق، مناسبة لطلاب الثانوية المتميزين الراغبين في الاستعداد للمسار الجامعي.",
+    badge: "مستوى متقدم وعالمي"
+  }
+};
 
-function filterRes(){const g=document.getElementById('res-grade').value,s=document.getElementById('res-subject').value,f=RESOURCES.filter(r=>{if(g!=='all'&&!r.grades.includes(parseInt(g)))return false;if(s!=='all'&&!r.subjects.includes(s))return false;return true;}),grid=document.getElementById('res-grid'),empty=document.getElementById('res-empty');if(!f.length){grid.innerHTML='';empty.style.display='block';return;}empty.style.display='none';const colors={Math:'rgba(255,140,66,.12);color:var(--accent)',Arabic:'rgba(239,68,68,.12);color:#EF4444',English:'rgba(88,166,255,.12);color:var(--blue)',Science:'rgba(78,205,196,.12);color:var(--teal)',Physics:'rgba(168,85,247,.12);color:#A855F7',Chemistry:'rgba(6,182,212,.12);color:#06B6D4',Biology:'rgba(34,197,94,.12);color:#22C55E','Social Studies':'rgba(251,191,36,.12);color:#FBBF24',History:'rgba(251,191,36,.12);color:#FBBF24',Philosophy:'rgba(236,72,153,.12);color:#EC4899'};grid.innerHTML=f.map(r=>{
-  const isPhet = r.name === 'PhET Simulations';
-  return `<div class="res-card" style="display:flex;flex-direction:column;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:40px;height:40px;border-radius:10px;background:${r.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas ${r.icon}" style="color:${r.color};font-size:16px"></i></div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">${r.subjects.map(x=>`<span class="tag" style="background:${colors[x]||'rgba(78,205,196,.12);color:var(--teal)'};font-size:10px;padding:2px 6px">${x}</span>`).join('')}</div></div><a href="${r.url}" target="_blank" rel="noopener" onclick="completeQuest('resource');" title="Open website" style="color:var(--text2);font-size:12px"><i class="fas fa-external-link-alt"></i></a></div><p style="font-size:13px;color:var(--text2);line-height:1.4">${r.desc}</p></div><div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:11px;color:var(--text2)">Grades ${r.grades[0]}–${r.grades[r.grades.length-1]}</div>${isPhet?`<button class="btn btn-primary btn-sm" style="font-size:11px;padding:4px 10px;gap:6px" onclick="navigate('science')"><i class="fas fa-flask-vial"></i> Launch Labs</button>`:`<a href="${r.url}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:11px;padding:4px 10px" onclick="completeQuest('resource');">Visit</a>`}</div></div>`;}).join('');}
+const RES_SUBJECT_AR = {
+  'Math': 'الرياضيات',
+  'Arabic': 'اللغة العربية',
+  'English': 'اللغة الإنجليزية',
+  'Science': 'العلوم',
+  'Physics': 'الفيزياء',
+  'Chemistry': 'الكيمياء',
+  'Biology': 'الأحياء',
+  'Social Studies': 'الدراسات الاجتماعية',
+  'History': 'التاريخ',
+  'Philosophy': 'الفلسفة والمنطق'
+};
+
+function formatResourceGrades(grades, isAr) {
+  if (!grades || !grades.length) return '';
+  if (grades.length === 12 && grades[0] === 1 && grades[11] === 12) {
+    return isAr ? 'جميع المراحل (1–12)' : 'All Grades (1–12)';
+  }
+  if (grades.length === 1) {
+    if (!isAr) return `Grade ${grades[0]}`;
+    if (grades[0] <= 6) return `الصف ${grades[0]} الابتدائي`;
+    if (grades[0] <= 9) return `الصف ${grades[0]-6} الإعدادي`;
+    return `الصف ${grades[0]-9} الثانوي`;
+  }
+  const min = grades[0], max = grades[grades.length - 1];
+  return isAr ? `الصفوف ${min} إلى ${max}` : `Grades ${min}–${max}`;
+}
+
+function renderResources(){
+  updateUserPanel();
+  const el = document.getElementById('view-resources');
+  if (!el) return;
+  const u = Store.get('user'), grade = u ? u.grade : 2;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+
+  el.innerHTML = `
+    <div style="max-width:920px;margin:0 auto" ${isAr ? 'dir="rtl"' : ''}>
+      <!-- Header -->
+      <div style="margin-bottom:20px">
+        <h1 style="font-size:26px;font-weight:700;margin-bottom:6px">
+          ${isAr ? '<i class="fas fa-book-open" style="color:var(--teal);margin-left:8px"></i> مصادر التعلّم المجانية' : 'Free Learning Resources'}
+        </h1>
+        <p style="color:var(--text2);margin-bottom:0">
+          ${isAr ? 'مختارة بعناية لدعم طلاب المناهج المصرية والمراحل المختلفة. جميعها مجانية بالكامل أو بحساب البريد المدرسي الموحد.' : 'Curated for the Egyptian curriculum. All free or free-with-school-email.'}
+        </p>
+      </div>
+
+      <!-- Egyptian Unified Email Guidance Banner -->
+      <div class="card" style="margin-bottom:20px; padding:14px 18px; background:linear-gradient(135deg, rgba(78,205,196,0.08) 0%, rgba(88,166,255,0.08) 100%); border:1px solid rgba(78,205,196,0.25); display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="width:42px;height:42px;border-radius:12px;background:rgba(78,205,196,0.2);display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:18px;flex-shrink:0">
+          <i class="fas fa-school"></i>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:2px">
+            ${isAr ? 'تنويه لطلاب المدارس في مصر' : 'Notice for Egyptian Students'}
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.4">
+            ${isAr 
+              ? 'يمكنك تسجيل الدخول إلى منصة <strong>حصص مصر</strong> و<strong>بنك المعرفة المصري (EKB)</strong> مجاناً باستخدام البريد الإلكتروني المدرسي الموحد (@moe.edu.eg) للوصول إلى كافة المناهج وبنوك الأسئلة الرسمية.' 
+              : 'You can access <strong>Hessas Misr</strong> and the <strong>Egyptian Knowledge Bank (EKB)</strong> for free with your official school email (@moe.edu.eg).'}
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+        <div style="flex:1;min-width:200px">
+          <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">
+            <i class="fas fa-search" style="margin-${isAr?'left':'right'}:4px"></i> ${isAr ? 'بحث سريع' : 'Search'}
+          </label>
+          <input type="text" id="res-search" class="input" placeholder="${isAr ? 'ابحث بالاسم، المادة، أو الكلمات المفتاحية...' : 'Search by name, subject, or keywords...'}" oninput="filterRes()" style="padding:8px 12px;width:100%">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">
+            <i class="fas fa-graduation-cap" style="margin-${isAr?'left':'right'}:4px"></i> ${isAr ? 'المرحلة والصف' : 'Grade'}
+          </label>
+          <select class="input" id="res-grade" style="width:auto;padding:8px 12px" onchange="filterRes()">
+            <option value="all">${isAr ? 'جميع الصفوف الدراسية' : 'All Grades'}</option>
+            <optgroup label="${isAr ? 'المرحلة الابتدائية' : 'Primary'}">
+              ${[1,2,3,4,5,6].map(g=>`<option value="${g}" ${g===grade?'selected':''}>${isAr ? `الصف ${['الأول','الثاني','الثالث','الرابع','الخامس','السادس'][g-1]} الابتدائي` : `Grade ${g}`}</option>`).join('')}
+            </optgroup>
+            <optgroup label="${isAr ? 'المرحلة الإعدادية' : 'Preparatory'}">
+              ${[7,8,9].map(g=>`<option value="${g}" ${g===grade?'selected':''}>${isAr ? `الصف ${['الأول','الثاني','الثالث'][g-7]} الإعدادي` : `Grade ${g}`}</option>`).join('')}
+            </optgroup>
+            <optgroup label="${isAr ? 'المرحلة الثانوية' : 'Secondary'}">
+              <option value="10" ${grade===10?'selected':''}>${isAr ? 'الصف الأول الثانوي' : 'Grade 10'}</option>
+              <option value="11" ${grade===11?'selected':''}>${isAr ? 'الصف الثاني الثانوي' : 'Grade 11'}</option>
+              <option value="12" ${grade===12?'selected':''}>${isAr ? 'الصف الثالث الثانوي (الثانوية العامة)' : 'Grade 12'}</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">
+            <i class="fas fa-shapes" style="margin-${isAr?'left':'right'}:4px"></i> ${isAr ? 'المادة الدراسية' : 'Subject'}
+          </label>
+          <select class="input" id="res-subject" style="width:auto;padding:8px 12px" onchange="filterRes()">
+            <option value="all">${isAr ? 'جميع المواد الدراسية' : 'All Subjects'}</option>
+            <option value="Math">${isAr ? 'الرياضيات' : 'Math'}</option>
+            <option value="Arabic">${isAr ? 'اللغة العربية' : 'Arabic'}</option>
+            <option value="English">${isAr ? 'اللغة الإنجليزية' : 'English'}</option>
+            <option value="Science">${isAr ? 'العلوم العامة' : 'Science'}</option>
+            <option value="Physics">${isAr ? 'الفيزياء' : 'Physics'}</option>
+            <option value="Chemistry">${isAr ? 'الكيمياء' : 'Chemistry'}</option>
+            <option value="Biology">${isAr ? 'الأحياء' : 'Biology'}</option>
+            <option value="Social Studies">${isAr ? 'الدراسات الاجتماعية' : 'Social Studies'}</option>
+            <option value="History">${isAr ? 'التاريخ' : 'History'}</option>
+            <option value="Philosophy">${isAr ? 'الفلسفة والمنطق' : 'Philosophy'}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Grid & Empty State -->
+      <div id="res-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:16px"></div>
+      <div id="res-empty" style="display:none;text-align:center;padding:40px;color:var(--text2)">
+        <i class="fas fa-search" style="font-size:32px;margin-bottom:12px;display:block"></i>
+        ${isAr ? 'لا توجد مصادر تعليمية تطابق خيارات التصفية الحالية.' : 'No resources match this filter.'}
+      </div>
+    </div>`;
+  filterRes();
+}
+
+function filterRes(){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const gradeEl = document.getElementById('res-grade');
+  const subjEl = document.getElementById('res-subject');
+  const searchEl = document.getElementById('res-search');
+
+  const g = gradeEl ? gradeEl.value : 'all';
+  const s = subjEl ? subjEl.value : 'all';
+  const q = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+  const f = RESOURCES.filter(r => {
+    if (g !== 'all' && !r.grades.includes(parseInt(g))) return false;
+    if (s !== 'all' && !r.subjects.includes(s)) return false;
+    if (q) {
+      const arData = RESOURCES_ARABIC_DATA[r.name] || {};
+      const matchEn = r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q) || r.subjects.some(sub=>sub.toLowerCase().includes(q));
+      const matchAr = (arData.name && arData.name.toLowerCase().includes(q)) || 
+                      (arData.desc && arData.desc.toLowerCase().includes(q)) ||
+                      (arData.badge && arData.badge.toLowerCase().includes(q)) ||
+                      r.subjects.some(sub => (RES_SUBJECT_AR[sub] || '').toLowerCase().includes(q));
+      if (!matchEn && !matchAr) return false;
+    }
+    return true;
+  });
+
+  const grid = document.getElementById('res-grid'), empty = document.getElementById('res-empty');
+  if (!grid) return;
+  if (!f.length) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const colors = {
+    Math: 'rgba(255,140,66,.12);color:var(--accent)',
+    Arabic: 'rgba(239,68,68,.12);color:#EF4444',
+    English: 'rgba(88,166,255,.12);color:var(--blue)',
+    Science: 'rgba(78,205,196,.12);color:var(--teal)',
+    Physics: 'rgba(168,85,247,.12);color:#A855F7',
+    Chemistry: 'rgba(6,182,212,.12);color:#06B6D4',
+    Biology: 'rgba(34,197,94,.12);color:#22C55E',
+    'Social Studies': 'rgba(251,191,36,.12);color:#FBBF24',
+    History: 'rgba(251,191,36,.12);color:#FBBF24',
+    Philosophy: 'rgba(236,72,153,.12);color:#EC4899'
+  };
+
+  grid.innerHTML = f.map(r => {
+    const isPhet = r.name === 'PhET Simulations';
+    const arData = RESOURCES_ARABIC_DATA[r.name] || {};
+    const displayName = isAr && arData.name ? arData.name : r.name;
+    const displayDesc = isAr && arData.desc ? arData.desc : r.desc;
+    const displayBadge = isAr && arData.badge 
+      ? `<span style="display:inline-flex;align-items:center;font-size:10px;padding:2px 8px;border-radius:12px;background:rgba(78,205,196,0.14);color:var(--teal);font-weight:600;margin-top:4px"><i class="fas fa-check-circle" style="margin-${isAr?'left':'right'}:4px"></i>${arData.badge}</span>` 
+      : '';
+    const gradesText = formatResourceGrades(r.grades, isAr);
+
+    return `
+      <div class="res-card" style="display:flex;flex-direction:column;justify-content:space-between;padding:16px;border-radius:12px;background:var(--card);border:1px solid var(--border);transition:transform 0.2s,box-shadow 0.2s;" onmouseenter="this.style.borderColor='var(--teal)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="width:42px;height:42px;border-radius:12px;background:${r.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="fas ${r.icon}" style="color:${r.color};font-size:17px"></i>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${displayName}">
+                ${displayName}
+              </div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">
+                ${r.subjects.map(x=>`<span class="tag" style="background:${colors[x]||'rgba(78,205,196,.12);color:var(--teal)'};font-size:10px;padding:2px 6px">${isAr ? (RES_SUBJECT_AR[x] || x) : x}</span>`).join('')}
+              </div>
+            </div>
+            <a href="${r.url}" target="_blank" rel="noopener" onclick="completeQuest('resource');" title="${isAr ? 'فتح الرابط في نافذة جديدة' : 'Open website'}" style="color:var(--text2);font-size:13px;padding:4px">
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+          ${displayBadge ? `<div style="margin-bottom:8px">${displayBadge}</div>` : ''}
+          <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:0">${displayDesc}</p>
+        </div>
+        <div style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div style="font-size:11px;color:var(--text2);font-weight:600">
+            <i class="fas fa-layer-group" style="margin-${isAr?'left':'right'}:4px;color:var(--accent)"></i> ${gradesText}
+          </div>
+          ${isPhet
+            ? `<button class="btn btn-primary btn-sm" style="font-size:11px;padding:5px 12px;gap:6px" onclick="navigate('science')"><i class="fas fa-flask-vial"></i> ${isAr ? 'فتح مختبر العلوم' : 'Launch Labs'}</button>`
+            : `<a href="${r.url}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:11px;padding:5px 12px;gap:6px" onclick="completeQuest('resource');"><i class="fas fa-arrow-up-right-from-square"></i> ${isAr ? 'زيارة المنصة' : 'Visit'}</a>`}
+        </div>
+      </div>`;
+  }).join('');
+}
 
 // ======================== PROGRESS ========================
 let progressChart=null;
 function renderProgress(){updateUserPanel();const el=document.getElementById('view-progress'),ts=Store.get('sessions').length,tg=Store.get('games').length,tfm=Store.get('sessions').reduce((s,x)=>s+x.duration,0),txp=Store.get('totalXP'),ad=ts>0?(Store.get('sessions').reduce((s,x)=>s+x.distractions,0)/ts).toFixed(1):'0';const labels=[],fd=[],xd=[];for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*86400000);labels.push(d.toLocaleDateString('en',{weekday:'short'}));const ds=d.toDateString();fd.push(Store.get('sessions').filter(s=>new Date(s.date).toDateString()===ds).reduce((s,x)=>s+x.duration,0));xd.push(Store.get('games').filter(g=>new Date(g.date).toDateString()===ds).reduce((s,g)=>s+g.xp,0));}const games=Store.get('games').filter(g=>new Date(g.date).getTime()>Date.now()-7*86400000);const sessions=Store.get('sessions');el.innerHTML=`<div style="max-width:900px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Your Progress</h1><p style="color:var(--text2);margin-bottom:28px">Every minute counts.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:28px"><div class="card stat-card"><div class="stat-num" style="color:var(--teal)">${tfm}m</div><div class="stat-label">Total focus</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--accent)">${txp}</div><div class="stat-label">Total XP</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--green)">${ts}</div><div class="stat-label">Sessions</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--blue)">${tg}</div><div class="stat-label">Games played</div></div><div class="card stat-card"><div class="stat-num" style="color:var(--text)">${ad}</div><div class="stat-label">Avg distractions</div></div></div><div class="card" style="margin-bottom:28px"><h3 style="font-size:16px;margin-bottom:16px">Last 7 Days</h3><div style="position:relative;height:260px"><canvas id="progress-chart"></canvas></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px"><div class="card"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-bullseye" style="color:var(--teal)"></i> Recent Focus Sessions</h3>${!sessions.length?'<p style="color:var(--text2);font-size:14px">No focus sessions yet.</p>':`<div style="display:flex;flex-direction:column;gap:8px">${sessions.slice(-8).reverse().map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:10px"><div style="width:36px;height:36px;border-radius:8px;background:var(--teal-g);display:flex;align-items:center;justify-content:center"><i class="fas fa-clock" style="color:var(--teal);font-size:14px"></i></div><div style="flex:1"><div style="font-weight:700;font-size:14px">${escHtml(s.task)}</div><div style="font-size:12px;color:var(--text2)">${new Date(s.date).toLocaleDateString()} &middot; ${s.distractions} distraction${s.distractions!==1?'s':''}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:var(--teal)">${s.duration}m</div><div style="font-size:12px;color:var(--green)">+${s.duration*2} XP</div></div></div>`).join('')}</div>`}</div><div class="card"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-gamepad" style="color:var(--accent)"></i> Recent Games</h3>${!games.length?'<p style="color:var(--text2);font-size:14px">No games played recently.</p>':`<div style="display:flex;flex-direction:column;gap:8px">${games.slice(-8).reverse().map(g=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:10px"><div style="width:36px;height:36px;border-radius:8px;background:rgba(255,140,66,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-gamepad" style="color:var(--accent);font-size:14px"></i></div><div style="flex:1"><div style="font-weight:700;font-size:14px">Grade ${g.grade} Math</div><div style="font-size:12px;color:var(--text2)">${new Date(g.date).toLocaleDateString()}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:var(--green)">${g.score}/${g.total}</div><div style="font-size:12px;color:var(--accent)">+${g.xp} XP</div></div></div>`).join('')}</div>`}</div></div></div>`;if(progressChart)progressChart.destroy();const ctx=document.getElementById('progress-chart');if(ctx){progressChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Focus (min)',data:fd,backgroundColor:'rgba(78,205,196,0.6)',borderColor:'#4ECDC4',borderWidth:1,borderRadius:6,barPercentage:.5},{label:'XP Earned',data:xd,backgroundColor:'rgba(255,140,66,0.6)',borderColor:'#FF8C42',borderWidth:1,borderRadius:6,barPercentage:.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9B97A0',font:{family:'Nunito',weight:'600'}}}},scales:{x:{grid:{color:'rgba(42,42,61,0.5)'},ticks:{color:'#9B97A0',font:{family:'Nunito'}}},y:{grid:{color:'rgba(42,42,61,0.5)'},ticks:{color:'#9B97A0',font:{family:'Nunito'}},beginAtZero:true}}}});}}
 
 // ======================== SETTINGS ========================
-function renderSettings(){updateUserPanel();const el=document.getElementById('view-settings'),u=Store.get('user')||{name:'',grade:2,color:'#FF8C42'},s=Store.get('settings'),thoughts=Store.get('thoughts')||[],sched=getScheduleSettings();
-const gradeSections=(sel)=>`<div style="margin-bottom:6px"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Primary</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}</div></div><div style="margin-bottom:6px"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Preparatory</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[7,8,9].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}</div></div><div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Secondary (Thanawya Amma)</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[10,11,12].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}</div></div>`;
-  el.innerHTML=`<div style="max-width:700px;margin:0 auto"><h1 style="font-size:26px;font-weight:700;margin-bottom:6px">Settings</h1><p style="color:var(--text2);margin-bottom:28px">Customize Spark.</p>
-    <div class="card" style="margin-bottom:20px"><h3 style="font-size:16px;margin-bottom:14px"><i class="fas fa-user" style="color:var(--accent);margin-right:8px"></i>Profile</h3><div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Name</label><input class="input" id="set-name" value="${u.name}" placeholder="Your name"></div><div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Grade</label>${gradeSections(u.grade)}</div><div><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Color</label>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-  ${(function() {
-    const ownedColors = Store.get('inventory').colors || ['#FF8C42'];
-    return ['#FF8C42','#4ECDC4','#FF6B6B','#58A6FF','#A855F7','#22C55E','#EC4899','#FBBF24'].map(c => {
-      const isOwned = ownedColors.includes(c);
-      if (isOwned) {
-        return `<div class="color-opt ${c===u.color?'selected':''}" style="background:${c}" data-color="${c}" onclick="document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')"></div>`;
-      } else {
-        return `<div class="color-opt locked-color" style="background:${c}; position:relative; display:flex; align-items:center; justify-content:center; opacity:0.4; cursor:pointer;" onclick="navigate('store'); toast('Unlock this color in the Store first!','info')">
-          <i class="fas fa-lock" style="font-size:11px; color:#fff;"></i>
-        </div>`;
-      }
-    }).join('');
-  })()}
-</div></div><button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="saveProfile()">Save Profile</button></div>
-<div><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Default focus duration</label><div style="display:flex;gap:6px">${[5,10,15,20,25,30,45,60].map(m=>`<button class="grade-pill ${m===s.focusDuration?'selected':''}" onclick="Store.get('settings').focusDuration=${m};Store.save();SFX.click();renderSettings()">${m} min</button>`).join('')}</div></div><div style="margin-top:12px;"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Default break duration</label><div style="display:flex;gap:6px">${[3, 5, 10].map(m => `<button class="grade-pill ${m === s.breakDuration ? 'selected' : ''}" onclick="Store.get('settings').breakDuration=${m};Store.save();SFX.click();renderSettings()">${m} min</button>`).join('')}</div></div></div>
+function renderSettings(){
+  updateUserPanel();
+  const el=document.getElementById('view-settings');
+  const u=Store.get('user')||{name:'',grade:2,color:'#FF8C42'};
+  const s=Store.get('settings');
+  const thoughts=Store.get('thoughts')||[];
+  const sched=getScheduleSettings();
+  const isAr = currentLang() === 'ar';
+
+  const gradeSections=(sel)=>`
+    <div style="margin-bottom:6px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isAr ? 'المرحلة الابتدائية' : 'Primary'}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${[1,2,3,4,5,6].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}
+      </div>
+    </div>
+    <div style="margin-bottom:6px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isAr ? 'المرحلة الإعدادية' : 'Preparatory'}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${[7,8,9].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isAr ? 'المرحلة الثانوية (الثانوية العامة)' : 'Secondary (Thanawya Amma)'}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${[10,11,12].map(g=>`<button class="grade-pill ${g===sel?'selected':''}" onclick="document.querySelectorAll('#view-settings .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected');this.dataset.val='${g}'" data-val="${g}">${g}</button>`).join('')}
+      </div>
+    </div>
+  `;
+
+  el.innerHTML=`
+    <div style="max-width:700px;margin:0 auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <h1 style="font-size:26px;font-weight:700;margin-bottom:4px">${isAr ? 'الإعدادات والتخصيص' : 'Settings & Preferences'}</h1>
+          <p style="color:var(--text2);">${isAr ? 'تخصيص تجربة التعلّم ومنصة منارة بالكامل.' : 'Customize your Manara learning environment.'}</p>
+        </div>
+        <div class="tag" style="background:rgba(78,205,196,0.15);color:var(--teal);padding:6px 12px;font-weight:700;">
+          <i class="fas fa-landmark"></i> ${isAr ? 'منصة منارة' : 'Manara Platform'}
+        </div>
+      </div>
+
+      <!-- Language & RTL Settings Card -->
+      <div class="card" style="margin-bottom:20px;border-color:rgba(78,205,196,0.35);">
+        <h3 style="font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-globe" style="color:var(--teal);"></i> ${isAr ? 'اللغة والاتجاه (Language & Direction)' : 'Language & Interface Direction'}
+        </h3>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">
+          ${isAr ? 'التبديل بين الواجهة العربية مع المحاذاة الكاملة من اليمين لليسار (RTL) والواجهة الإنجليزية (LTR).' : 'Toggle between full Arabic with Right-to-Left (RTL) alignment and English (LTR).'}
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="grade-pill ${isAr ? 'selected' : ''}" onclick="setLanguage('ar')" style="padding:10px 18px;font-weight:700;font-size:14px;font-family:'Cairo',sans-serif;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-check" style="display:${isAr ? 'inline-block' : 'none'};color:var(--teal);"></i> العربية (RTL)
+          </button>
+          <button class="grade-pill ${!isAr ? 'selected' : ''}" onclick="setLanguage('en')" style="padding:10px 18px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-check" style="display:${!isAr ? 'inline-block' : 'none'};color:var(--teal);"></i> English (LTR)
+          </button>
+        </div>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="card" style="margin-bottom:20px">
+        <h3 style="font-size:16px;margin-bottom:14px">
+          <i class="fas fa-user" style="color:var(--accent);margin-right:8px"></i>${isAr ? 'الملف الشخصي' : 'Profile'}
+        </h3>
+        <div style="margin-bottom:12px">
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'الاسم' : 'Name'}</label>
+          <input class="input" id="set-name" value="${u.name}" placeholder="${isAr ? 'اكتب اسمك...' : 'Your name'}">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'المرحلة والصف الدراسي' : 'Grade'}</label>
+          ${gradeSections(u.grade)}
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">${isAr ? 'اللون المميّز' : 'Color'}</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${(function() {
+              const ownedColors = Store.get('inventory').colors || ['#FF8C42'];
+              return ['#FF8C42','#4ECDC4','#FF6B6B','#58A6FF','#A855F7','#22C55E','#EC4899','#FBBF24'].map(c => {
+                const isOwned = ownedColors.includes(c);
+                if (isOwned) {
+                  return `<div class="color-opt ${c===u.color?'selected':''}" style="background:${c}" data-color="${c}" onclick="document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')"></div>`;
+                } else {
+                  return `<div class="color-opt locked-color" style="background:${c}; position:relative; display:flex; align-items:center; justify-content:center; opacity:0.4; cursor:pointer;" onclick="navigate('store'); toast('${isAr ? 'قم بفتح هذا اللون من المتجر أولاً!' : 'Unlock this color in the Store first!'}','info')">
+                    <i class="fas fa-lock" style="font-size:11px; color:#fff;"></i>
+                  </div>`;
+                }
+              }).join('');
+            })()}
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="saveProfile()">${isAr ? 'حفظ الملف الشخصي' : 'Save Profile'}</button>
+      </div>
+
+      <!-- Focus Durations Card -->
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="font-size:16px;margin-bottom:14px">
+          <i class="fas fa-clock" style="color:var(--accent);margin-right:8px"></i>${isAr ? 'توقيتات جلسات التركيز' : 'Focus Timer Durations'}
+        </h3>
+        <div>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">${isAr ? 'مدة التركيز الافتراضية' : 'Default focus duration'}</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${[5,10,15,20,25,30,45,60].map(m=>`<button class="grade-pill ${m===s.focusDuration?'selected':''}" onclick="Store.get('settings').focusDuration=${m};Store.save();SFX.click();renderSettings()">${m} ${isAr ? 'دقيقة' : 'min'}</button>`).join('')}
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">${isAr ? 'مدة الاستراحة الافتراضية' : 'Default break duration'}</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${[3, 5, 10].map(m => `<button class="grade-pill ${m === s.breakDuration ? 'selected' : ''}" onclick="Store.get('settings').breakDuration=${m};Store.save();SFX.click();renderSettings()">${m} ${isAr ? 'دقيقة' : 'min'}</button>`).join('')}
+          </div>
+        </div>
+      </div>
 
     <!-- Schedule & Timetable Customization -->
     <div class="card" style="margin-bottom:20px;border-color:rgba(78,205,196,.25)">
@@ -2874,6 +4319,68 @@ let savedUserFormulas = [
   'z = \\frac{x^2 - y^2}{4}',
   '\\int_{0}^{\\pi} \\sin(x)\\,dx = 2'
 ];
+
+// ======================== CALCULATOR ARABIC LOCALIZATION DATA ========================
+const CALC_ARABIC_DATA = {
+  categories: {
+    'Algebra & Polynomials': 'الجبر وكثيرات الحدود',
+    'Trigonometry & Polar Waves': 'حساب المثلثات والموجات القطبية',
+    'Calculus & Tangents': 'التفاضل والتكامل والمماسات',
+    'Conics & Statistics': 'القطوع المخروطية والإحصاء',
+    'algebra': 'الجبر والهندسة',
+    'trig': 'حساب المثلثات',
+    'calculus': 'التفاضل والتكامل',
+    'constants': 'الثوابت العلمية'
+  },
+  desmosItems: {
+    'Quadratic Parabola': { nameAr: 'القطع المكافئ من الدرجة الثانية', descAr: 'رأس المنحنى عند (2, -1) ونقاط التقاطع عند س = 1, 3' },
+    'Cubic with Local Extrema': { nameAr: 'دالة تكعيبية مع نهايات عظمى وصغرى', descAr: 'نقاط انقلاب ونهايات محلية عظمى وصغرى' },
+    'Factored Polynomial': { nameAr: 'كثيرة حدود مفككة إلى عوامل', descAr: 'منحنى متعدد الأصفار عند -1, 2, 3' },
+    'Rational Hyperbola': { nameAr: 'دالة كسرية متماثلة', descAr: 'منحنى كسري متماثل ومحدود' },
+    'Harmonic Sine Wave': { nameAr: 'موجة جيبية توافقية', descAr: 'سعة الموجة 2 والتردد الزاوي 3' },
+    'Damped Oscillation': { nameAr: 'اهتزاز متخامد أسياً', descAr: 'حركة توافقية بتخميد أسي طبيعي' },
+    'Polar 5-Petal Rose': { nameAr: 'وردة قطبية خماسية البتلات', descAr: 'منحنى قطبي زهري خماسي متماثل' },
+    'Tangent Asymptotes': { nameAr: 'دالة الظل والخطوط التقاربية', descAr: 'منحنيات دورية بخطوط تقارب رأسية' },
+    'Function & Derivative': { nameAr: 'الدالة الأصلية ومشتقتها الأولى', descAr: "كثيرة حدود مع رسم مشتقتها f'(x)" },
+    'Dynamic Tangent Slider': { nameAr: 'مماس ديناميكي منزلق للمنحنى', descAr: 'خط مماس يتحرك بسلاسة على المنحنى' },
+    'Accumulation Integral': { nameAr: 'دالة المساحة التراكمية (تكامل)', descAr: 'تكامل تراكمي لموجة الجيب' },
+    'Taylor Series Polynomial': { nameAr: 'كثيرة حدود متسلسلة تايلور', descAr: 'تقريب تايلور من الدرجة الخامسة لدالة جا(س)' },
+    'Standard Circle': { nameAr: 'معادلة الدائرة القياسية', descAr: 'نصف قطرها 5 ومركزها نقطة الأصل' },
+    'Centered Ellipse': { nameAr: 'قطع ناقص متمركز', descAr: 'المحور الأكبر 6 والمحور الأصغر 4' },
+    'Normal Bell Distribution': { nameAr: 'منحنى التوزيع الطبيعي الغاوسي', descAr: 'منحنى الجرس للتوزيع الاحتمالي القياسي' },
+    'Hyperbola Conic': { nameAr: 'قطع زائد مخروطي', descAr: 'منحنى مخروطي بخطوط تقاربية' }
+  },
+  threeItems: {
+    'Hyperbolic Paraboloid (Saddle)': { nameAr: 'السطح السرجي (البارابولويد الزائدي)', descAr: 'سطح سرجي كلاسيكي مع نقطة انقلاب صغرى وعظمى عند الأصل' },
+    'Sinc Wave Ripple': { nameAr: 'موجة التموج الدائري (Sinc)', descAr: 'اضطراب موجي دائري ينتشر في السائل' },
+    'Circular Paraboloid Bowl': { nameAr: 'وعاء القطع المكافئ الدائري', descAr: 'سطح مكافئ محدب مع نقطة نهاية صغرى مطلقة' },
+    'Monkey Saddle': { nameAr: 'سرج القرد ثلاثي الانخفاضات', descAr: 'سطح رياضي ذو 3 منخفضات فراغية' },
+    'Egg Carton / 2D Sine': { nameAr: 'شبكة الكرتون الجيبية 2D', descAr: 'شبكة متكررة من القمم والقيعان الدورية' },
+    'Damped Shockwave': { nameAr: 'موجة صدمية متخامدة 3D', descAr: 'نبضة طاقة ميكانيكية تتلاشى للخارج' },
+    'Gaussian Bell Curve 3D': { nameAr: 'منحنى الجرس الغاوسي 3D', descAr: 'كثافة التوزيع الاحتمالي ثنائي المتغير' },
+    'Whirlpool Spiral Wave': { nameAr: 'دوامة الموجات متحدة المركز', descAr: 'نطاقات موجية متحدة المركز تهتز بتردد عالٍ' }
+  },
+  formulas: {
+    'Quadratic Formula': { nameAr: 'القانون العام لمعادلات الدرجة الثانية', descAr: 'إيجاد الجذور الحقيقية والمركبة للمعادلة أ س² + ب س + جـ = 0' },
+    'Pythagorean Theorem': { nameAr: 'نظرية فيثاغورس الهندسية', descAr: 'العلاقة الأساسية بين أطوال أضلاع المثلث القائم الزاوية' },
+    'Difference of Squares': { nameAr: 'الفرق بين مربعين', descAr: 'متطابقة التحليل الجبري لكثيرات الحدود' },
+    'Pythagorean Trig Identity': { nameAr: 'متطابقة فيثاغورس المثلثية', descAr: 'المتطابقة الدائرية الأساسية: جا²(س) + جتا²(س) = 1 لجميع الزوايا' },
+    'Tangent Quotient': { nameAr: 'متطابقة قسمة دالة الظل', descAr: 'ظل الزاوية = الجيب ÷ جيب التمام مع خطوط التقارب الدورية' },
+    'Double Angle Sine': { nameAr: 'قانون ضعف زاوية الجيب', descAr: 'متطابقة فك ضعف الزاوية: جا(2س) = 2 جا(س) جتا(س)' },
+    'Law of Cosines': { nameAr: 'قانون جيب التمام للمثلثات', descAr: 'تعميم لنظرية فيثاغورس على أي مثلث مائل' },
+    'Power Rule (Derivative)': { nameAr: 'قاعدة القوة في التفاضل', descAr: 'مشتقة الحدود الأسية ذات الأسس الحقيقية: ن س^(ن-1)' },
+    'Exponential Derivative': { nameAr: 'مشتقة الدالة الأسية الطبيعية', descAr: 'الدالة الرياضية الحقيقية الفريدة المطابقة لمشتقتها تماماً' },
+    'Fundamental Theorem of Calculus': { nameAr: 'النظرية الأساسية في التفاضل والتكامل', descAr: 'الربط الجوهري بين علم التفاضل والتكامل المحدد' },
+    '3D Hyperbolic Paraboloid (Saddle)': { nameAr: 'السطح السرجي 3D (البارابولويد الزائدي)', descAr: 'سطح سرجي كلاسيكي مع نقطة سرجية حرجة عند الأصل' },
+    '3D Sinc Ripple Surface': { nameAr: 'سطح التموج الدائري 3D', descAr: 'انتشار الموجات الدائرية المتماثلة قطرياً في فضاء ثلاثي الأبعاد' },
+    "Euler's Identity": { nameAr: 'متطابقة أويلر الرياضية الشهيرة', descAr: 'المعادلة الأجمل في الرياضيات: توحيد الثوابت الأسية والمركبة والدائرية' },
+    'Speed of Light (c)': { nameAr: 'سرعة الضوء في الفراغ (c)', descAr: 'السرعة الكونية القصوى للإشعاع الكهرومغناطيسي في الفراغ' },
+    "Planck's Constant (h)": { nameAr: 'ثابت بلانك الكمومي (h)', descAr: 'الثابت الفيزيائي الأساسي في ميكانيكا الكم' },
+    'Gravitational Constant (G)': { nameAr: 'ثابت الجذب العام لنيوتن (G)', descAr: 'الثابت الفيزيائي التجريبي في قانون الجذب الكوني لنيوتن' },
+    "Avogadro's Number (Nₐ)": { nameAr: 'عدد أفوجادرو للمول (Nₐ)', descAr: 'عدد الجسيمات أو الذرات في مول واحد من أي مادة نقية' },
+    'Golden Ratio (φ)': { nameAr: 'النسبة الذهبية الجمالية (φ)', descAr: 'النسبة الهندسية الجمالية ونهاية حدود متتالية فيبوناتشي' }
+  }
+};
 
 const DESMOS_PRESETS = [
   {
@@ -3082,6 +4589,8 @@ function renderCalculator() {
   const el = document.getElementById('view-calculator');
   if (!el) return;
 
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+
   // Restore settings if stored, migrate legacy geogebra tab to desmos
   const s = Store.get('calcSettings') || {};
   if (s.tab) calcTab = s.tab;
@@ -3089,23 +4598,25 @@ function renderCalculator() {
   if (s.angleUnit && !calcAngleUnit) calcAngleUnit = s.angleUnit;
 
   el.innerHTML = `
-    <div class="calc-container">
+    <div class="calc-container" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Header with refined typography -->
       <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
         <div>
           <h1 style="font-size:26px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:4px;">
-            <i class="fas fa-calculator" style="color:var(--teal);"></i> Mathematical Suite & Calculator
+            <i class="fas fa-calculator" style="color:var(--teal);"></i> ${isAr ? 'الآلة الحاسبة والجناح الرياضي الشامل' : 'Mathematical Suite & Calculator'}
           </h1>
           <p style="color:var(--text2); font-size:14px; max-width:720px;">
-            Unified mathematical environment featuring the Desmos 2D Graphing API, Three.js 3D Surface Plotter, Math3D.org, and a Unified KaTeX Math Renderer matching Desmos typography.
+            ${isAr
+              ? 'بيئة رياضية شاملة ومتكاملة تضم محاكي الرسوم البيانية Desmos 2D، وراسم الأسطح ثلاثية الأبعاد Three.js 3D، ومنصة Math3D، ومحرر معادلات KaTeX الفوري المطابق لخطوط Desmos.'
+              : 'Unified mathematical environment featuring the Desmos 2D Graphing API, Three.js 3D Surface Plotter, Math3D.org, and a Unified KaTeX Math Renderer matching Desmos typography.'}
           </p>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <button class="calc-mode-pill ${calcAngleUnit==='deg'?'active':''}" onclick="calcToggleAngleUnit()" title="Toggle Degrees / Radians">
-            <span class="dot"></span> ${calcAngleUnit.toUpperCase()}
+          <button class="calc-mode-pill ${calcAngleUnit==='deg'?'active':''}" onclick="calcToggleAngleUnit()" title="${isAr ? 'التبديل بين الدرجات والراديان' : 'Toggle Degrees / Radians'}">
+            <span class="dot"></span> ${isAr ? (calcAngleUnit==='deg' ? 'بالدرجات DEG' : 'بالراديان RAD') : calcAngleUnit.toUpperCase()}
           </button>
           <button class="btn btn-sm btn-ghost" onclick="showCalcHelpModal()" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
-            <i class="fas fa-circle-question"></i> Guide & Shortcuts
+            <i class="fas fa-circle-question"></i> ${isAr ? 'الدليل والاختصارات' : 'Guide & Shortcuts'}
           </button>
         </div>
       </div>
@@ -3113,22 +4624,22 @@ function renderCalculator() {
       <!-- Segmented Navigation Tabs -->
       <div class="calc-nav-tabs">
         <button class="calc-tab-btn ${calcTab==='desmos'?'active':''}" onclick="calcSetTab('desmos')">
-          <i class="fas fa-chart-line"></i> Desmos 2D Grapher
+          <i class="fas fa-chart-line"></i> ${isAr ? 'راسم Desmos 2D' : 'Desmos 2D Grapher'}
         </button>
         <button class="calc-tab-btn ${calcTab==='three3d'?'active':''}" onclick="calcSetTab('three3d')">
-          <i class="fas fa-cube"></i> 3D Studio (Three.js & Math3D)
+          <i class="fas fa-cube"></i> ${isAr ? 'استوديو 3D (Three.js & Math3D)' : '3D Studio (Three.js & Math3D)'}
         </button>
         <button class="calc-tab-btn ${calcTab==='scratchpad'?'active':''}" onclick="calcSetTab('scratchpad')">
-          <i class="fas fa-pen-to-square"></i> Unified Math Studio
+          <i class="fas fa-pen-to-square"></i> ${isAr ? 'استوديو معادلات KaTeX' : 'Unified Math Studio'}
         </button>
         <button class="calc-tab-btn ${calcTab==='native'?'active':''}" onclick="calcSetTab('native')">
-          <i class="fas fa-calculator"></i> Scientific Keypad
+          <i class="fas fa-calculator"></i> ${isAr ? 'الآلة العلمية الدقيقة' : 'Scientific Keypad'}
         </button>
         <button class="calc-tab-btn ${calcTab==='formulas'?'active':''}" onclick="calcSetTab('formulas')">
-          <i class="fas fa-square-root-variable"></i> Formulas & Constants
+          <i class="fas fa-square-root-variable"></i> ${isAr ? 'بنك القوانين والثوابت' : 'Formulas & Constants'}
         </button>
         <button class="calc-tab-btn ${calcTab==='converter'?'active':''}" onclick="calcSetTab('converter')">
-          <i class="fas fa-repeat"></i> Base & Unit Converter
+          <i class="fas fa-repeat"></i> ${isAr ? 'محول الأنظمة والزوايا' : 'Base & Unit Converter'}
         </button>
       </div>
 
@@ -3173,28 +4684,29 @@ function calcSetTab(t) {
 
 // ======================== 1. DESMOS API GRAPHING SUITE ========================
 function renderCalcDesmosTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
-    <div class="math-workstation">
+    <div class="math-workstation" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Toolbar with Actions & Helpers -->
       <div class="math-app-bar">
         <div style="display:flex; align-items:center; gap:10px;">
           <span style="font-weight:700; font-size:14px; color:var(--teal); display:inline-flex; align-items:center; gap:6px;">
-            <i class="fas fa-chart-line"></i> Desmos API 2D Graphing Calculator
+            <i class="fas fa-chart-line"></i> ${isAr ? 'حاسبة الرسوم البيانية ثنائية الأبعاد Desmos API' : 'Desmos API 2D Graphing Calculator'}
           </span>
           <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px;">
-            Official Web API
+            ${isAr ? 'واجهة الويب الرسمية' : 'Official Web API'}
           </span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">
-          <button class="btn btn-sm btn-ghost" onclick="desmosClearAll()" title="Clear all equations" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
-            <i class="fas fa-trash-can"></i> Clear All
+          <button class="btn btn-sm btn-ghost" onclick="desmosClearAll()" title="${isAr ? 'مسح كافة المعادلات' : 'Clear all equations'}" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+            <i class="fas fa-trash-can"></i> ${isAr ? 'مسح الكل' : 'Clear All'}
           </button>
-          <button class="btn btn-sm btn-ghost" onclick="desmosResetView()" title="Reset viewport" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
-            <i class="fas fa-rotate"></i> Reset View
+          <button class="btn btn-sm btn-ghost" onclick="desmosResetView()" title="${isAr ? 'إعادة ضبط المشهد' : 'Reset viewport'}" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+            <i class="fas fa-rotate"></i> ${isAr ? 'إعادة ضبط' : 'Reset View'}
           </button>
           <button class="btn btn-sm btn-teal" id="desmos-fullscreen-btn" onclick="calcToggleDesmosFullscreen()" style="font-size:12px; border-radius:10px;">
-            <i class="fas fa-expand"></i> Fullscreen
+            <i class="fas fa-expand"></i> ${isAr ? (desmosFullscreen ? 'إنهاء ملء الشاشة' : 'ملء الشاشة') : (desmosFullscreen ? 'Exit Fullscreen' : 'Fullscreen')}
           </button>
         </div>
       </div>
@@ -3206,61 +4718,68 @@ function renderCalcDesmosTab() {
           id="desmos-cmd-input"
           class="math-cmd-input"
           type="text"
-          placeholder="Type formula (e.g. y = \\sin(3x) * e^{-0.2x}, y = x^2 - 4x + 3, x^2 + y^2 = 25)..."
+          placeholder="${isAr ? 'اكتب معادلة أو دالة (مثال: y = \\sin(3x) * e^{-0.2x}، y = x^2 - 4x + 3، x^2 + y^2 = 25)...' : 'Type formula (e.g. y = \\sin(3x) * e^{-0.2x}, y = x^2 - 4x + 3, x^2 + y^2 = 25)...'}"
           onkeydown="if(event.key==='Enter'){desmosSubmitCommand();}"
         />
         <button class="btn btn-sm btn-teal" onclick="desmosSubmitCommand()" style="font-size:12px; white-space:nowrap; border-radius:8px;">
-          <i class="fas fa-paper-plane"></i> Graph in Desmos
+          <i class="fas fa-paper-plane"></i> ${isAr ? 'رسم في Desmos' : 'Graph in Desmos'}
         </button>
       </div>
 
       <!-- Instant Math Presets Ribbon -->
       <div>
         <div style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          <i class="fas fa-bolt" style="color:var(--accent);"></i> Instant Graph Presets (1-Click Plot)
+          <i class="fas fa-bolt" style="color:var(--accent);"></i> ${isAr ? 'نماذج دوال فورية (رسم بنقرة واحدة)' : 'Instant Graph Presets (1-Click Plot)'}
         </div>
         <div class="calc-preset-ribbon no-scrollbar">
-          ${DESMOS_PRESETS.flatMap(g => g.items.slice(0, 2)).map(p => `
-            <button class="calc-preset-chip" onclick="desmosPlotFormula('${escHtml(p.latex)}')" title="${escHtml(p.desc)}">
+          ${DESMOS_PRESETS.flatMap(g => g.items.slice(0, 2)).map(p => {
+            const pName = (isAr && CALC_ARABIC_DATA.desmosItems[p.name]?.nameAr) || p.name;
+            const pDesc = (isAr && CALC_ARABIC_DATA.desmosItems[p.name]?.descAr) || p.desc;
+            return `
+            <button class="calc-preset-chip" onclick="desmosPlotFormula('${escHtml(p.latex)}')" title="${escHtml(pDesc)}">
               <i class="fas fa-play" style="font-size:10px; color:var(--teal);"></i>
-              <strong>${escHtml(p.name)}:</strong>
-              <span style="font-family:monospace; color:var(--text2);">${escHtml(p.latex)}</span>
+              <strong>${escHtml(pName)}:</strong>
+              <span style="font-family:monospace; color:var(--text2);" dir="ltr">${escHtml(p.latex)}</span>
             </button>
-          `).join('')}
+          `;}).join('')}
         </div>
       </div>
 
       <!-- Main Desmos Canvas Chassis -->
-      <div id="desmos-frame-wrapper" class="desmos-frame-chassis ${desmosFullscreen ? 'fullscreen' : ''}">
+      <div id="desmos-frame-wrapper" class="desmos-frame-chassis ${desmosFullscreen ? 'fullscreen' : ''}" dir="ltr">
         <div id="desmos-calculator"></div>
       </div>
 
       <!-- Presets Reference Gallery by Mathematical Topic -->
       <div class="card" style="margin-top:4px; border-radius:16px;">
         <h3 style="font-size:15px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-lightbulb" style="color:var(--accent);"></i> Desmos Formula Gallery by Topic
+          <i class="fas fa-lightbulb" style="color:var(--accent);"></i> ${isAr ? 'معرض صيغ ومخططات Desmos حسب الموضوع' : 'Desmos Formula Gallery by Topic'}
         </h3>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;">
-          ${DESMOS_PRESETS.map(cat => `
+          ${DESMOS_PRESETS.map(cat => {
+            const catTitle = (isAr && CALC_ARABIC_DATA.categories[cat.category]) || cat.category;
+            return `
             <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px;">
               <div style="font-size:13px; font-weight:700; color:var(--teal); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                <i class="fas ${cat.icon}"></i> ${cat.category}
+                <i class="fas ${cat.icon}"></i> ${catTitle}
               </div>
               <div style="display:flex; flex-direction:column; gap:6px;">
-                ${cat.items.map(item => `
+                ${cat.items.map(item => {
+                  const itName = (isAr && CALC_ARABIC_DATA.desmosItems[item.name]?.nameAr) || item.name;
+                  return `
                   <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px; border-radius:8px; background:var(--card); font-size:12px; border:1px solid var(--border);">
                     <div style="min-width:0; flex:1;">
-                      <div style="font-weight:700; color:var(--text);">${escHtml(item.name)}</div>
-                      <div style="font-family:monospace; color:var(--text2); font-size:11px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${escHtml(item.latex)}</div>
+                      <div style="font-weight:700; color:var(--text);">${escHtml(itName)}</div>
+                      <div style="font-family:monospace; color:var(--text2); font-size:11px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" dir="ltr">${escHtml(item.latex)}</div>
                     </div>
-                    <button class="btn btn-xs btn-ghost" onclick="desmosPlotFormula('${escHtml(item.latex)}')" title="Insert & Graph" style="color:var(--teal);">
+                    <button class="btn btn-xs btn-ghost" onclick="desmosPlotFormula('${escHtml(item.latex)}')" title="${isAr ? 'إدراج ورسم' : 'Insert & Graph'}" style="color:var(--teal);">
                       <i class="fas fa-play"></i>
                     </button>
                   </div>
-                `).join('')}
+                `;}).join('')}
               </div>
             </div>
-          `).join('')}
+          `;}).join('')}
         </div>
       </div>
     </div>
@@ -3370,35 +4889,36 @@ function calcToggleDesmosFullscreen() {
 
 // ======================== 2. THREE.JS 3D VISUALIZER & MATH3D.ORG ========================
 function renderCalcThree3dTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
-    <div class="math-workstation">
+    <div class="math-workstation" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Toolbar with 3D Mode Switcher (Three.js vs Math3D.org) -->
       <div class="math-app-bar">
         <div class="math-switcher-deck">
           <button class="math-sub-pill ${calc3dMode==='three'?'active':''}" onclick="calcSet3dMode('three')">
-            <i class="fas fa-cube"></i> Three.js 3D Visualizer
+            <i class="fas fa-cube"></i> ${isAr ? 'مجسمات Three.js 3D' : 'Three.js 3D Visualizer'}
           </button>
           <button class="math-sub-pill ${calc3dMode==='math3d'?'active':''}" onclick="calcSet3dMode('math3d')">
-            <i class="fas fa-globe"></i> Math3D.org Workstation
+            <i class="fas fa-globe"></i> ${isAr ? 'منصة Math3D.org' : 'Math3D.org Workstation'}
           </button>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">
           ${calc3dMode === 'three' ? `
-            <button class="btn btn-sm btn-ghost" onclick="three3dResetCamera()" title="Reset 3D camera" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
-              <i class="fas fa-camera-rotate"></i> Reset Camera
+            <button class="btn btn-sm btn-ghost" onclick="three3dResetCamera()" title="${isAr ? 'إعادة ضبط الكاميرا' : 'Reset 3D camera'}" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+              <i class="fas fa-camera-rotate"></i> ${isAr ? 'ضبط الكاميرا' : 'Reset Camera'}
             </button>
             <button class="btn btn-sm btn-teal" id="three-fullscreen-btn" onclick="three3dToggleFullscreen()" style="font-size:12px; border-radius:10px;">
-              <i class="fas fa-expand"></i> Fullscreen
+              <i class="fas fa-expand"></i> ${isAr ? (three3dFullscreen ? 'إنهاء ملء الشاشة' : 'ملء الشاشة') : (three3dFullscreen ? 'Exit Fullscreen' : 'Fullscreen')}
             </button>
           ` : `
-            <button class="btn btn-sm btn-ghost" onclick="math3dReset()" title="Reload Math3D" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
-              <i class="fas fa-rotate"></i> Reload
+            <button class="btn btn-sm btn-ghost" onclick="math3dReset()" title="${isAr ? 'إعادة تحميل المنصة' : 'Reload Math3D'}" style="border:1px solid var(--border); font-size:12px; border-radius:10px;">
+              <i class="fas fa-rotate"></i> ${isAr ? 'تحديث' : 'Reload'}
             </button>
             <button class="btn btn-sm btn-teal" id="math3d-fullscreen-btn" onclick="math3dToggleFullscreen()" style="font-size:12px; border-radius:10px;">
-              <i class="fas fa-expand"></i> Fullscreen
+              <i class="fas fa-expand"></i> ${isAr ? (three3dFullscreen ? 'إنهاء ملء الشاشة' : 'ملء الشاشة') : (three3dFullscreen ? 'Exit Fullscreen' : 'Fullscreen')}
             </button>
-            <a href="https://www.math3d.org/" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" title="Open math3d.org in new window" style="font-size:12px; border-radius:10px;">
+            <a href="https://www.math3d.org/" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" title="${isAr ? 'فتح math3d.org في نافذة جديدة' : 'Open math3d.org in new window'}" style="font-size:12px; border-radius:10px;">
               <i class="fas fa-arrow-up-right-from-square"></i>
             </a>
           `}
@@ -3411,45 +4931,50 @@ function renderCalcThree3dTab() {
 }
 
 function renderThree3dContent() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
     <!-- Command Bar for 3D Surface Function -->
     <div class="math-cmd-panel">
-      <span style="font-weight:700; color:var(--teal); font-family:monospace; font-size:15px;">z = f(x, y) =</span>
+      <span style="font-weight:700; color:var(--teal); font-family:monospace; font-size:15px;" dir="ltr">z = f(x, y) =</span>
       <input
         id="three-formula-input"
         class="math-cmd-input"
         type="text"
+        dir="ltr"
         value="${escHtml(three3dFormula)}"
-        placeholder="Type z = f(x, y) (e.g. (x^2 - y^2)/4, 3*sin(sqrt(x^2+y^2))/sqrt(x^2+y^2), sin(x)*cos(y))..."
+        placeholder="${isAr ? 'اكتب دالة السطح z = f(x, y) (مثال: (x^2 - y^2)/4، 3*sin(sqrt(x^2+y^2))/sqrt(x^2+y^2))...' : 'Type z = f(x, y) (e.g. (x^2 - y^2)/4, 3*sin(sqrt(x^2+y^2))/sqrt(x^2+y^2), sin(x)*cos(y))...'}"
         onkeydown="if(event.key==='Enter'){three3dApplyInput();}"
       />
       <button class="btn btn-sm btn-teal" onclick="three3dApplyInput()" style="font-size:12px; white-space:nowrap; border-radius:8px;">
-        <i class="fas fa-cube"></i> Plot 3D Surface
+        <i class="fas fa-cube"></i> ${isAr ? 'رسم السطح 3D' : 'Plot 3D Surface'}
       </button>
     </div>
 
     <!-- 3D Presets Ribbon -->
     <div>
       <div style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-        <i class="fas fa-bolt" style="color:var(--accent);"></i> 3D Surface Presets
+        <i class="fas fa-bolt" style="color:var(--accent);"></i> ${isAr ? 'نماذج الأسطح ثلاثية الأبعاد الجاهزة' : '3D Surface Presets'}
       </div>
       <div class="calc-preset-ribbon no-scrollbar">
-        ${THREE_3D_PRESETS.map(p => `
-          <button class="calc-preset-chip" onclick="three3dPlotFormula('${escHtml(p.formula)}')" title="${escHtml(p.desc)}">
+        ${THREE_3D_PRESETS.map(p => {
+          const pName = (isAr && CALC_ARABIC_DATA.threeItems[p.name]?.nameAr) || p.name;
+          const pDesc = (isAr && CALC_ARABIC_DATA.threeItems[p.name]?.descAr) || p.desc;
+          return `
+          <button class="calc-preset-chip" onclick="three3dPlotFormula('${escHtml(p.formula)}')" title="${escHtml(pDesc)}">
             <i class="fas fa-cube" style="font-size:10px; color:var(--accent);"></i>
-            <strong>${escHtml(p.name)}:</strong>
-            <span style="font-family:monospace; color:var(--text2);">${escHtml(p.formula)}</span>
+            <strong>${escHtml(pName)}:</strong>
+            <span style="font-family:monospace; color:var(--text2);" dir="ltr">${escHtml(p.formula)}</span>
           </button>
-        `).join('')}
+        `;}).join('')}
       </div>
     </div>
 
     <!-- Three.js 3D Viewport Chassis -->
-    <div id="three-frame-wrapper" class="three-chassis ${three3dFullscreen ? 'fullscreen' : ''}">
+    <div id="three-frame-wrapper" class="three-chassis ${three3dFullscreen ? 'fullscreen' : ''}" dir="ltr">
       <div id="three-canvas-mount"></div>
 
       <!-- Real-Time HUD Overlay with KaTeX Math -->
-      <div class="three-overlay-hud">
+      <div class="three-overlay-hud" dir="${isAr ? 'rtl' : 'ltr'}">
         <div class="three-hud-badge">
           <i class="fas fa-cube" style="color:var(--teal);"></i>
           <span id="three-hud-formula">
@@ -3457,23 +4982,23 @@ function renderThree3dContent() {
           </span>
         </div>
         <div class="three-hud-badge" style="font-size:11px; color:#94A3B8;">
-          <i class="fas fa-arrows-up-down-left-right"></i> Drag to Rotate • Wheel to Zoom • Right-Click to Pan
+          <i class="fas fa-arrows-up-down-left-right"></i> ${isAr ? 'اسحب للتدوير • العجلة للتكبير والتصغير • زر الفأرة الأيمن للإزاحة' : 'Drag to Rotate • Wheel to Zoom • Right-Click to Pan'}
         </div>
       </div>
 
       <!-- Quick Interactive 3D Controls -->
-      <div class="three-hud-controls">
+      <div class="three-hud-controls" dir="${isAr ? 'rtl' : 'ltr'}">
         <button class="btn btn-xs btn-ghost" onclick="three3dToggleRotate()" style="background:rgba(13,17,28,0.85); color:#FFF; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
-          <i class="fas fa-arrows-spin"></i> Auto-Spin: ${three3dAutoRotate ? 'ON' : 'OFF'}
+          <i class="fas fa-arrows-spin"></i> ${isAr ? (`دوران تلقائي: ${three3dAutoRotate ? 'مفعل' : 'معطل'}`) : (`Auto-Spin: ${three3dAutoRotate ? 'ON' : 'OFF'}`)}
         </button>
         <button class="btn btn-xs btn-ghost" onclick="three3dToggleWireframe()" style="background:rgba(13,17,28,0.85); color:#FFF; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
-          <i class="fas fa-border-all"></i> Wireframe: ${three3dWireframe ? 'ON' : 'OFF'}
+          <i class="fas fa-border-all"></i> ${isAr ? (`شبكة خطوط: ${three3dWireframe ? 'مفعلة' : 'معطلة'}`) : (`Wireframe: ${three3dWireframe ? 'ON' : 'OFF'}`)}
         </button>
         <select onchange="three3dSetColormap(this.value)" style="background:rgba(13,17,28,0.85); color:#FFF; border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:11px; padding:4px 8px;">
-          <option value="neon" ${three3dColormap==='neon'?'selected':''}>Colormap: Neon Cyberpunk</option>
-          <option value="viridis" ${three3dColormap==='viridis'?'selected':''}>Colormap: Viridis</option>
-          <option value="coolwarm" ${three3dColormap==='coolwarm'?'selected':''}>Colormap: Cool-Warm</option>
-          <option value="aurora" ${three3dColormap==='aurora'?'selected':''}>Colormap: Emerald Aurora</option>
+          <option value="neon" ${three3dColormap==='neon'?'selected':''}>${isAr ? 'الألوان: نيون سايبربانك' : 'Colormap: Neon Cyberpunk'}</option>
+          <option value="viridis" ${three3dColormap==='viridis'?'selected':''}>${isAr ? 'الألوان: فيريديس العلمي' : 'Colormap: Viridis'}</option>
+          <option value="coolwarm" ${three3dColormap==='coolwarm'?'selected':''}>${isAr ? 'الألوان: بارد - دافئ' : 'Colormap: Cool-Warm'}</option>
+          <option value="aurora" ${three3dColormap==='aurora'?'selected':''}>${isAr ? 'الألوان: الشفق الزمردي' : 'Colormap: Emerald Aurora'}</option>
         </select>
       </div>
     </div>
@@ -3481,8 +5006,9 @@ function renderThree3dContent() {
 }
 
 function renderMath3dContent() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
-    <div id="math3d-frame-wrapper" class="math3d-frame-chassis ${three3dFullscreen ? 'fullscreen' : ''}">
+    <div id="math3d-frame-wrapper" class="math3d-frame-chassis ${three3dFullscreen ? 'fullscreen' : ''}" dir="ltr">
       <iframe
         id="math3d-iframe"
         src="https://www.math3d.org/"
@@ -3495,7 +5021,7 @@ function renderMath3dContent() {
     <!-- Math3D Reference Topics -->
     <div class="card" style="border-radius:16px;">
       <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-        <i class="fas fa-compass" style="color:var(--teal);"></i> Multivariable Calculus in Math3D.org
+        <i class="fas fa-compass" style="color:var(--teal);"></i> ${isAr ? 'حساب التفاضل والتكامل متعدد المتغيرات في Math3D' : 'Multivariable Calculus in Math3D.org'}
       </h3>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
         ${MATH3D_PRESETS.map(p => `
@@ -3900,33 +5426,34 @@ function three3dToggleFullscreen() {
 
 // ======================== 3. UNIFIED MATH LATEX STUDIO & SCRATCHPAD ========================
 function renderCalcScratchpadTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const symbols = [
-    { label: 'a/b', latex: '\\frac{a}{b}', title: 'Fraction' },
-    { label: '√x', latex: '\\sqrt{x}', title: 'Square Root' },
-    { label: 'ⁿ√x', latex: '\\sqrt[n]{x}', title: 'N-th Root' },
-    { label: 'xⁿ', latex: 'x^{n}', title: 'Exponent' },
-    { label: 'xₙ', latex: 'x_{n}', title: 'Subscript' },
-    { label: '∫', latex: '\\int_{a}^{b}', title: 'Definite Integral' },
-    { label: '∑', latex: '\\sum_{i=1}^{n}', title: 'Summation' },
-    { label: 'lim', latex: '\\lim_{x \\to 0}', title: 'Limit' },
-    { label: '∂/∂x', latex: '\\frac{\\partial z}{\\partial x}', title: 'Partial Derivative' },
-    { label: 'π', latex: '\\pi', title: 'Pi' },
-    { label: 'θ', latex: '\\theta', title: 'Theta' },
-    { label: 'α', latex: '\\alpha', title: 'Alpha' },
-    { label: 'β', latex: '\\beta', title: 'Beta' },
-    { label: 'λ', latex: '\\lambda', title: 'Lambda' },
-    { label: '∞', latex: '\\infty', title: 'Infinity' },
-    { label: '±', latex: '\\pm', title: 'Plus-Minus' },
-    { label: '×', latex: '\\times', title: 'Multiply' },
-    { label: '÷', latex: '\\div', title: 'Divide' },
-    { label: '≤', latex: '\\le', title: 'Less or Equal' },
-    { label: '≥', latex: '\\ge', title: 'Greater or Equal' },
-    { label: '≠', latex: '\\neq', title: 'Not Equal' },
-    { label: '≈', latex: '\\approx', title: 'Approximate' }
+    { label: 'a/b', latex: '\\frac{a}{b}', title: isAr ? 'كسر اعتيادي' : 'Fraction' },
+    { label: '√x', latex: '\\sqrt{x}', title: isAr ? 'جذر تربيعي' : 'Square Root' },
+    { label: 'ⁿ√x', latex: '\\sqrt[n]{x}', title: isAr ? 'جذر نوني' : 'N-th Root' },
+    { label: 'xⁿ', latex: 'x^{n}', title: isAr ? 'أس وقوة' : 'Exponent' },
+    { label: 'xₙ', latex: 'x_{n}', title: isAr ? 'دليل سفلي' : 'Subscript' },
+    { label: '∫', latex: '\\int_{a}^{b}', title: isAr ? 'تكامل محدد' : 'Definite Integral' },
+    { label: '∑', latex: '\\sum_{i=1}^{n}', title: isAr ? 'رمز المجموع' : 'Summation' },
+    { label: 'lim', latex: '\\lim_{x \\to 0}', title: isAr ? 'نهاية دالة' : 'Limit' },
+    { label: '∂/∂x', latex: '\\frac{\\partial z}{\\partial x}', title: isAr ? 'مشتقة جزئية' : 'Partial Derivative' },
+    { label: 'π', latex: '\\pi', title: isAr ? 'النسبة التقريبية باي' : 'Pi' },
+    { label: 'θ', latex: '\\theta', title: isAr ? 'زاوية ثيتا' : 'Theta' },
+    { label: 'α', latex: '\\alpha', title: isAr ? 'ألفا' : 'Alpha' },
+    { label: 'β', latex: '\\beta', title: isAr ? 'بيتا' : 'Beta' },
+    { label: 'λ', latex: '\\lambda', title: isAr ? 'لامدا' : 'Lambda' },
+    { label: '∞', latex: '\\infty', title: isAr ? 'ما لا نهاية' : 'Infinity' },
+    { label: '±', latex: '\\pm', title: isAr ? 'موجب أو سالب' : 'Plus-Minus' },
+    { label: '×', latex: '\\times', title: isAr ? 'ضرب' : 'Multiply' },
+    { label: '÷', latex: '\\div', title: isAr ? 'قسمة' : 'Divide' },
+    { label: '≤', latex: '\\le', title: isAr ? 'أصغر من أو يساوي' : 'Less or Equal' },
+    { label: '≥', latex: '\\ge', title: isAr ? 'أكبر من أو يساوي' : 'Greater or Equal' },
+    { label: '≠', latex: '\\neq', title: isAr ? 'لا يساوي' : 'Not Equal' },
+    { label: '≈', latex: '\\approx', title: isAr ? 'تقريباً' : 'Approximate' }
   ];
 
   return `
-    <div style="display:flex; flex-direction:column; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:20px;" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Banner with Explanation -->
       <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -3934,16 +5461,16 @@ function renderCalcScratchpadTab() {
             <i class="fas fa-square-root-variable" style="font-size:18px;"></i>
           </div>
           <div>
-            <div style="font-weight:700; font-size:14px; color:var(--text);">Unified KaTeX Typography & Expression Scratchpad</div>
-            <div style="font-size:12px; color:var(--text2);">Formulas typed in this custom text area render live in KaTeX, identical to Desmos mathematical notation.</div>
+            <div style="font-weight:700; font-size:14px; color:var(--text);">${isAr ? 'محرر ومسودة صياغة KaTeX الفورية' : 'Unified KaTeX Typography & Expression Scratchpad'}</div>
+            <div style="font-size:12px; color:var(--text2);">${isAr ? 'الصيغ المكتوبة في هذا المحرر تُعرض مباشرة بصيغة KaTeX المتطابقة مع خطوط ورموز Desmos الرياضية.' : 'Formulas typed in this custom text area render live in KaTeX, identical to Desmos mathematical notation.'}</div>
           </div>
         </div>
         <div style="display:flex; gap:8px;">
           <button class="btn btn-sm btn-ghost" onclick="unifiedMathCopyLatex()" style="border:1px solid var(--border); font-size:12px;">
-            <i class="fas fa-copy"></i> Copy LaTeX
+            <i class="fas fa-copy"></i> ${isAr ? 'نسخ LaTeX' : 'Copy LaTeX'}
           </button>
           <button class="btn btn-sm btn-secondary" onclick="unifiedMathSaveFormula()" style="font-size:12px;">
-            <i class="fas fa-bookmark"></i> Save Formula
+            <i class="fas fa-bookmark"></i> ${isAr ? 'حفظ الصيغة' : 'Save Formula'}
           </button>
         </div>
       </div>
@@ -3954,15 +5481,15 @@ function renderCalcScratchpadTab() {
         <div class="math-editor-pane">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <span style="font-weight:700; font-size:14px; color:var(--text); display:inline-flex; align-items:center; gap:6px;">
-              <i class="fas fa-pen-to-square" style="color:var(--teal);"></i> Formula Custom Text Area
+              <i class="fas fa-pen-to-square" style="color:var(--teal);"></i> ${isAr ? 'مساحة كتابة المعادلات المخصصة' : 'Formula Custom Text Area'}
             </span>
             <span class="tag" style="background:rgba(255,140,66,0.12); color:var(--accent); font-size:11px;">
-              LaTeX & Math Syntax
+              ${isAr ? 'صيغة LaTeX الرياضية' : 'LaTeX & Math Syntax'}
             </span>
           </div>
 
           <!-- Symbol & Syntax Insertion Palette -->
-          <div class="math-symbol-toolbar">
+          <div class="math-symbol-toolbar" dir="ltr">
             ${symbols.map(s => `
               <button class="math-sym-btn" onclick="unifiedMathInsert('${s.latex}')" title="${s.title}">
                 ${s.label}
@@ -3974,30 +5501,31 @@ function renderCalcScratchpadTab() {
           <textarea
             id="unified-math-input"
             class="math-custom-textarea"
-            placeholder="Type mathematical formula or LaTeX here (e.g. \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a} or y = \\sin(2x) + \\cos(3x))..."
+            dir="ltr"
+            placeholder="${isAr ? 'اكتب المعادلة الرياضية أو صيغة LaTeX هنا (مثال: \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a} أو y = \\sin(2x) + \\cos(3x))...' : 'Type mathematical formula or LaTeX here (e.g. \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a} or y = \\sin(2x) + \\cos(3x))...'}"
             oninput="updateUnifiedMathStudio(this.value)"
           >${escHtml(unifiedMathText)}</textarea>
 
           <!-- Quick Templates -->
           <div>
             <div style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; margin-bottom:6px;">
-              Instant Templates:
+              ${isAr ? 'قوالب سريعة جاهزة:' : 'Instant Templates:'}
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
               <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('f(x) = \\\\frac{-b \\\\pm \\\\sqrt{b^2 - 4ac}}{2a}')" style="border:1px solid var(--border); font-size:11px;">
-                Quadratic
+                ${isAr ? 'المعادلة التربيعية' : 'Quadratic'}
               </button>
               <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('e^{i\\\\pi} + 1 = 0')" style="border:1px solid var(--border); font-size:11px;">
-                Euler's Identity
+                ${isAr ? 'متطابقة أويلر' : "Euler's Identity"}
               </button>
               <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('\\\\int_{-\\\\infty}^{\\\\infty} e^{-x^2}\\\\,dx = \\\\sqrt{\\\\pi}')" style="border:1px solid var(--border); font-size:11px;">
-                Gaussian Integral
+                ${isAr ? 'تكامل غاوس' : 'Gaussian Integral'}
               </button>
               <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('y = 2\\\\sin(3x) \\\\cdot e^{-0.15x}')" style="border:1px solid var(--border); font-size:11px;">
-                Damped Wave
+                ${isAr ? 'موجة متخامدة' : 'Damped Wave'}
               </button>
               <button class="btn btn-xs btn-ghost" onclick="unifiedMathSetText('z = \\\\frac{x^2 - y^2}{4}')" style="border:1px solid var(--border); font-size:11px;">
-                3D Saddle
+                ${isAr ? 'السطح السرجي 3D' : '3D Saddle'}
               </button>
             </div>
           </div>
@@ -4007,27 +5535,27 @@ function renderCalcScratchpadTab() {
         <div class="math-preview-pane">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <span style="font-weight:700; font-size:14px; color:var(--text); display:inline-flex; align-items:center; gap:6px;">
-              <i class="fas fa-eye" style="color:var(--teal);"></i> Rendered Output (Matches Desmos Typography)
+              <i class="fas fa-eye" style="color:var(--teal);"></i> ${isAr ? 'المعاينة الرياضية (مطابقة لخطوط Desmos)' : 'Rendered Output (Matches Desmos Typography)'}
             </span>
             <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px;">
-              KaTeX High-DPI
+              ${isAr ? 'عالي الدقة KaTeX' : 'KaTeX High-DPI'}
             </span>
           </div>
 
           <!-- Dynamic Display Box -->
-          <div id="unified-math-preview-canvas" class="math-preview-canvas">
+          <div id="unified-math-preview-canvas" class="math-preview-canvas" dir="ltr">
             ${renderKatexToString(unifiedMathText || ' ', true)}
           </div>
 
           <!-- Cross-Engine Action Deck -->
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <div style="font-size:12px; font-weight:700; color:var(--text2);">Send to Visualization Engines:</div>
+            <div style="font-size:12px; font-weight:700; color:var(--text2);">${isAr ? 'تصدير إلى محركات الرسوم:' : 'Send to Visualization Engines:'}</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
               <button class="btn btn-sm btn-teal" onclick="unifiedMathSendToDesmos()" style="justify-content:center; font-size:12px;">
-                <i class="fas fa-chart-line"></i> Plot in Desmos 2D
+                <i class="fas fa-chart-line"></i> ${isAr ? 'رسم في Desmos 2D' : 'Plot in Desmos 2D'}
               </button>
               <button class="btn btn-sm btn-primary" onclick="unifiedMathSendTo3D()" style="justify-content:center; font-size:12px;">
-                <i class="fas fa-cube"></i> Plot in Three.js 3D
+                <i class="fas fa-cube"></i> ${isAr ? 'رسم في Three.js 3D' : 'Plot in Three.js 3D'}
               </button>
             </div>
           </div>
@@ -4037,22 +5565,22 @@ function renderCalcScratchpadTab() {
       <!-- Saved Formulas Notebook -->
       <div class="card" style="border-radius:16px;">
         <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-bookmark" style="color:var(--teal);"></i> Formula Notebook (Saved Expressions)
+          <i class="fas fa-bookmark" style="color:var(--teal);"></i> ${isAr ? 'دفتر المعادلات المحفوظة' : 'Formula Notebook (Saved Expressions)'}
         </h3>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
           ${savedUserFormulas.map((formula, idx) => `
             <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
-              <div style="overflow-x:auto; padding:6px 0; text-align:center;">
+              <div style="overflow-x:auto; padding:6px 0; text-align:center;" dir="ltr">
                 ${renderKatexToString(formula, false)}
               </div>
               <div style="display:flex; gap:6px; margin-top:auto;">
                 <button class="btn btn-xs btn-teal" onclick="unifiedMathLoadSaved('${escHtml(formula)}')" style="flex:1; justify-content:center;">
-                  <i class="fas fa-arrow-up"></i> Load
+                  <i class="fas fa-arrow-up"></i> ${isAr ? 'تحميل' : 'Load'}
                 </button>
-                <button class="btn btn-xs btn-ghost" onclick="desmosPlotFormula('${escHtml(formula)}')" title="Plot in Desmos" style="border:1px solid var(--border); color:var(--teal);">
+                <button class="btn btn-xs btn-ghost" onclick="desmosPlotFormula('${escHtml(formula)}')" title="${isAr ? 'رسم في Desmos' : 'Plot in Desmos'}" style="border:1px solid var(--border); color:var(--teal);">
                   <i class="fas fa-chart-line"></i>
                 </button>
-                <button class="btn btn-xs btn-ghost" onclick="unifiedMathDeleteSaved(${idx})" title="Remove" style="color:#FF6B6B;">
+                <button class="btn btn-xs btn-ghost" onclick="unifiedMathDeleteSaved(${idx})" title="${isAr ? 'حذف' : 'Remove'}" style="color:#FF6B6B;">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -4172,34 +5700,35 @@ function unifiedMathDeleteSaved(idx) {
 
 // ------------------------ NATIVE SCIENTIFIC CALCULATOR TAB ------------------------
 function renderCalcNativeTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const history = Store.get('calcHistory') || [];
 
   return `
-    <div class="native-calc-layout">
+    <div class="native-calc-layout" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Calculator Chassis (Luxury Precision Instrument) -->
       <div class="native-calc-chassis">
         <!-- Precision Display Screen -->
         <div class="calc-screen-enclosure">
           <div class="calc-screen-header">
             <div class="calc-status-group">
-              <button class="calc-mode-pill ${calcAngleUnit==='deg'?'active':''}" onclick="calcToggleAngleUnit()" title="Click to toggle DEG / RAD">
-                <span class="dot"></span> ${calcAngleUnit.toUpperCase()}
+              <button class="calc-mode-pill ${calcAngleUnit==='deg'?'active':''}" onclick="calcToggleAngleUnit()" title="${isAr ? 'التبديل بين الدرجات والراديان' : 'Click to toggle DEG / RAD'}">
+                <span class="dot"></span> ${isAr ? (calcAngleUnit==='deg' ? 'بالدرجات DEG' : 'بالراديان RAD') : calcAngleUnit.toUpperCase()}
               </button>
-              <span class="calc-mem-pill" title="Memory Register">${calcMemory !== 0 ? `M: ${calcMemory}` : 'M: 0'}</span>
-              ${calcLastAns !== '0' ? `<span class="calc-screen-btn" onclick="calcAppend('ANS')" title="Click to use ANS">Ans: ${calcLastAns}</span>` : ''}
+              <span class="calc-mem-pill" title="${isAr ? 'سجل الذاكرة' : 'Memory Register'}">${calcMemory !== 0 ? `M: ${calcMemory}` : 'M: 0'}</span>
+              ${calcLastAns !== '0' ? `<span class="calc-screen-btn" onclick="calcAppend('ANS')" title="${isAr ? 'استخدام الناتج السابق' : 'Click to use ANS'}">Ans: ${calcLastAns}</span>` : ''}
             </div>
             <div class="calc-screen-actions">
-              <button class="calc-screen-btn" onclick="calcCopyResult()" title="Copy current result to clipboard">
-                <i class="fas fa-copy"></i> Copy
+              <button class="calc-screen-btn" onclick="calcCopyResult()" title="${isAr ? 'نسخ الناتج الحالي إلى الحافظة' : 'Copy current result to clipboard'}">
+                <i class="fas fa-copy"></i> ${isAr ? 'نسخ' : 'Copy'}
               </button>
-              <button class="calc-screen-btn" onclick="calcClear()" style="color:var(--red);" title="All Clear (AC)">
-                <i class="fas fa-trash-can"></i> Clear
+              <button class="calc-screen-btn" onclick="calcClear()" style="color:var(--red);" title="${isAr ? 'مسح شامل (AC)' : 'All Clear (AC)'}">
+                <i class="fas fa-trash-can"></i> ${isAr ? 'مسح' : 'Clear'}
               </button>
             </div>
           </div>
 
-          <div class="calc-expression-row" id="calc-screen-expr">${calcExpr || '0'}</div>
-          <div class="calc-result-row" id="calc-screen-result" onclick="calcCopyResult()" title="Click to copy result">
+          <div class="calc-expression-row" id="calc-screen-expr" dir="ltr">${calcExpr || '0'}</div>
+          <div class="calc-result-row" id="calc-screen-result" dir="ltr" onclick="calcCopyResult()" title="${isAr ? 'انقر لنسخ الناتج' : 'Click to copy result'}">
             ${calcResult}
           </div>
         </div>
@@ -4209,9 +5738,9 @@ function renderCalcNativeTab() {
           <!-- Scientific Functions Deck (Left) -->
           <div class="calc-deck-sci">
             <div class="calc-deck-section-title">
-              <i class="fas fa-atom" style="color:var(--teal)"></i> Functions & Powers
+              <i class="fas fa-atom" style="color:var(--teal)"></i> ${isAr ? 'الدوال والأسس العلمية' : 'Functions & Powers'}
             </div>
-            <div class="calc-sci-grid">
+            <div class="calc-sci-grid" dir="ltr">
               <!-- Row 1: Trigonometry -->
               <button class="c-key c-key-fn" onclick="calcAppendFn('sin(')">sin</button>
               <button class="c-key c-key-fn" onclick="calcAppendFn('cos(')">cos</button>
@@ -4248,23 +5777,23 @@ function renderCalcNativeTab() {
               <button class="c-key c-key-fn" onclick="calcAppendFn('nPr(')">nPr</button>
 
               <!-- Row 6: Memory Operations & Ans -->
-              <button class="c-key c-key-mem" onclick="calcMemoryAction('MC')" title="Clear Memory">MC</button>
-              <button class="c-key c-key-mem" onclick="calcMemoryAction('MR')" title="Recall Memory">MR</button>
-              <button class="c-key c-key-mem" onclick="calcMemoryAction('M+')" title="Add to Memory">M+</button>
-              <button class="c-key c-key-mem" onclick="calcMemoryAction('M-')" title="Subtract from Memory">M−</button>
-              <button class="c-key c-key-fn" onclick="calcAppend('ANS')" style="color:var(--accent); font-weight:800;" title="Previous Answer">ANS</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('MC')" title="${isAr ? 'مسح الذاكرة' : 'Clear Memory'}">MC</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('MR')" title="${isAr ? 'استرجاع الذاكرة' : 'Recall Memory'}">MR</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('M+')" title="${isAr ? 'إضافة إلى الذاكرة' : 'Add to Memory'}">M+</button>
+              <button class="c-key c-key-mem" onclick="calcMemoryAction('M-')" title="${isAr ? 'طرح من الذاكرة' : 'Subtract from Memory'}">M−</button>
+              <button class="c-key c-key-fn" onclick="calcAppend('ANS')" style="color:var(--accent); font-weight:800;" title="${isAr ? 'الناتج السابق' : 'Previous Answer'}">ANS</button>
             </div>
           </div>
 
           <!-- Numeric & Arithmetic Pad (Right) -->
           <div class="calc-deck-num">
             <div class="calc-deck-section-title">
-              <i class="fas fa-calculator" style="color:var(--accent)"></i> Input Pad
+              <i class="fas fa-calculator" style="color:var(--accent)"></i> ${isAr ? 'لوحة الأرقام والعمليات' : 'Input Pad'}
             </div>
-            <div class="calc-num-grid">
+            <div class="calc-num-grid" dir="ltr">
               <!-- Row 1: Clear & Parentheses -->
-              <button class="c-key c-key-clear" onclick="calcClear()" title="All Clear">AC</button>
-              <button class="c-key c-key-clear" onclick="calcBackspace()" title="Delete Backspace">DEL</button>
+              <button class="c-key c-key-clear" onclick="calcClear()" title="${isAr ? 'مسح شامل' : 'All Clear'}">AC</button>
+              <button class="c-key c-key-clear" onclick="calcBackspace()" title="${isAr ? 'حذف خطوة للخلف' : 'Delete Backspace'}">DEL</button>
               <button class="c-key c-key-fn" onclick="calcAppend('(')">(</button>
               <button class="c-key c-key-fn" onclick="calcAppend(')')">)</button>
 
@@ -4287,14 +5816,14 @@ function renderCalcNativeTab() {
               <button class="c-key c-key-op" onclick="calcAppend('−')">−</button>
 
               <!-- Row 5: Sign, Zero, Decimal, Addition -->
-              <button class="c-key c-key-fn" onclick="calcToggleSign()" title="Toggle Sign (±)">±</button>
+              <button class="c-key c-key-fn" onclick="calcToggleSign()" title="${isAr ? 'تغيير الإشارة (±)' : 'Toggle Sign (±)'}">±</button>
               <button class="c-key c-key-num" onclick="calcAppend('0')">0</button>
               <button class="c-key c-key-num" onclick="calcAppend('.')">.</button>
               <button class="c-key c-key-op" onclick="calcAppend('+')">+</button>
 
               <!-- Row 6: Big Equals Button -->
-              <button class="c-key c-key-equals" onclick="calcEvaluate()" style="grid-column: span 4;" title="Evaluate Expression (Enter)">
-                <i class="fas fa-equals"></i> Calculate
+              <button class="c-key c-key-equals" onclick="calcEvaluate()" style="grid-column: span 4;" title="${isAr ? 'حساب النتيجة (Enter)' : 'Evaluate Expression (Enter)'}">
+                <i class="fas fa-equals"></i> ${isAr ? 'حساب النتيجة' : 'Calculate'}
               </button>
             </div>
           </div>
@@ -4305,11 +5834,11 @@ function renderCalcNativeTab() {
       <div class="calc-history-card">
         <div class="calc-history-header">
           <div class="calc-history-title">
-            <i class="fas fa-clock-rotate-left" style="color:var(--teal);"></i> History
+            <i class="fas fa-clock-rotate-left" style="color:var(--teal);"></i> ${isAr ? 'سجل الحسابات' : 'History'}
             ${history.length > 0 ? `<span class="tag" style="background:rgba(78,205,196,0.15); color:var(--teal); font-size:11px; padding:2px 7px;">${history.length}</span>` : ''}
           </div>
           ${history.length > 0 ? `
-            <button class="btn btn-xs btn-ghost" onclick="calcClearHistory()" title="Clear History" style="color:var(--red);">
+            <button class="btn btn-xs btn-ghost" onclick="calcClearHistory()" title="${isAr ? 'مسح السجل' : 'Clear History'}" style="color:var(--red);">
               <i class="fas fa-trash-can"></i>
             </button>
           ` : ''}
@@ -4319,14 +5848,14 @@ function renderCalcNativeTab() {
           ${history.length === 0 ? `
             <div style="text-align:center; padding:36px 12px; color:var(--text2); font-size:13px;">
               <i class="fas fa-receipt" style="font-size:24px; opacity:0.3; margin-bottom:8px; display:block;"></i>
-              No calculations yet.<br>Solve a problem to track it here!
+              ${isAr ? 'لا توجد عمليات حسابية سابقة بعد.<br>احسب معادلة لتسجيلها هنا!' : 'No calculations yet.<br>Solve a problem to track it here!'}
             </div>
           ` : history.map(item => `
-            <div class="calc-history-entry" onclick="calcLoadHistory('${escHtml(item.expr)}', '${escHtml(item.result)}')" title="Click to reload into screen">
-              <div class="calc-history-expr-text">${escHtml(item.expr)} =</div>
-              <div class="calc-history-res-val">
+            <div class="calc-history-entry" onclick="calcLoadHistory('${escHtml(item.expr)}', '${escHtml(item.result)}')" title="${isAr ? 'انقر لإعادة التحميل في الشاشة' : 'Click to reload into screen'}">
+              <div class="calc-history-expr-text" dir="ltr">${escHtml(item.expr)} =</div>
+              <div class="calc-history-res-val" dir="ltr">
                 <span>${escHtml(item.result)}</span>
-                <button class="btn btn-xs btn-ghost" onclick="event.stopPropagation(); calcCopyText('${escHtml(item.result)}')" title="Copy result">
+                <button class="btn btn-xs btn-ghost" onclick="event.stopPropagation(); calcCopyText('${escHtml(item.result)}')" title="${isAr ? 'نسخ الناتج' : 'Copy result'}">
                   <i class="fas fa-copy"></i>
                 </button>
               </div>
@@ -4335,7 +5864,7 @@ function renderCalcNativeTab() {
         </div>
 
         <div style="font-size:11px; color:var(--text2); text-align:center; padding-top:8px; border-top:1px solid var(--border);">
-          <i class="fas fa-keyboard" style="margin-right:4px;"></i> Keyboard active (0-9, + - * /, Enter, Esc)
+          <i class="fas fa-keyboard" style="margin-right:4px;"></i> ${isAr ? 'لوحة المفاتيح نشطة (0-9، + - * /، Enter، Esc)' : 'Keyboard active (0-9, + - * /, Enter, Esc)'}
         </div>
       </div>
     </div>
@@ -4345,55 +5874,60 @@ function renderCalcNativeTab() {
 // ------------------------ FORMULAS & CONSTANTS TAB ------------------------
 let calcFormulaFilter = 'all';
 function renderCalcFormulasTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const filtered = calcFormulaFilter === 'all'
     ? MATH_FORMULAS
     : MATH_FORMULAS.filter(f => f.category === calcFormulaFilter);
 
   return `
-    <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; flex-direction:column; gap:18px;" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Filter Chips -->
       <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
-        <button class="grade-pill ${calcFormulaFilter==='all'?'selected':''}" onclick="calcFormulaFilter='all'; renderCalculator();">All Formulas</button>
-        <button class="grade-pill ${calcFormulaFilter==='algebra'?'selected':''}" onclick="calcFormulaFilter='algebra'; renderCalculator();">Algebra & Geometry</button>
-        <button class="grade-pill ${calcFormulaFilter==='trig'?'selected':''}" onclick="calcFormulaFilter='trig'; renderCalculator();">Trigonometry</button>
-        <button class="grade-pill ${calcFormulaFilter==='calculus'?'selected':''}" onclick="calcFormulaFilter='calculus'; renderCalculator();">Calculus & 3D</button>
-        <button class="grade-pill ${calcFormulaFilter==='constants'?'selected':''}" onclick="calcFormulaFilter='constants'; renderCalculator();">Scientific Constants</button>
+        <button class="grade-pill ${calcFormulaFilter==='all'?'selected':''}" onclick="calcFormulaFilter='all'; renderCalculator();">${isAr ? 'جميع الصيغ' : 'All Formulas'}</button>
+        <button class="grade-pill ${calcFormulaFilter==='algebra'?'selected':''}" onclick="calcFormulaFilter='algebra'; renderCalculator();">${isAr ? 'الجبر والهندسة' : 'Algebra & Geometry'}</button>
+        <button class="grade-pill ${calcFormulaFilter==='trig'?'selected':''}" onclick="calcFormulaFilter='trig'; renderCalculator();">${isAr ? 'حساب المثلثات' : 'Trigonometry'}</button>
+        <button class="grade-pill ${calcFormulaFilter==='calculus'?'selected':''}" onclick="calcFormulaFilter='calculus'; renderCalculator();">${isAr ? 'التفاضل والتكامل و3D' : 'Calculus & 3D'}</button>
+        <button class="grade-pill ${calcFormulaFilter==='constants'?'selected':''}" onclick="calcFormulaFilter='constants'; renderCalculator();">${isAr ? 'الثوابت العلمية' : 'Scientific Constants'}</button>
       </div>
 
       <!-- Formula Cards Grid with KaTeX Unified Math Rendering -->
       <div class="formula-grid">
-        ${filtered.map(f => `
+        ${filtered.map(f => {
+          const fName = (isAr && CALC_ARABIC_DATA.formulas[f.name]?.nameAr) || f.name;
+          const fDesc = (isAr && CALC_ARABIC_DATA.formulas[f.name]?.descAr) || f.desc;
+          const fCat = (isAr && CALC_ARABIC_DATA.categories[f.category]) || f.category;
+          return `
           <div class="formula-card">
             <div style="display:flex; align-items:center; justify-content:space-between;">
-              <span style="font-weight:700; font-size:15px; color:var(--text);">${escHtml(f.name)}</span>
+              <span style="font-weight:700; font-size:15px; color:var(--text);">${escHtml(fName)}</span>
               <span class="tag" style="background:rgba(78,205,196,0.12); color:var(--teal); font-size:11px; text-transform:capitalize;">
-                ${f.category}
+                ${escHtml(fCat)}
               </span>
             </div>
-            <div class="formula-math-box" style="justify-content:center; padding:12px 14px; overflow-x:auto;">
+            <div class="formula-math-box" style="justify-content:center; padding:12px 14px; overflow-x:auto;" dir="ltr">
               ${renderKatexToString(f.latex, true)}
             </div>
-            <p style="font-size:12px; color:var(--text2); line-height:1.5; margin:0;">${escHtml(f.desc)}</p>
+            <p style="font-size:12px; color:var(--text2); line-height:1.5; margin:0;">${escHtml(fDesc)}</p>
             <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
               <button class="btn btn-sm btn-teal" onclick="calcInsertFormula('${escHtml(f.insert)}')" style="flex:1; justify-content:center; font-size:12px; border-radius:8px;">
-                <i class="fas fa-calculator"></i> Use in Calc
+                <i class="fas fa-calculator"></i> ${isAr ? 'استخدام في الحاسبة' : 'Use in Calc'}
               </button>
               ${f.desmos ? `
-                <button class="btn btn-sm btn-secondary" onclick="desmosPlotFormula('${escHtml(f.desmos)}')" style="font-size:12px; border-radius:8px;" title="Plot in Desmos 2D">
+                <button class="btn btn-sm btn-secondary" onclick="desmosPlotFormula('${escHtml(f.desmos)}')" style="font-size:12px; border-radius:8px;" title="${isAr ? 'رسم في Desmos 2D' : 'Plot in Desmos 2D'}">
                   <i class="fas fa-chart-line" style="color:var(--teal);"></i> Desmos
                 </button>
               ` : ''}
               ${f.three ? `
-                <button class="btn btn-sm btn-secondary" onclick="three3dPlotFormula('${escHtml(f.three)}')" style="font-size:12px; border-radius:8px;" title="Plot in Three.js 3D">
-                  <i class="fas fa-cube" style="color:var(--accent);"></i> 3D Plot
+                <button class="btn btn-sm btn-secondary" onclick="three3dPlotFormula('${escHtml(f.three)}')" style="font-size:12px; border-radius:8px;" title="${isAr ? 'رسم في Three.js 3D' : 'Plot in Three.js 3D'}">
+                  <i class="fas fa-cube" style="color:var(--accent);"></i> ${isAr ? 'رسم 3D' : '3D Plot'}
                 </button>
               ` : ''}
-              <button class="btn btn-sm btn-ghost" onclick="calcCopyText('${escHtml(f.latex)}')" style="font-size:12px; border-radius:8px; border:1px solid var(--border);" title="Copy LaTeX">
+              <button class="btn btn-sm btn-ghost" onclick="calcCopyText('${escHtml(f.latex)}')" style="font-size:12px; border-radius:8px; border:1px solid var(--border);" title="${isAr ? 'نسخ صيغة LaTeX' : 'Copy LaTeX'}">
                 <i class="fas fa-copy"></i>
               </button>
             </div>
           </div>
-        `).join('')}
+        `;}).join('')}
       </div>
     </div>
   `;
@@ -4401,6 +5935,7 @@ function renderCalcFormulasTab() {
 
 // ------------------------ BASE & UNIT CONVERTER TAB ------------------------
 function renderCalcConverterTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const num = parseInt(calcBaseInputVal, 10) || 0;
   const decVal = isNaN(num) ? '0' : num.toString(10);
   const hexVal = isNaN(num) ? '0' : '0x' + num.toString(16).toUpperCase();
@@ -4412,56 +5947,56 @@ function renderCalcConverterTab() {
   const binNibbles = binPadded.match(/.{1,4}/g)?.join(' ') || binVal;
 
   return `
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;" dir="${isAr ? 'rtl' : 'ltr'}">
       <!-- Programmer Base Converter Card -->
       <div class="converter-card">
         <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-binary" style="color:var(--teal);"></i> Programmer Base Converter
+          <i class="fas fa-binary" style="color:var(--teal);"></i> ${isAr ? 'محول الأنظمة العددية للمبرمجين' : 'Programmer Base Converter'}
         </h3>
-        <p style="font-size:13px; color:var(--text2); margin:0;">Convert numbers dynamically between Decimal, Hexadecimal, Binary (with 4-bit grouping), and Octal.</p>
+        <p style="font-size:13px; color:var(--text2); margin:0;">${isAr ? 'تحويل ديناميكي مباشر بين النظام العشري، والسداسي عشري، والثنائي (مقسم 4 بت)، والثماني.' : 'Convert numbers dynamically between Decimal, Hexadecimal, Binary (with 4-bit grouping), and Octal.'}</p>
 
         <div style="display:flex; flex-direction:column; gap:14px; margin-top:8px;">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="font-size:12px; font-weight:700; color:var(--text2);">Decimal (Base 10)</label>
-              <span style="font-size:11px; color:var(--teal); font-family:monospace;">DEC</span>
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">${isAr ? 'النظام العشري (أساس 10)' : 'Decimal (Base 10)'}</label>
+              <span style="font-size:11px; color:var(--teal); font-family:monospace;" dir="ltr">DEC</span>
             </div>
             <div style="display:flex; gap:8px;">
-              <input type="text" class="input-field" value="${decVal}" oninput="calcUpdateBaseFromDec(this.value)" style="font-family:monospace; font-size:15px;" />
-              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${decVal}')" title="Copy Decimal" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+              <input type="text" class="input-field" value="${decVal}" dir="ltr" oninput="calcUpdateBaseFromDec(this.value)" style="font-family:monospace; font-size:15px;" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${decVal}')" title="${isAr ? 'نسخ العشري' : 'Copy Decimal'}" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
             </div>
           </div>
 
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="font-size:12px; font-weight:700; color:var(--text2);">Hexadecimal (Base 16)</label>
-              <span style="font-size:11px; color:var(--teal); font-family:monospace;">HEX</span>
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">${isAr ? 'النظام السداسي عشري (أساس 16)' : 'Hexadecimal (Base 16)'}</label>
+              <span style="font-size:11px; color:var(--teal); font-family:monospace;" dir="ltr">HEX</span>
             </div>
             <div style="display:flex; gap:8px;">
-              <input type="text" class="input-field" value="${hexVal}" oninput="calcUpdateBaseFromHex(this.value)" style="font-family:monospace; font-size:15px; color:var(--teal);" />
-              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${hexVal}')" title="Copy Hex" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+              <input type="text" class="input-field" value="${hexVal}" dir="ltr" oninput="calcUpdateBaseFromHex(this.value)" style="font-family:monospace; font-size:15px; color:var(--teal);" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${hexVal}')" title="${isAr ? 'نسخ السداسي عشري' : 'Copy Hex'}" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
             </div>
           </div>
 
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="font-size:12px; font-weight:700; color:var(--text2);">Binary (Base 2)</label>
-              <span style="font-size:11px; color:var(--accent); font-family:monospace;">${binVal.length} bits</span>
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">${isAr ? 'النظام الثنائي (أساس 2)' : 'Binary (Base 2)'}</label>
+              <span style="font-size:11px; color:var(--accent); font-family:monospace;" dir="ltr">${isAr ? `${binVal.length} بت` : `${binVal.length} bits`}</span>
             </div>
             <div style="display:flex; gap:8px;">
-              <input type="text" class="input-field" value="${binNibbles}" oninput="calcUpdateBaseFromBin(this.value)" style="font-family:monospace; font-size:15px; color:var(--accent);" />
-              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${binVal}')" title="Copy Binary" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+              <input type="text" class="input-field" value="${binNibbles}" dir="ltr" oninput="calcUpdateBaseFromBin(this.value)" style="font-family:monospace; font-size:15px; color:var(--accent);" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${binVal}')" title="${isAr ? 'نسخ الثنائي' : 'Copy Binary'}" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
             </div>
           </div>
 
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="font-size:12px; font-weight:700; color:var(--text2);">Octal (Base 8)</label>
-              <span style="font-size:11px; color:var(--blue); font-family:monospace;">OCT</span>
+              <label style="font-size:12px; font-weight:700; color:var(--text2);">${isAr ? 'النظام الثماني (أساس 8)' : 'Octal (Base 8)'}</label>
+              <span style="font-size:11px; color:var(--blue); font-family:monospace;" dir="ltr">OCT</span>
             </div>
             <div style="display:flex; gap:8px;">
-              <input type="text" class="input-field" value="${octVal}" oninput="calcUpdateBaseFromOct(this.value)" style="font-family:monospace; font-size:15px;" />
-              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${octVal}')" title="Copy Octal" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
+              <input type="text" class="input-field" value="${octVal}" dir="ltr" oninput="calcUpdateBaseFromOct(this.value)" style="font-family:monospace; font-size:15px;" />
+              <button class="btn btn-sm btn-secondary" onclick="calcCopyText('${octVal}')" title="${isAr ? 'نسخ الثماني' : 'Copy Octal'}" style="border-radius:8px;"><i class="fas fa-copy"></i></button>
             </div>
           </div>
         </div>
@@ -4470,9 +6005,9 @@ function renderCalcConverterTab() {
       <!-- Angle & Trigonometry Converter -->
       <div class="converter-card">
         <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-compass" style="color:var(--accent);"></i> Angle Unit Converter
+          <i class="fas fa-compass" style="color:var(--accent);"></i> ${isAr ? 'محول وحدات قياس الزوايا' : 'Angle Unit Converter'}
         </h3>
-        <p style="font-size:13px; color:var(--text2); margin:0;">Convert between Degrees, Radians, and Gradians with real-time bidirectional synchronization.</p>
+        <p style="font-size:13px; color:var(--text2); margin:0;">${isAr ? 'تحويل فوري متبادل بين الدرجات، والراديان، والغراد بالتزامن اللحظي.' : 'Convert between Degrees, Radians, and Gradians with real-time bidirectional synchronization.'}</p>
 
         <!-- Angle Presets -->
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
@@ -4485,16 +6020,16 @@ function renderCalcConverterTab() {
 
         <div style="display:flex; flex-direction:column; gap:14px; margin-top:14px;" id="angle-conv-wrapper">
           <div>
-            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">Degrees (°)</label>
-            <input type="number" id="conv-deg-input" class="input-field" value="180" oninput="calcUpdateAngles(this.value, 'deg')" style="font-family:monospace; font-size:15px;" />
+            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'بالدرجات (°)' : 'Degrees (°)'}</label>
+            <input type="number" id="conv-deg-input" class="input-field" value="180" dir="ltr" oninput="calcUpdateAngles(this.value, 'deg')" style="font-family:monospace; font-size:15px;" />
           </div>
           <div>
-            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">Radians (rad)</label>
-            <input type="number" id="conv-rad-input" class="input-field" value="${(Math.PI).toFixed(6)}" oninput="calcUpdateAngles(this.value, 'rad')" style="font-family:monospace; font-size:15px; color:var(--teal);" />
+            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'بالراديان (rad)' : 'Radians (rad)'}</label>
+            <input type="number" id="conv-rad-input" class="input-field" value="${(Math.PI).toFixed(6)}" dir="ltr" oninput="calcUpdateAngles(this.value, 'rad')" style="font-family:monospace; font-size:15px; color:var(--teal);" />
           </div>
           <div>
-            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">Gradians (gon)</label>
-            <input type="number" id="conv-grad-input" class="input-field" value="200" oninput="calcUpdateAngles(this.value, 'grad')" style="font-family:monospace; font-size:15px;" />
+            <label style="font-size:12px; font-weight:700; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'بالغراد (gon)' : 'Gradians (gon)'}</label>
+            <input type="number" id="conv-grad-input" class="input-field" value="200" dir="ltr" oninput="calcUpdateAngles(this.value, 'grad')" style="font-family:monospace; font-size:15px;" />
           </div>
         </div>
       </div>
@@ -4645,32 +6180,34 @@ function calcToggleSign() {
 }
 
 function calcToggleAngleUnit() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   calcAngleUnit = calcAngleUnit === 'deg' ? 'rad' : 'deg';
   const s = Store.get('calcSettings') || {};
   s.angleUnit = calcAngleUnit;
   Store.set('calcSettings', s);
-  toast(`Trig angle mode: ${calcAngleUnit.toUpperCase()}`, 'info');
+  toast(isAr ? (calcAngleUnit === 'deg' ? 'تم التبديل إلى نظام الدرجات (DEG)' : 'تم التبديل إلى نظام الراديان (RAD)') : `Trig angle mode: ${calcAngleUnit.toUpperCase()}`, 'info');
   SFX.click();
   calcUpdateScreen();
 }
 
 function calcMemoryAction(action) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const curNum = parseFloat(calcResult) || 0;
   if (action === 'MC') {
     calcMemory = 0;
-    toast('Memory register cleared', 'info');
+    toast(isAr ? 'تم مسح سجل الذاكرة' : 'Memory register cleared', 'info');
   } else if (action === 'MR') {
     calcAppend(calcMemory.toString());
-    toast(`Recalled memory: ${calcMemory}`, 'info');
+    toast(isAr ? `تم استدعاء قيمة الذاكرة: ${calcMemory}` : `Recalled memory: ${calcMemory}`, 'info');
   } else if (action === 'M+') {
     calcMemory += curNum;
-    toast(`Added to memory: ${calcMemory}`, 'success');
+    toast(isAr ? `تمت الإضافة إلى الذاكرة: ${calcMemory}` : `Added to memory: ${calcMemory}`, 'success');
   } else if (action === 'M-') {
     calcMemory -= curNum;
-    toast(`Subtracted from memory: ${calcMemory}`, 'success');
+    toast(isAr ? `تم الطرح من الذاكرة: ${calcMemory}` : `Subtracted from memory: ${calcMemory}`, 'success');
   } else if (action === 'MS') {
     calcMemory = curNum;
-    toast(`Stored to memory: ${calcMemory}`, 'success');
+    toast(isAr ? `تم حفظ القيمة في الذاكرة: ${calcMemory}` : `Stored to memory: ${calcMemory}`, 'success');
   }
   SFX.click();
   calcUpdateScreen();
@@ -4717,70 +6254,77 @@ function calcCopyResult() {
 }
 
 function calcCopyText(txt) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   if (!txt) return;
   navigator.clipboard.writeText(txt).then(() => {
-    toast(`Copied "${txt}" to clipboard!`, 'success');
+    toast(isAr ? `تم نسخ "${txt}" إلى الحافظة بنجاح!` : `Copied "${txt}" to clipboard!`, 'success');
     SFX.click();
   }).catch(() => {
-    toast(`Value: ${txt}`, 'info');
+    toast(isAr ? `القيمة: ${txt}` : `Value: ${txt}`, 'info');
   });
 }
 
 function calcLoadHistory(expr, res) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   calcExpr = expr;
   calcResult = res;
   calcIsNew = true;
   calcUpdateScreen();
   SFX.click();
-  toast('Loaded past calculation', 'info');
+  toast(isAr ? 'تم تحميل العملية السابقة إلى الشاشة' : 'Loaded past calculation', 'info');
 }
 
 function calcClearHistory() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   Store.set('calcHistory', []);
-  toast('Calculation history cleared', 'info');
+  toast(isAr ? 'تم مسح سجل العمليات الحسابية' : 'Calculation history cleared', 'info');
   renderCalculator();
 }
 
 function calcInsertFormula(formulaStr) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   calcSetTab('native');
   calcExpr = formulaStr;
   calcIsNew = false;
   calcUpdateScreen();
-  toast(`Inserted formula: ${formulaStr}`, 'success');
+  toast(isAr ? `تم إدراج الصيغة: ${formulaStr}` : `Inserted formula: ${formulaStr}`, 'success');
 }
 
 function showCalcHelpModal() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   showModal(`
-    <h2 style="font-size:20px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-      <i class="fas fa-calculator" style="color:var(--teal);"></i> Mathematical Suite Guide & Shortcuts
-    </h2>
-    <div style="display:flex; flex-direction:column; gap:12px; font-size:14px; color:var(--text2); line-height:1.5;">
-      <div>
-        <strong style="color:var(--text);"><i class="fas fa-chart-line" style="color:var(--teal);"></i> Desmos API 2D Graphing:</strong>
-        <p style="margin:4px 0 0;">Official Desmos 2D Graphing Calculator engine. Plot equations, polar curves, tangents, derivatives, and polynomials. Click any preset formula chip to graph instantly.</p>
+    <div dir="${isAr ? 'rtl' : 'ltr'}">
+      <h2 style="font-size:20px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-calculator" style="color:var(--teal);"></i> ${isAr ? 'دليل الجناح الرياضي واختصارات لوحة المفاتيح' : 'Mathematical Suite Guide & Shortcuts'}
+      </h2>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:14px; color:var(--text2); line-height:1.6;">
+        <div>
+          <strong style="color:var(--text);"><i class="fas fa-chart-line" style="color:var(--teal);"></i> ${isAr ? 'راسم Desmos 2D الرسمي:' : 'Desmos API 2D Graphing:'}</strong>
+          <p style="margin:4px 0 0;">${isAr ? 'محرك حاسبة Desmos البيانية ثنائية الأبعاد الرسمي. يتيح تمثيل الدوال والمعادلات والمنحنيات القطبية والمماسات والمشتقات وكثيرات الحدود. انقر على أي نموذج لرسمه فورياً.' : 'Official Desmos 2D Graphing Calculator engine. Plot equations, polar curves, tangents, derivatives, and polynomials. Click any preset formula chip to graph instantly.'}</p>
+        </div>
+        <div>
+          <strong style="color:var(--text);"><i class="fas fa-cube" style="color:var(--accent);"></i> ${isAr ? 'راسم الأسطح Three.js 3D ومنصة Math3D:' : 'Three.js 3D Surface Visualizer & Math3D.org:'}</strong>
+          <p style="margin:4px 0 0;">${isAr ? 'راسم رسومي تفاعلي ثلاثي الأبعاد بالويب-جل (WebGL) لدوال الأسطح z = f(x, y) مع تحكم كامل بالتدوير والتكبير، وأنماط ألوان متقدمة، ووضع الشبكة الهيكلية، والدوران التلقائي، بالإضافة لمنصة Math3D.org لحساب التفاضل والتكامل متعدد المتغيرات.' : 'Real-time interactive 3D WebGL plotter for surfaces z = f(x, y) with OrbitControls, custom colormaps (Neon, Viridis, Cool-Warm, Aurora), wireframe mode, and auto-rotation. Also includes embedded Math3D.org for multivariable calculus.'}</p>
+        </div>
+        <div>
+          <strong style="color:var(--text);"><i class="fas fa-pen-to-square" style="color:#A78BFA;"></i> ${isAr ? 'استوديو معادلات KaTeX الفوري:' : 'Unified KaTeX Math Studio:'}</strong>
+          <p style="margin:4px 0 0;">${isAr ? 'محرر مخصص لكتابة المعادلات وصيغ LaTeX مع عرض مباشر وفوري مطابق لخطوط ورموز Desmos، وشريط رموز سريعة، وإمكانية إرسال الصيغة بنقرة واحدة إلى Desmos أو محرك 3D.' : 'Type formulas in the custom text area with live KaTeX rendering designed to match Desmos mathematical typography. Includes quick syntax symbol palette and 1-click dispatch to Desmos or Three.js 3D.'}</p>
+        </div>
+        <div>
+          <strong style="color:var(--text);"><i class="fas fa-keyboard" style="color:var(--blue);"></i> ${isAr ? 'اختصارات لوحة المفاتيح (الآلة العلمية):' : 'Keyboard Shortcuts (Scientific Keypad):'}</strong>
+          <ul style="margin:4px 0 0 18px;" dir="ltr">
+            <li><code>0-9</code>, <code>.</code> — ${isAr ? 'إدخال الأرقام' : 'Enter numbers'}</li>
+            <li><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code> — ${isAr ? 'العمليات الحسابية' : 'Math operations'}</li>
+            <li><code>Enter</code> or <code>=</code> — ${isAr ? 'حساب النتيجة' : 'Calculate result'}</li>
+            <li><code>Backspace</code> — ${isAr ? 'حذف آخر مدخل' : 'Delete character'}</li>
+            <li><code>Escape</code> or <code>C</code> — ${isAr ? 'مسح شامل (AC)' : 'All Clear (AC)'}</li>
+            <li><code>D</code> — ${isAr ? 'التبديل بين الدرجات والراديان' : 'Toggle Degrees / Radians'}</li>
+          </ul>
+        </div>
       </div>
-      <div>
-        <strong style="color:var(--text);"><i class="fas fa-cube" style="color:var(--accent);"></i> Three.js 3D Surface Visualizer & Math3D.org:</strong>
-        <p style="margin:4px 0 0;">Real-time interactive 3D WebGL plotter for surfaces z = f(x, y) with OrbitControls, custom colormaps (Neon, Viridis, Cool-Warm, Aurora), wireframe mode, and auto-rotation. Also includes embedded Math3D.org for multivariable calculus.</p>
+      <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+        <button class="btn btn-teal" onclick="closeModal()">${isAr ? 'فهمت ذلك!' : 'Got it!'}</button>
       </div>
-      <div>
-        <strong style="color:var(--text);"><i class="fas fa-pen-to-square" style="color:#A78BFA;"></i> Unified KaTeX Math Studio:</strong>
-        <p style="margin:4px 0 0;">Type formulas in the custom text area with live KaTeX rendering designed to match Desmos mathematical typography. Includes quick syntax symbol palette and 1-click dispatch to Desmos or Three.js 3D.</p>
-      </div>
-      <div>
-        <strong style="color:var(--text);"><i class="fas fa-keyboard" style="color:var(--blue);"></i> Keyboard Shortcuts (Scientific Keypad):</strong>
-        <ul style="margin:4px 0 0 18px;">
-          <li><code>0-9</code>, <code>.</code> — Enter numbers</li>
-          <li><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code> — Math operations</li>
-          <li><code>Enter</code> or <code>=</code> — Calculate result</li>
-          <li><code>Backspace</code> — Delete character</li>
-          <li><code>Escape</code> or <code>C</code> — All Clear (AC)</li>
-          <li><code>D</code> — Toggle Degrees / Radians</li>
-        </ul>
-      </div>
-    </div>
-    <div style="display:flex; justify-content:flex-end; margin-top:20px;">
-      <button class="btn btn-teal" onclick="closeModal()">Got it!</button>
     </div>
   `);
 }
@@ -4992,42 +6536,96 @@ function cleanupFlash(){flashState={screen:'list',deckId:null,queue:[],idx:0,fli
 async function renderFlashcards(){
   updateUserPanel();
   const el=document.getElementById('view-flashcards');
-  try{await FlashDB.open();}catch(e){el.innerHTML=`<div style="max-width:600px;margin:0 auto;text-align:center;padding:40px"><i class="fas fa-exclamation-triangle" style="font-size:32px;color:var(--accent);margin-bottom:12px"></i><p>Flashcard storage is unavailable in this browser.</p></div>`;return;}
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  try{await FlashDB.open();}catch(e){
+    el.innerHTML=`<div style="max-width:600px;margin:0 auto;text-align:center;padding:40px" dir="${isAr ? 'rtl' : 'ltr'}"><i class="fas fa-exclamation-triangle" style="font-size:32px;color:var(--accent);margin-bottom:12px"></i><p>${isAr ? 'تخزين البطاقات التعليمية غير متاح في هذا المتصفح.' : 'Flashcard storage is unavailable in this browser.'}</p></div>`;
+    return;
+  }
   if(flashState.screen==='list')await renderFlashDeckList(el);
   else if(flashState.screen==='deck')await renderFlashDeckDetail(el);
   else if(flashState.screen==='study')renderFlashStudy(el);
 }
 
 async function renderFlashDeckList(el){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const decks=await FlashDB.getAllDecks();
   const stats=await Promise.all(decks.map(async d=>({deck:d,stats:await FlashDB.getDeckStats(d.id)})));
   const totalDue=stats.reduce((s,x)=>s+x.stats.due,0);
-  el.innerHTML=`<div style="max-width:960px;margin:0 auto">
+  el.innerHTML=`<div style="max-width:960px;margin:0 auto" dir="${isAr ? 'rtl' : 'ltr'}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px">
-      <div><h1 style="font-size:26px;font-weight:700;margin-bottom:4px">Flashcards</h1><p style="color:var(--text2);font-size:15px">Anki-style spaced repetition. Cards stored in IndexedDB — room for thousands.</p></div>
+      <div>
+        <h1 style="font-size:26px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:10px;">
+          <i class="fas fa-layer-group" style="color:var(--teal)"></i> ${isAr ? 'البطاقات التعليمية الذكية' : 'Flashcards'}
+        </h1>
+        <p style="color:var(--text2);font-size:15px">
+          ${isAr ? 'نظام التكرار المتباعد الذكي (SM-2 على طريقة Anki). بطاقات تُحفظ محلياً في قاعدة IndexedDB وتتسع لآلاف البطاقات.' : 'Anki-style spaced repetition. Cards stored in IndexedDB — room for thousands.'}
+        </p>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-secondary btn-sm" onclick="loadStarterFlashcardDecks()"><i class="fas fa-magic"></i> Starter Decks</button>
-        <button class="btn btn-secondary btn-sm" onclick="triggerImportDeckJSON()"><i class="fas fa-file-import"></i> Import JSON</button>
-        <button class="btn btn-primary btn-sm" onclick="showCreateDeckModal()"><i class="fas fa-plus"></i> New Deck</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadStarterFlashcardDecks()"><i class="fas fa-magic"></i> ${isAr ? 'حزم نموذجية' : 'Starter Decks'}</button>
+        <button class="btn btn-secondary btn-sm" onclick="triggerImportDeckJSON()"><i class="fas fa-file-import"></i> ${isAr ? 'استيراد JSON' : 'Import JSON'}</button>
+        <button class="btn btn-primary btn-sm" onclick="showCreateDeckModal()"><i class="fas fa-plus"></i> ${isAr ? 'حزمة جديدة' : 'New Deck'}</button>
       </div>
     </div>
-    ${totalDue>0?`<div class="card" style="margin-bottom:20px;border-color:rgba(255,140,66,.3);display:flex;align-items:center;gap:12px;padding:14px 18px"><i class="fas fa-bell" style="color:var(--accent)"></i><span style="font-size:14px"><strong>${totalDue}</strong> card${totalDue!==1?'s':''} due for review across your decks</span></div>`:''}
-    ${!decks.length?`<div class="card" style="text-align:center;padding:48px 24px"><i class="fas fa-clone" style="font-size:40px;color:var(--text2);margin-bottom:16px;display:block"></i><h3 style="font-size:18px;margin-bottom:8px">No decks yet</h3><p style="color:var(--text2);margin-bottom:20px;font-size:14px">Create a deck, import JSON, or load preset starter decks to start studying with SM-2 spaced repetition.</p>
+    ${totalDue>0?`<div class="card" style="margin-bottom:20px;border-color:rgba(255,140,66,.3);display:flex;align-items:center;gap:12px;padding:14px 18px"><i class="fas fa-bell" style="color:var(--accent)"></i><span style="font-size:14px">${isAr ? `لديك <strong>${totalDue}</strong> بطاقة جاهزة للمراجعة عبر حزمك الدراسية` : `<strong>${totalDue}</strong> card${totalDue!==1?'s':''} due for review across your decks`}</span></div>`:''}
+    ${!decks.length?`<div class="card" style="text-align:center;padding:48px 24px"><i class="fas fa-clone" style="font-size:40px;color:var(--text2);margin-bottom:16px;display:block"></i><h3 style="font-size:18px;margin-bottom:8px">${isAr ? 'لا توجد حزم بطاقات بعد' : 'No decks yet'}</h3><p style="color:var(--text2);margin-bottom:20px;font-size:14px">${isAr ? 'أنشئ حزمة مخصصة، أو استورد ملف JSON، أو حمّل الحزم النموذجية الجاهزة للمذاكرة بنظام SM-2 للتكرار المتباعد.' : 'Create a deck, import JSON, or load preset starter decks to start studying with SM-2 spaced repetition.'}</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="showCreateDeckModal()"><i class="fas fa-plus"></i> Create Deck</button>
-      <button class="btn btn-secondary" onclick="loadStarterFlashcardDecks()"><i class="fas fa-magic"></i> Load Starter Decks</button>
+      <button class="btn btn-primary" onclick="showCreateDeckModal()"><i class="fas fa-plus"></i> ${isAr ? 'إنشاء حزمة' : 'Create Deck'}</button>
+      <button class="btn btn-secondary" onclick="loadStarterFlashcardDecks()"><i class="fas fa-magic"></i> ${isAr ? 'تحميل حزم نموذجية' : 'Load Starter Decks'}</button>
     </div></div>`
     :`<div class="flash-deck-grid">${stats.map(({deck,stats:s})=>`<div class="flash-deck-card" onclick="openFlashDeck('${deck.id}')">
       <div style="display:flex;align-items:center;gap:12px"><div class="deck-icon" style="background:${deck.color}22;color:${deck.color}"><i class="fas fa-layer-group"></i></div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(deck.name)}</div>${deck.desc?`<div style="font-size:12px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(deck.desc)}</div>`:''}</div></div>
-      <div class="flash-stat-row"><span><i class="fas fa-clone"></i> ${s.total} cards</span>${s.due?`<span class="flash-stat-due"><i class="fas fa-clock"></i> ${s.due} due</span>`:''}${s.newC?`<span class="flash-stat-new"><i class="fas fa-seedling"></i> ${s.newC} new</span>`:''}</div>
-      ${s.due||s.newC?`<div class="btn btn-sm btn-teal" style="width:100%;justify-content:center;margin-top:4px" onclick="event.stopPropagation();startFlashStudy('${deck.id}')"><i class="fas fa-play"></i> Study Now</div>`:''}
+      <div class="flash-stat-row"><span><i class="fas fa-clone"></i> ${s.total} ${isAr ? 'بطاقة' : 'cards'}</span>${s.due?`<span class="flash-stat-due"><i class="fas fa-clock"></i> ${s.due} ${isAr ? 'مستحقة' : 'due'}</span>`:''}${s.newC?`<span class="flash-stat-new"><i class="fas fa-seedling"></i> ${s.newC} ${isAr ? 'جديدة' : 'new'}</span>`:''}</div>
+      ${s.due||s.newC?`<div class="btn btn-sm btn-teal" style="width:100%;justify-content:center;margin-top:4px" onclick="event.stopPropagation();startFlashStudy('${deck.id}')"><i class="fas fa-play"></i> ${isAr ? 'ذاكر الآن' : 'Study Now'}</div>`:''}
     </div>`).join('')}</div>`}
-    <div class="card" style="margin-top:24px"><h3 style="font-size:15px;margin-bottom:10px"><i class="fas fa-info-circle" style="color:var(--blue)"></i> How it works</h3><div style="font-size:13px;color:var(--text2);line-height:1.6;display:flex;flex-direction:column;gap:6px"><div><strong style="color:var(--text)">SM-2 algorithm</strong> — schedules reviews based on how well you remember each card.</div><div><strong style="color:var(--text)">Again / Hard / Good / Easy</strong> — rate each card after flipping to set the next review date.</div><div><strong style="color:var(--text)">IndexedDB storage</strong> — supports large decks with text and images without the 5MB localStorage limit.</div></div></div>
+    <div class="card" style="margin-top:24px"><h3 style="font-size:15px;margin-bottom:10px"><i class="fas fa-info-circle" style="color:var(--blue)"></i> ${isAr ? 'كيف يعمل نظام البطاقات الذكي؟' : 'How it works'}</h3><div style="font-size:13px;color:var(--text2);line-height:1.6;display:flex;flex-direction:column;gap:6px"><div><strong style="color:var(--text)">${isAr ? 'خوارزمية SM-2 المتقدمة' : 'SM-2 algorithm'}</strong> — ${isAr ? 'تجدول فترات المراجعة آلياً بناءً على مدى ثبات المعلومة وسرعة تذكرك لها.' : 'schedules reviews based on how well you remember each card.'}</div><div><strong style="color:var(--text)">${isAr ? 'أعد / صعب / جيد / سهل' : 'Again / Hard / Good / Easy'}</strong> — ${isAr ? 'قيّم كل بطاقة بعد قلبها لتحديد موعد الجلسة التالية تلقائياً.' : 'rate each card after flipping to set the next review date.'}</div><div><strong style="color:var(--text)">${isAr ? 'قاعدة بيانات IndexedDB' : 'IndexedDB storage'}</strong> — ${isAr ? 'تتيح حفظ حزم عملاقة مع النصوص والصور دون سقف التخزين المحدود لـ localStorage.' : 'supports large decks with text and images without the 5MB localStorage limit.'}</div></div></div>
   </div>`;
 }
 
 async function loadStarterFlashcardDecks() {
-  const sampleDecks = [
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const sampleDecks = isAr ? [
+    {
+      id: 'deck_adhd_hacks_ar',
+      name: 'حيل التركيز والدراسة لفرط الحركة وتشتت الانتباه (ADHD)',
+      desc: 'استراتيجيات مجربة لتسهيل المذاكرة وتجاوز صعوبات الوظائف التنفيذية.',
+      color: '#4ECDC4',
+      created: Date.now(),
+      cards: [
+        { front: 'ما هي قاعدة الـ 5 دقائق لبدء المذاكرة؟', back: 'التزم بالعمل لمدة 5 دقائق فقط. التغلب على عقبة البداية هو الأصعب لعقل الـ ADHD؛ وبمجرد أن يبدأ الزخم، ينشط التركيز الفائق غالباً.' },
+        { front: 'ما هو أسلوب مضاعفة الجسد (Body Doubling)؟', back: 'العمل بجوار شخص آخر (أو رفيق دراسة افتراضي). مجرد وجود شخص آخر يعزز التركيز والمسؤولية دون ضغط نفسي.' },
+        { front: 'لماذا تساعد الضوضاء البنية (Brown Noise) في التركيز؟', back: 'تحتوي الضوضاء البنية على ترددات هادئة وعميقة تحجب الضوضاء المحيطة المشتتة وتهدئ العقل النشط.' },
+        { front: 'ما هو تقسيم المهام إلى كتل صغيرة (Task Chunking)؟', back: 'تفكيك المشاريع الكبيرة المرهقة إلى خطوات مجهرية صغيرة (مهام من دقيقة إلى دقيقتين) لتجنب الشلل التنفيذي والتسويف.' },
+        { front: 'كيف يساعد التأطير الزمني البصري (Visual Time-Boxing)؟', back: 'رؤية الوقت يتقلص بصرياً (كدونات أو ساعة رملية) تجعل الوقت ملموساً بدلاً من كونه هاجساً غامضاً، مما يخفف قلق الوقت.' }
+      ]
+    },
+    {
+      id: 'deck_mental_math_ar',
+      name: 'أسرار وحيل الحساب الذهني السريع',
+      desc: 'حيل ذكية لإجراء العمليات الحسابية والمسائل في ثوانٍ دون ورقة وقلم.',
+      color: '#FF8C42',
+      created: Date.now() + 1,
+      cards: [
+        { front: 'كيف تضرب أي عدد من رقمين في 11 ذهنياً؟', back: 'اجمع الرقمين وضع المجموع في المنتصف.\nمثال: 35 × 11 → نجمع (3+5=8) ونضعها بينهما → 385!' },
+        { front: 'كيف تربع أي عدد ينتهي بالرقم 5 (مثل 35²)؟', back: 'اضرب رقم العشرات (3) في (3 + 1 = 4) فيعطي 12. ثم أضف 25 في النهاية → 1225!' },
+        { front: 'طريقة سريعة ومثيرة للطرح من 1,000؟', back: 'اطرح جميع الأرقام من 9 باستثناء الرقم الأخير اطرحه من 10.\nمثال: 1000 - 647 → (9-6)=3، (9-4)=5، (10-7)=3 → الناتج 353.' },
+        { front: 'كيف تحسب 15% من أي رقم في ذهنك؟', back: '1. احسب 10% أولاً (حرك الفاصلة لليسار خانة واحدة).\n2. أضف نصف قيمة الـ 10%.\nمثال: 10% من 40 = 4؛ ونصفها 2 → الإجمالي 6.' }
+      ]
+    },
+    {
+      id: 'deck_science_core_ar',
+      name: 'أساسيات العلوم والفيزياء العامة',
+      desc: 'مفاهيم جوهرية في علم الأحياء، والكيمياء، والفيزياء الكلاسيكية.',
+      color: '#A855F7',
+      created: Date.now() + 2,
+      cards: [
+        { front: 'ما هي المعادلة الكيميائية للبناء الضوئي؟', back: '6CO₂ + 6H₂O + ضوء الشمس → C₆H₁₂O₆ + 6O₂\n(ثاني أكسيد الكربون + ماء → جلوكوز + أكسجين)' },
+        { front: 'ما هو نص قانون أوم الكهربائي؟', back: 'فرق الجهد (جـ) = شدة التيار (ت) × المقاومة (م)\nV = I × R' },
+        { front: 'ما هي وظيفة الميتوكوندريا في الخلية الحية؟', back: 'محطة توليد الطاقة في الخلية: تقوم بإنتاج جزيئات ATP من خلال عملية التنفس الخلوي.' },
+        { front: 'ما هي قوانين نيوتن الثلاثة للحركة؟', back: '1. القصور الذاتي (الجسم الساكن يبقى ساكناً والمتحرك يستمر ما لم تؤثر عليه قوة خارجية)\n2. القوة = الكتلة × التسارع (F = m × a)\n3. لكل فعل رد فعل مساوٍ له في المقدار ومضاد له في الاتجاه.' }
+      ]
+    }
+  ] : [
     {
       id: 'deck_adhd_hacks',
       name: 'ADHD Focus & Study Hacks',
@@ -5089,11 +6687,12 @@ async function loadStarterFlashcardDecks() {
     }
   }
   SFX.bonus();
-  toast('Loaded starter decks with cards!', 'success');
+  toast(isAr ? 'تم تحميل الحزم النموذجية بنجاح!' : 'Loaded starter decks with cards!', 'success');
   renderFlashcards();
 }
 
 async function exportDeckJSON(deckId) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const decks = await FlashDB.getAllDecks();
   const deck = decks.find(d => d.id === deckId);
   if (!deck) return;
@@ -5104,10 +6703,11 @@ async function exportDeckJSON(deckId) {
   a.href = URL.createObjectURL(blob);
   a.download = `${deck.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_deck.json`;
   a.click();
-  toast('Deck exported as JSON!', 'success');
+  toast(isAr ? 'تم تصدير الحزمة كملف JSON!' : 'Deck exported as JSON!', 'success');
 }
 
 function triggerImportDeckJSON() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'application/json';
@@ -5131,30 +6731,32 @@ function triggerImportDeckJSON() {
         });
       }
       SFX.bonus();
-      toast(`Imported deck "${deck.name}" with ${parsed.cards.length} cards!`, 'success');
+      toast(isAr ? `تم استيراد الحزمة "${deck.name}" بنجاح مع ${parsed.cards.length} بطاقة!` : `Imported deck "${deck.name}" with ${parsed.cards.length} cards!`, 'success');
       renderFlashcards();
     } catch (err) {
-      toast('Failed to import deck JSON file.', 'warn');
+      toast(isAr ? 'فشل استيراد ملف JSON للحزمة.' : 'Failed to import deck JSON file.', 'warn');
     }
   };
   input.click();
 }
 
 function showCreateDeckModal(){
-  showModal(`<h2 style="font-size:20px;margin-bottom:16px">New Deck</h2>
-    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Deck name</label><input class="input" id="deck-name" placeholder="e.g. Biology Chapter 3" autofocus></div>
-    <div style="margin-bottom:20px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Description (optional)</label><input class="input" id="deck-desc" placeholder="What is this deck about?"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="createFlashDeck()">Create</button></div>`);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  showModal(`<div dir="${isAr ? 'rtl' : 'ltr'}"><h2 style="font-size:20px;margin-bottom:16px">${isAr ? 'إنشاء حزمة بطاقات جديدة' : 'New Deck'}</h2>
+    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'اسم الحزمة' : 'Deck name'}</label><input class="input" id="deck-name" placeholder="${isAr ? 'مثال: أحياء - الفصل الثالث، مصطلحات إنجليزية...' : 'e.g. Biology Chapter 3'}" autofocus></div>
+    <div style="margin-bottom:20px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'الوصف (اختياري)' : 'Description (optional)'}</label><input class="input" id="deck-desc" placeholder="${isAr ? 'ما موضوع هذه الحزمة وماذا تغطي؟' : 'What is this deck about?'}"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">${isAr ? 'إلغاء' : 'Cancel'}</button><button class="btn btn-primary" onclick="createFlashDeck()">${isAr ? 'إنشاء' : 'Create'}</button></div></div>`);
 }
 
 async function createFlashDeck(){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const name=document.getElementById('deck-name')?.value.trim();
-  if(!name){toast('Enter a deck name','warn');return;}
+  if(!name){toast(isAr ? 'يرجى كتابة اسم الحزمة' : 'Enter a deck name','warn');return;}
   const desc=document.getElementById('deck-desc')?.value.trim()||'';
   const decks=await FlashDB.getAllDecks();
   const deck={id:'deck_'+Date.now(),name,desc,color:DECK_COLORS[decks.length%DECK_COLORS.length],created:Date.now()};
   await FlashDB.saveDeck(deck);
-  closeModal();SFX.click();toast('Deck created!','success');
+  closeModal();SFX.click();toast(isAr ? 'تم إنشاء الحزمة بنجاح!' : 'Deck created!','success');
   flashState={screen:'deck',deckId:deck.id,queue:[],idx:0,flipped:false,sessionReviewed:0,sessionXP:0};
   renderFlashcards();
 }
@@ -5162,115 +6764,130 @@ async function createFlashDeck(){
 function openFlashDeck(id){flashState={screen:'deck',deckId:id,queue:[],idx:0,flipped:false,sessionReviewed:0,sessionXP:0};renderFlashcards();}
 
 async function renderFlashDeckDetail(el){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const decks=await FlashDB.getAllDecks();
   const deck=decks.find(d=>d.id===flashState.deckId);
   if(!deck){flashState.screen='list';renderFlashcards();return;}
   const cards=await FlashDB.getCardsByDeck(deck.id);
   const stats=await FlashDB.getDeckStats(deck.id);
   const now=Date.now();
-  el.innerHTML=`<div style="max-width:800px;margin:0 auto">
-    <button class="btn btn-sm btn-ghost" style="margin-bottom:16px" onclick="flashState.screen='list';renderFlashcards()"><i class="fas fa-arrow-left"></i> All Decks</button>
+  el.innerHTML=`<div style="max-width:800px;margin:0 auto" dir="${isAr ? 'rtl' : 'ltr'}">
+    <button class="btn btn-sm btn-ghost" style="margin-bottom:16px" onclick="flashState.screen='list';renderFlashcards()">
+      <i class="fas ${isAr ? 'fa-arrow-right' : 'fa-arrow-left'}"></i> ${isAr ? 'جميع الحزم' : 'All Decks'}
+    </button>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px">
       <div><h1 style="font-size:26px;font-weight:700;margin-bottom:4px">${escHtml(deck.name)}</h1>${deck.desc?`<p style="color:var(--text2)">${escHtml(deck.desc)}</p>`:''}
-      <div class="flash-stat-row" style="margin-top:8px"><span>${stats.total} cards</span>${stats.due?`<span class="flash-stat-due">${stats.due} due</span>`:''}${stats.newC?`<span class="flash-stat-new">${stats.newC} new</span>`:''}</div></div>
+      <div class="flash-stat-row" style="margin-top:8px"><span>${stats.total} ${isAr ? 'بطاقة' : 'cards'}</span>${stats.due?`<span class="flash-stat-due">${stats.due} ${isAr ? 'مستحقة' : 'due'}</span>`:''}${stats.newC?`<span class="flash-stat-new">${stats.newC} ${isAr ? 'جديدة' : 'new'}</span>`:''}</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${stats.total?`<button class="btn btn-teal" onclick="startFlashStudy('${deck.id}')"><i class="fas fa-play"></i> Study${stats.due||stats.newC?` (${stats.due+Math.min(stats.newC,20)} cards)`:''}</button>`:''}
-        <button class="btn btn-primary" onclick="showAddCardModal()"><i class="fas fa-plus"></i> Add Card</button>
-        <button class="btn btn-sm btn-secondary" onclick="exportDeckJSON('${deck.id}')"><i class="fas fa-file-export"></i> Export</button>
-        <button class="btn btn-sm btn-ghost" style="color:var(--red);border:1px solid rgba(255,107,107,.2)" onclick="confirmDeleteDeck('${deck.id}')"><i class="fas fa-trash"></i></button>
+        ${stats.total?`<button class="btn btn-teal" onclick="startFlashStudy('${deck.id}')"><i class="fas fa-play"></i> ${isAr ? 'ابدأ المذاكرة' : 'Study'}${stats.due||stats.newC?` (${stats.due+Math.min(stats.newC,20)} ${isAr ? 'بطاقة' : 'cards'})`:''}</button>`:''}
+        <button class="btn btn-primary" onclick="showAddCardModal()"><i class="fas fa-plus"></i> ${isAr ? 'إضافة بطاقة' : 'Add Card'}</button>
+        <button class="btn btn-sm btn-secondary" onclick="exportDeckJSON('${deck.id}')"><i class="fas fa-file-export"></i> ${isAr ? 'تصدير' : 'Export'}</button>
+        <button class="btn btn-sm btn-ghost" style="color:var(--red);border:1px solid rgba(255,107,107,.2)" onclick="confirmDeleteDeck('${deck.id}')" title="${isAr ? 'حذف الحزمة' : 'Delete'}"><i class="fas fa-trash"></i></button>
       </div>
     </div>
-    ${!cards.length?`<div class="card" style="text-align:center;padding:32px"><p style="color:var(--text2);margin-bottom:16px">No cards in this deck yet.</p><button class="btn btn-primary" onclick="showAddCardModal()"><i class="fas fa-plus"></i> Add Your First Card</button></div>`
+    ${!cards.length?`<div class="card" style="text-align:center;padding:32px"><p style="color:var(--text2);margin-bottom:16px">${isAr ? 'لا توجد بطاقات في هذه الحزمة حتى الآن.' : 'No cards in this deck yet.'}</p><button class="btn btn-primary" onclick="showAddCardModal()"><i class="fas fa-plus"></i> ${isAr ? 'أضف أول بطاقة' : 'Add Your First Card'}</button></div>`
     :`<div class="flash-card-list">${cards.map(c=>{
       const isNew=!c.repetitions;
       const isDue=!isNew&&c.nextReview<=now;
-      const meta=isNew?'New':isDue?'Due':`Review in ${Math.max(1,Math.ceil((c.nextReview-now)/86400000))}d`;
+      const meta=isNew ? (isAr ? 'جديدة' : 'New') : isDue ? (isAr ? 'مستحقة' : 'Due') : (isAr ? `مراجعة بعد ${Math.max(1,Math.ceil((c.nextReview-now)/86400000))} يوم` : `Review in ${Math.max(1,Math.ceil((c.nextReview-now)/86400000))}d`);
       return`<div class="flash-card-row"><div class="fc-front">${escHtml(c.front)}</div><span class="fc-meta ${isDue?'fc-due':''}">${meta}</span><button class="btn btn-sm btn-ghost" onclick="confirmDeleteCard(${c.id})" style="padding:4px 8px;color:var(--red)"><i class="fas fa-trash"></i></button></div>`;
     }).join('')}</div>`}
   </div>`;
 }
 
 function showAddCardModal(){
-  showModal(`<h2 style="font-size:20px;margin-bottom:16px">Add Card</h2>
-    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Front (question)</label><textarea class="input" id="card-front" rows="3" placeholder="Question or term..." style="resize:vertical"></textarea></div>
-    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Back (answer)</label><textarea class="input" id="card-back" rows="3" placeholder="Answer or definition..." style="resize:vertical"></textarea></div>
-    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Front image (optional)</label><input type="file" class="input" id="card-front-img" accept="image/*" style="padding:8px"></div>
-    <div style="margin-bottom:20px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">Back image (optional)</label><input type="file" class="input" id="card-back-img" accept="image/*" style="padding:8px"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveFlashCard()">Save Card</button></div>`);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  showModal(`<div dir="${isAr ? 'rtl' : 'ltr'}"><h2 style="font-size:20px;margin-bottom:16px">${isAr ? 'إضافة بطاقة جديدة' : 'Add Card'}</h2>
+    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'الوجه الأمامي (السؤال أو المصطلح)' : 'Front (question)'}</label><textarea class="input" id="card-front" rows="3" placeholder="${isAr ? 'اكتب السؤال، المفهوم، أو المصطلح الرياضي أو العلمي...' : 'Question or term...'}" style="resize:vertical"></textarea></div>
+    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'الوجه الخلفي (الإجابة أو الشرح)' : 'Back (answer)'}</label><textarea class="input" id="card-back" rows="3" placeholder="${isAr ? 'اكتب الإجابة، التعريف، أو الحل...' : 'Answer or definition...'}" style="resize:vertical"></textarea></div>
+    <div style="margin-bottom:12px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'صورة الوجه الأمامي (اختياري)' : 'Front image (optional)'}</label><input type="file" class="input" id="card-front-img" accept="image/*" style="padding:8px"></div>
+    <div style="margin-bottom:20px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'صورة الوجه الخلفي (اختياري)' : 'Back image (optional)'}</label><input type="file" class="input" id="card-back-img" accept="image/*" style="padding:8px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">${isAr ? 'إلغاء' : 'Cancel'}</button><button class="btn btn-primary" onclick="saveFlashCard()">${isAr ? 'حفظ البطاقة' : 'Save Card'}</button></div></div>`);
 }
 
 function readImageFile(input){
   return new Promise((ok,no)=>{
     const f=input?.files?.[0];
     if(!f)return ok(null);
-    if(f.size>3*1024*1024){toast('Image too large (max 3MB)','warn');return ok(null);}
+    if(f.size>3*1024*1024){
+      const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+      toast(isAr ? 'حجم الصورة كبير جداً (الحد الأقصى 3 ميجابايت)' : 'Image too large (max 3MB)','warn');
+      return ok(null);
+    }
     const r=new FileReader();
     r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f);
   });
 }
 
 async function saveFlashCard(){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const front=document.getElementById('card-front')?.value.trim();
   const back=document.getElementById('card-back')?.value.trim();
-  if(!front||!back){toast('Enter both front and back','warn');return;}
+  if(!front||!back){toast(isAr ? 'يرجى كتابة السؤال والإجابة معاً' : 'Enter both front and back','warn');return;}
   const frontImage=await readImageFile(document.getElementById('card-front-img'));
   const backImage=await readImageFile(document.getElementById('card-back-img'));
   const card={deckId:flashState.deckId,front,back,frontImage,backImage,repetitions:0,interval:0,easiness:2.5,nextReview:0,lastReview:null,created:Date.now()};
   await FlashDB.saveCard(card);
-  closeModal();SFX.click();toast('Card added!','success');renderFlashcards();
+  closeModal();SFX.click();toast(isAr ? 'تمت إضافة البطاقة بنجاح!' : 'Card added!','success');renderFlashcards();
 }
 
 function confirmDeleteDeck(id){
-  showModal(`<h2 style="font-size:18px;margin-bottom:10px">Delete this deck?</h2><p style="color:var(--text2);margin-bottom:20px">All cards in this deck will be permanently deleted.</p><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn" style="background:var(--red);color:#fff" onclick="deleteFlashDeck('${id}')">Delete</button></div>`);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  showModal(`<div dir="${isAr ? 'rtl' : 'ltr'}"><h2 style="font-size:18px;margin-bottom:10px">${isAr ? 'هل أنت متأكد من حذف هذه الحزمة؟' : 'Delete this deck?'}</h2><p style="color:var(--text2);margin-bottom:20px">${isAr ? 'سيتم حذف جميع البطاقات المحفوظة داخل هذه الحزمة نهائياً.' : 'All cards in this deck will be permanently deleted.'}</p><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">${isAr ? 'إلغاء' : 'Cancel'}</button><button class="btn" style="background:var(--red);color:#fff" onclick="deleteFlashDeck('${id}')">${isAr ? 'حذف' : 'Delete'}</button></div></div>`);
 }
 
 async function deleteFlashDeck(id){
-  await FlashDB.deleteDeck(id);closeModal();flashState.screen='list';toast('Deck deleted','info');renderFlashcards();
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  await FlashDB.deleteDeck(id);closeModal();flashState.screen='list';toast(isAr ? 'تم حذف الحزمة' : 'Deck deleted','info');renderFlashcards();
 }
 
 function confirmDeleteCard(id){
-  showModal(`<p style="margin-bottom:20px">Delete this card?</p><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn" style="background:var(--red);color:#fff" onclick="deleteFlashCard(${id})">Delete</button></div>`);
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  showModal(`<div dir="${isAr ? 'rtl' : 'ltr'}"><p style="margin-bottom:20px">${isAr ? 'هل أنت متأكد من حذف هذه البطاقة؟' : 'Delete this card?'}</p><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-secondary" onclick="closeModal()">${isAr ? 'إلغاء' : 'Cancel'}</button><button class="btn" style="background:var(--red);color:#fff" onclick="deleteFlashCard(${id})">${isAr ? 'حذف' : 'Delete'}</button></div></div>`);
 }
 
 async function deleteFlashCard(id){
-  await FlashDB.deleteCard(id);closeModal();toast('Card deleted','info');renderFlashcards();
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  await FlashDB.deleteCard(id);closeModal();toast(isAr ? 'تم حذف البطاقة' : 'Card deleted','info');renderFlashcards();
 }
 
 async function startFlashStudy(deckId){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const cards=await FlashDB.getCardsByDeck(deckId);
   const now=Date.now();
   const due=cards.filter(c=>c.repetitions>0&&c.nextReview<=now);
   const fresh=cards.filter(c=>!c.repetitions).slice(0,20);
   const queue=shuffle([...due,...fresh]);
-  if(!queue.length){toast('No cards to review — add some first!','info');return;}
+  if(!queue.length){toast(isAr ? 'لا توجد بطاقات للمراجعة حالياً — أضف بطاقات جديدة أولاً!' : 'No cards to review — add some first!','info');return;}
   flashState={screen:'study',deckId,queue,idx:0,flipped:false,sessionReviewed:0,sessionXP:0};
   SFX.click();renderFlashcards();
 }
 
 function renderFlashStudy(el){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   if(flashState.idx>=flashState.queue.length){finishFlashSession();return;}
   const card=flashState.queue[flashState.idx];
   const total=flashState.queue.length,done=flashState.idx;
   const frontImg=card.frontImage?`<img class="flash-card-img" src="${card.frontImage}" alt="">`:'';
   const backImg=card.backImage?`<img class="flash-card-img" src="${card.backImage}" alt="">`:'';
-  el.innerHTML=`<div style="max-width:640px;margin:0 auto">
+  el.innerHTML=`<div style="max-width:640px;margin:0 auto" dir="${isAr ? 'rtl' : 'ltr'}">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <button class="btn btn-sm btn-ghost" onclick="flashState.screen='deck';renderFlashcards()"><i class="fas fa-times"></i> Exit</button>
-      <span style="font-size:14px;color:var(--text2)">${done+1} / ${total}</span>
+      <button class="btn btn-sm btn-ghost" onclick="flashState.screen='deck';renderFlashcards()"><i class="fas fa-times"></i> ${isAr ? 'خروج' : 'Exit'}</button>
+      <span style="font-size:14px;color:var(--text2);font-weight:700;">${done+1} / ${total}</span>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:20px">${flashState.queue.map((_,i)=>`<div class="progress-dot ${i<done?'done':i===done?'current':''}"></div>`).join('')}</div>
     <div class="flash-card-scene" id="flash-scene" onclick="flipFlashCard()">
       <div class="flash-card-inner ${flashState.flipped?'flipped':''}" id="flash-inner">
-        <div class="flash-card-face front">${frontImg}<div class="flash-card-text">${escHtml(card.front)}</div><div class="flash-card-hint">Tap or press Space to flip</div></div>
+        <div class="flash-card-face front">${frontImg}<div class="flash-card-text">${escHtml(card.front)}</div><div class="flash-card-hint">${isAr ? 'انقر أو اضغط مفتاح المسافة (Space) لقلب البطاقة' : 'Tap or press Space to flip'}</div></div>
         <div class="flash-card-face back">${backImg}<div class="flash-card-text">${escHtml(card.back)}</div></div>
       </div>
     </div>
-    ${flashState.flipped?`<div class="flash-rate-row">
-      <button class="flash-rate-btn again" onclick="rateFlashCard(1)"><span>Again</span><small>&lt;1 day</small></button>
-      <button class="flash-rate-btn hard" onclick="rateFlashCard(3)"><span>Hard</span><small>~1 day</small></button>
-      <button class="flash-rate-btn good" onclick="rateFlashCard(4)"><span>Good</span><small>Normal</small></button>
-      <button class="flash-rate-btn easy" onclick="rateFlashCard(5)"><span>Easy</span><small>Longer</small></button>
-    </div>`:`<div style="text-align:center"><button class="btn btn-teal btn-lg" onclick="flipFlashCard()"><i class="fas fa-sync-alt"></i> Show Answer</button></div>`}
+    ${flashState.flipped?`<div class="flash-rate-row" dir="ltr">
+      <button class="flash-rate-btn again" onclick="rateFlashCard(1)"><span>${isAr ? 'أعد' : 'Again'}</span><small>${isAr ? '&lt;1 يوم' : '&lt;1 day'}</small></button>
+      <button class="flash-rate-btn hard" onclick="rateFlashCard(3)"><span>${isAr ? 'صعب' : 'Hard'}</span><small>${isAr ? '~1 يوم' : '~1 day'}</small></button>
+      <button class="flash-rate-btn good" onclick="rateFlashCard(4)"><span>${isAr ? 'جيد' : 'Good'}</span><small>${isAr ? 'طبيعي' : 'Normal'}</small></button>
+      <button class="flash-rate-btn easy" onclick="rateFlashCard(5)"><span>${isAr ? 'سهل' : 'Easy'}</span><small>${isAr ? 'أطول' : 'Longer'}</small></button>
+    </div>`:`<div style="text-align:center"><button class="btn btn-teal btn-lg" onclick="flipFlashCard()"><i class="fas fa-sync-alt"></i> ${isAr ? 'إظهار الإجابة' : 'Show Answer'}</button></div>`}
   </div>`;
 }
 
@@ -5295,9 +6912,10 @@ async function rateFlashCard(quality){
 }
 
 function finishFlashSession(){
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const n=flashState.sessionReviewed,xp=flashState.sessionXP;
   SFX.complete();
-  showModal(`<div style="text-align:center"><div style="font-size:48px;margin-bottom:12px"><i class="fas fa-check-circle" style="color:var(--green)"></i></div><h2 style="font-size:22px;margin-bottom:4px">Session Complete!</h2><p style="color:var(--text2);margin-bottom:20px">You reviewed ${n} card${n!==1?'s':''}.</p>${xp>0?`<div class="card" style="padding:16px;margin-bottom:20px"><div style="font-family:Fredoka;font-size:28px;color:var(--accent)">+${xp} XP</div><div style="font-size:12px;color:var(--text2)">5 XP per Good/Easy card</div></div>`:''}<div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-secondary" onclick="closeModal();flashState.screen='deck';renderFlashcards()">Back to Deck</button><button class="btn btn-primary" onclick="closeModal();startFlashStudy(flashState.deckId)">Study Again</button></div></div>`);
+  showModal(`<div style="text-align:center" dir="${isAr ? 'rtl' : 'ltr'}"><div style="font-size:48px;margin-bottom:12px"><i class="fas fa-check-circle" style="color:var(--green)"></i></div><h2 style="font-size:22px;margin-bottom:4px">${isAr ? 'اكتملت الجلسة بنجاح!' : 'Session Complete!'}</h2><p style="color:var(--text2);margin-bottom:20px">${isAr ? `راجعت <strong>${n}</strong> بطاقة تعليمية.` : `You reviewed ${n} card${n!==1?'s':''}.`}</p>${xp>0?`<div class="card" style="padding:16px;margin-bottom:20px"><div style="font-family:Fredoka;font-size:28px;color:var(--accent)">+${xp} XP</div><div style="font-size:12px;color:var(--text2)">${isAr ? '5 نقاط XP لكل بطاقة جيدة أو سهلة' : '5 XP per Good/Easy card'}</div></div>`:''}<div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-secondary" onclick="closeModal();flashState.screen='deck';renderFlashcards()">${isAr ? 'العودة للحزمة' : 'Back to Deck'}</button><button class="btn btn-primary" onclick="closeModal();startFlashStudy(flashState.deckId)">${isAr ? 'مذاكرة مجدداً' : 'Study Again'}</button></div></div>`);
   flashState.flipped=false;
 }
 
@@ -5322,57 +6940,59 @@ function skipBreakToFocus() {
 }
 
 function showCreatePresetModal() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   showModal(`
-    <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">New Focus Preset</h2>
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">${isAr ? 'قالب تركيز جديد' : 'New Focus Preset'}</h2>
     <div style="margin-bottom:12px;">
-      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Preset Name</label>
-      <input class="input" id="preset-name-inp" placeholder="e.g. Cram Session, Reading Sprint" autofocus style="font-size:14px;">
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'اسم القالب' : 'Preset Name'}</label>
+      <input class="input" id="preset-name-inp" placeholder="${isAr ? 'مثال: جلسة مراجعة سريعة، سباق قراءة...' : 'e.g. Cram Session, Reading Sprint'}" autofocus style="font-size:14px;">
     </div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
       <div>
-        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Focus Duration</label>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'مدة التركيز' : 'Focus Duration'}</label>
         <select class="input" id="preset-focus-inp" style="font-size:13px;">
-          <option value="5">5 min</option>
-          <option value="10">10 min</option>
-          <option value="15" selected>15 min</option>
-          <option value="20">20 min</option>
-          <option value="25">25 min</option>
-          <option value="30">30 min</option>
-          <option value="45">45 min</option>
-          <option value="60">60 min</option>
+          <option value="5">5 ${isAr ? 'دقائق' : 'min'}</option>
+          <option value="10">10 ${isAr ? 'دقائق' : 'min'}</option>
+          <option value="15" selected>15 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="20">20 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="25">25 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="30">30 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="45">45 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="60">60 ${isAr ? 'دقيقة' : 'min'}</option>
         </select>
       </div>
       <div>
-        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Break Duration</label>
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'مدة الاستراحة' : 'Break Duration'}</label>
         <select class="input" id="preset-break-inp" style="font-size:13px;">
-          <option value="1">1 min</option>
-          <option value="2">2 min</option>
-          <option value="3" selected>3 min</option>
-          <option value="5">5 min</option>
-          <option value="10">10 min</option>
+          <option value="1">1 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="2">2 ${isAr ? 'دقيقة' : 'min'}</option>
+          <option value="3" selected>3 ${isAr ? 'دقائق' : 'min'}</option>
+          <option value="5">5 ${isAr ? 'دقائق' : 'min'}</option>
+          <option value="10">10 ${isAr ? 'دقائق' : 'min'}</option>
         </select>
       </div>
     </div>
     <div style="margin-bottom:20px;">
-      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">Preferred Soundscape</label>
+      <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:4px;">${isAr ? 'صوت الخلفية المفضل' : 'Preferred Soundscape'}</label>
       <select class="input" id="preset-sound-inp" style="font-size:13px;">
-        <option value="none">None</option>
-        <option value="adhd">ADHD Focus</option>
-        <option value="lofi">Cozy Lo-Fi</option>
-        <option value="nature">Nature Sounds</option>
-        <option value="cafe">Cafe Murmur</option>
-        <option value="brown">Brown Noise</option>
-        <option value="rain">Rain & Storm</option>
+        <option value="none">${isAr ? 'بدون' : 'None'}</option>
+        <option value="adhd">${isAr ? 'تركيز ADHD' : 'ADHD Focus'}</option>
+        <option value="lofi">${isAr ? 'لو-فاي مريح' : 'Cozy Lo-Fi'}</option>
+        <option value="nature">${isAr ? 'أصوات الطبيعة' : 'Nature Sounds'}</option>
+        <option value="cafe">${isAr ? 'أجواء المقهى' : 'Cafe Murmur'}</option>
+        <option value="brown">${isAr ? 'ضوضاء بنية' : 'Brown Noise'}</option>
+        <option value="rain">${isAr ? 'مطر وعواصف' : 'Rain & Storm'}</option>
       </select>
     </div>
     <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-teal" onclick="saveCustomPreset()"><i class="fas fa-check"></i> Save Preset</button>
+      <button class="btn btn-secondary" onclick="closeModal()">${isAr ? 'إلغاء' : 'Cancel'}</button>
+      <button class="btn btn-teal" onclick="saveCustomPreset()"><i class="fas fa-check"></i> ${isAr ? 'حفظ القالب' : 'Save Preset'}</button>
     </div>
   `);
 }
 
 function saveCustomPreset() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const nameEl = document.getElementById('preset-name-inp');
   const focusEl = document.getElementById('preset-focus-inp');
   const breakEl = document.getElementById('preset-break-inp');
@@ -5380,7 +7000,7 @@ function saveCustomPreset() {
 
   const name = nameEl ? nameEl.value.trim() : '';
   if (!name) {
-    toast('Please enter a preset name', 'warn');
+    toast(isAr ? 'يرجى كتابة اسم القالب' : 'Please enter a preset name', 'warn');
     return;
   }
 
@@ -5402,16 +7022,17 @@ function saveCustomPreset() {
   Store.set('focusPresets', presets);
   closeModal();
   SFX.click();
-  toast(`Custom preset "${name}" saved!`, 'success');
+  toast(isAr ? `تم حفظ القالب المخصص "${name}" بنجاح!` : `Custom preset "${name}" saved!`, 'success');
   if (currentView === 'focus') renderFocus();
 }
 
 function deleteCustomPreset(presetId) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   let presets = Store.get('focusPresets') || [];
   presets = presets.filter(p => p.id !== presetId);
   Store.set('focusPresets', presets);
   SFX.click();
-  toast('Preset deleted', 'info');
+  toast(isAr ? 'تم حذف القالب' : 'Preset deleted', 'info');
   if (currentView === 'focus') renderFocus();
 }
 
@@ -5430,7 +7051,15 @@ function applyFocusPreset(presetId) {
   }
 
   SFX.click();
-  toast(`Applied ${p.name} (${p.focusMin}m focus / ${p.breakMin}m break)`, 'info');
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const PRESET_NAMES_AR = {
+    p_pomo: 'بومودورو كلاسيكي',
+    p_deep: 'عمل عميق ومركز',
+    p_adhd: 'سباق تركيز ADHD',
+    p_burst: 'انطلاقة خاطفة'
+  };
+  const displayName = isAr && PRESET_NAMES_AR[p.id] ? PRESET_NAMES_AR[p.id] : p.name;
+  toast(isAr ? `تم تفعيل ${displayName} (${p.focusMin} دقيقة تركيز / ${p.breakMin} دقيقة استراحة)` : `Applied ${p.name} (${p.focusMin}m focus / ${p.breakMin}m break)`, 'info');
   renderFocus();
 }
 
@@ -7035,13 +8664,13 @@ let selectedMood = 'calm';
 let wellnessTab = 'checkin'; // 'checkin', 'breathing', 'grounding', 'dissolver', 'reframes'
 
 const MOOD_DATA = {
-  great: { label: 'Great', emoji: '🌟', rec: 'You are in high spirits! Capitalize on this momentum with a Focus session or learning game.', preset: 'p_deep' },
-  focused: { label: 'Focused', emoji: '🎯', rec: 'Your mind is locked in. Perfect time to smash a task on your planner!', preset: 'p_pomo' },
-  calm: { label: 'Calm', emoji: '🌿', rec: 'Steady & peaceful energy. Great time for deep reading or flashcard study.', preset: 'p_pomo' },
-  low_energy: { label: 'Low Energy', emoji: '🔋', rec: 'Be gentle with yourself. Try a 10-minute Quick Burst focus or cozy Lo-Fi soundscape.', preset: 'p_burst' },
-  overwhelmed: { label: 'Overwhelmed', emoji: '😫', rec: 'Stop and pause! Try 2 minutes of Box Breathing or the 5-4-3-2-1 Grounding exercise.', preset: 'p_adhd' },
-  anxious: { label: 'Anxious', emoji: '😰', rec: 'Take a deep breath. Use the Worry Dissolver below or listen to soothing Brown Noise.', preset: 'p_adhd' },
-  frustrated: { label: 'Frustrated', emoji: '😤', rec: 'Take 3 deep breaths. Remember B-minus work is better than non-existent work.', preset: 'p_burst' }
+  great: { label: 'Great', labelAr: 'رائع ومتحمس', emoji: '🌟', rec: 'You are in high spirits! Capitalize on this momentum with a Focus session or learning game.', recAr: 'طاقتك ومعنوياتك مرتفعة جدًا! استغل هذا الزخم الرائع وابدأ جلسة تركيز عميق أو تحديًا تعليميًا.', preset: 'p_deep' },
+  focused: { label: 'Focused', labelAr: 'مُركّز وواضح', emoji: '🎯', rec: 'Your mind is locked in. Perfect time to smash a task on your planner!', recAr: 'ذهنك حاضر ومستعد تمامًا. هذا هو الوقت المثالي لإنجاز مهمة رئيسية من جدول مهامك!', preset: 'p_pomo' },
+  calm: { label: 'Calm', labelAr: 'هادئ ومطمئن', emoji: '🌿', rec: 'Steady & peaceful energy. Great time for deep reading or flashcard study.', recAr: 'طاقتك هادئة ومتزنة. توقيت ممتاز للقراءة المتأنية أو مراجعة البطاقات التعليمية.', preset: 'p_pomo' },
+  low_energy: { label: 'Low Energy', labelAr: 'طاقة منخفضة', emoji: '🔋', rec: 'Be gentle with yourself. Try a 10-minute Quick Burst focus or cozy Lo-Fi soundscape.', recAr: 'كن رفيقًا بنفسك اليوم. جرّب جلسة تركيز سريعة لـ 10 دقائق فقط مع أصوات بيئية مهدئة.', preset: 'p_burst' },
+  overwhelmed: { label: 'Overwhelmed', labelAr: 'مُثقَل / مشتت', emoji: '😫', rec: 'Stop and pause! Try 2 minutes of Box Breathing or the 5-4-3-2-1 Grounding exercise.', recAr: 'توقف مؤقتًا وخذ نفسًا! جرّب دقيقتين من تمرين التنفس الصندوقي أو تثبيت الحواس 5-4-3-2-1.', preset: 'p_adhd' },
+  anxious: { label: 'Anxious', labelAr: 'قلق ومتوتر', emoji: '😰', rec: 'Take a deep breath. Use the Worry Dissolver below or listen to soothing Brown Noise.', recAr: 'خذ نفسًا عميقًا. استخدم مذيب القلق أدناه أو استمع إلى الضوضاء البنية المهدئة للذهن.', preset: 'p_adhd' },
+  frustrated: { label: 'Frustrated', labelAr: 'محبط أو متضايق', emoji: '😤', rec: 'Take 3 deep breaths. Remember B-minus work is better than non-existent work.', recAr: 'خذ 3 أنفاس عميقة واسترخِ. تذكر دائمًا: إنجاز عمل متواضع خيرٌ ألف مرة من عمل لا يُسلّم أبدًا.', preset: 'p_burst' }
 };
 
 function quickLogMood(moodKey) {
@@ -7060,7 +8689,8 @@ function quickLogMood(moodKey) {
 
   Store.addXP(10);
   SFX.click();
-  toast(`Mood logged: ${mood.emoji} ${mood.label} (+10 XP)`, 'success');
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  toast(isAr ? `تم تسجيل حالتك: ${mood.emoji} ${mood.labelAr || mood.label} (+10 نقاط خبرة)` : `Mood logged: ${mood.emoji} ${mood.label} (+10 XP)`, 'success');
 
   if (currentView !== 'wellness') {
     navigate('wellness');
@@ -7131,6 +8761,7 @@ function playBreathingChime(freq = 440) {
 }
 
 function tickBreathing() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   breathingState.seconds--;
   if (breathingState.seconds <= 0) {
     if (breathingState.mode === 'box') {
@@ -7182,7 +8813,7 @@ function tickBreathing() {
 
     if (breathingState.cycles > 0 && breathingState.cycles % 4 === 0 && breathingState.phase === 'inhale') {
       Store.addXP(15);
-      toast('4 Breathing cycles complete! +15 XP', 'success');
+      toast(isAr ? 'أتممت 4 دورات تنفس بنجاح! +15 نقطة خبرة' : '4 Breathing cycles complete! +15 XP', 'success');
     }
   }
 
@@ -7192,15 +8823,15 @@ function tickBreathing() {
   const cycleEl = document.getElementById('breath-cycle-count');
 
   if (circleEl && timerEl && phaseEl) {
-    timerEl.textContent = breathingState.seconds + 's';
-    cycleEl.textContent = `${breathingState.cycles} cycles done`;
+    timerEl.textContent = breathingState.seconds + (isAr ? ' ث' : 's');
+    cycleEl.textContent = isAr ? `${breathingState.cycles} دورات مكتملة` : `${breathingState.cycles} cycles done`;
 
-    let phaseText = 'Breathe In...';
+    let phaseText = isAr ? 'تنفّس بهدوء...' : 'Breathe In...';
     circleEl.className = 'guided-breath-circle ' + breathingState.phase;
 
-    if (breathingState.phase === 'inhale') phaseText = 'Breathe In Slowly...';
-    else if (breathingState.phase === 'hold' || breathingState.phase === 'hold2') phaseText = 'Hold Breath Calmly...';
-    else if (breathingState.phase === 'exhale') phaseText = 'Exhale Gently...';
+    if (breathingState.phase === 'inhale') phaseText = isAr ? 'شهيق هادئ وعميق...' : 'Breathe In Slowly...';
+    else if (breathingState.phase === 'hold' || breathingState.phase === 'hold2') phaseText = isAr ? 'احبس النفس باسترخاء...' : 'Hold Breath Calmly...';
+    else if (breathingState.phase === 'exhale') phaseText = isAr ? 'زفير بطيء ومريح...' : 'Exhale Gently...';
 
     phaseEl.textContent = phaseText;
   }
@@ -7222,18 +8853,20 @@ function nextGroundingStep() {
   if (groundingStep >= 5) {
     Store.addXP(20);
     SFX.complete();
-    toast('Grounding session complete! Feel present & clear. +20 XP', 'success');
+    const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+    toast(isAr ? 'اكتمل تمرين تثبيت الحواس! ذهنك الآن حاضر وصافٍ (+20 نقطة خبرة)' : 'Grounding session complete! Feel present & clear. +20 XP', 'success');
   }
   renderWellness();
 }
 
 // Dissolve Thought / Worry Jar
 function dissolveWorryThought() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const inp = document.getElementById('worry-dissolve-input');
   if (!inp) return;
   const val = inp.value.trim();
   if (!val) {
-    toast('Write down what is troubling you', 'warn');
+    toast(isAr ? 'اكتب ما يقلقك أو يشغل تفكيرك أولاً' : 'Write down what is troubling you', 'warn');
     return;
   }
 
@@ -7257,12 +8890,12 @@ function dissolveWorryThought() {
         container.innerHTML = `
           <div style="text-align:center; padding:20px; color:var(--teal); font-weight:700; animation:fadeIn 0.5s ease;">
             <i class="fas fa-sparkles" style="font-size:24px; margin-bottom:8px; display:block;"></i>
-            Thought released. You are not your thoughts — you are the one observing them.
+            ${isAr ? 'تلاشت الفكرة وتحررت منها تمامًا. لست أفكارك السلبية — بل أنت الوعي الهادئ الذي يراقبها.' : 'Thought released. You are not your thoughts — you are the one observing them.'}
           </div>
         `;
       }
       Store.addXP(10);
-      toast('Worry dissolved & released! +10 XP', 'bonus');
+      toast(isAr ? 'تلاشى القلق وتفرغ ذهنك! +10 نقاط خبرة' : 'Worry dissolved & released! +10 XP', 'bonus');
     }, 2100);
   }
 }
@@ -7272,98 +8905,146 @@ const COGNITIVE_DISTORTIONS = [
   {
     id: 'catastrophizing',
     name: 'Catastrophizing',
+    nameAr: 'تضخيم الأمور وتوقع الكوارث',
     subtitle: 'Fortune Telling / Worst-Case Bias',
+    subtitleAr: 'التنبؤ السلبي بالمستقبل وافتراض الأسوأ',
     icon: 'fa-meteor',
     color: '#EF4444',
     bg: 'rgba(239, 68, 68, 0.12)',
     summary: 'Assuming the absolute worst-case scenario will definitely happen and that you will be totally unable to cope.',
+    summaryAr: 'افتراض أن أسوأ سيناريو ممكن سيقع حتمًا، وأنك لن تتمكن إطلاقًا من تحمّله أو التعامل معه.',
     trapPrompt: 'If I mess this up, my entire grade and future will be completely ruined.',
+    trapPromptAr: 'إذا أخطأت في هذا الاختبار، ستتدمر درجتي بالكامل ويضيع مستقبلي الدراسي.',
     counterQuestion: 'What is the most probable, realistic outcome? Even in a worst case, what practical steps would I take?',
-    starterTemplate: 'Even though I fear [worst-case], the realistic probability is much lower, and I can handle it step-by-step by [concrete action].'
+    counterQuestionAr: 'ما هي النتيجة الأكثر واقعية واحتمالاً؟ وحتى في أسوأ سيناريو، ما هي الخطوات العملية المتاحة للتدارك؟',
+    starterTemplate: 'Even though I fear [worst-case], the realistic probability is much lower, and I can handle it step-by-step by [concrete action].',
+    starterTemplateAr: 'رغم أنني أخشى [أسوأ سيناريو]، إلا أن الاحتمال الواقعي أقل بكثير، ويمكنني التعامل معه خطوة بخطوة من خلال [إجراء عملي].'
   },
   {
     id: 'all-or-nothing',
     name: 'All-or-Nothing Thinking',
+    nameAr: 'تفكير الكل أو لا شيء (الأبيض والأسود)',
     subtitle: 'Black-and-White / Perfectionist Split',
+    subtitleAr: 'فخ الكمالية وتجاهل المنطقة الرمادية',
     icon: 'fa-circle-half-stroke',
     color: '#F59E0B',
     bg: 'rgba(245, 158, 11, 0.12)',
     summary: 'Viewing situations in polarized absolutes: either 100% flawless or a total failure. No middle ground or gray area.',
+    summaryAr: 'النظر إلى المواقف كأضداد متطرفة: إما 100% مثالي أو فشل ذريع كامل. غياب لأي مساحة مرنة وسطى.',
     trapPrompt: 'If I can’t study for the full 2 hours, my whole day is wasted and there is no point.',
+    trapPromptAr: 'إذا لم أتمكن من المذاكرة لساعتين كاملتين دون انقطاع، فقد ضاع يومي بالكامل ولا فائدة من البدء.',
     counterQuestion: 'What exists in the gray area between 0% and 100%? How is partial progress still valuable?',
-    starterTemplate: 'Progress is not all-or-nothing. Completing [partial amount] is still real progress that moves me forward.'
+    counterQuestionAr: 'ما الذي يوجد في المساحة الواقعية بين 0% و 100%؟ أليس أي تقدم جزئي أفضل بمراحل من الصفر؟',
+    starterTemplate: 'Progress is not all-or-nothing. Completing [partial amount] is still real progress that moves me forward.',
+    starterTemplateAr: 'التقدم ليس إما كل شيء أو لا شيء. إنجاز [جزء محدد] هو تقدم حقيقي يقربني من هدفي.'
   },
   {
     id: 'imposter-syndrome',
     name: 'Imposter Syndrome',
+    nameAr: 'متلازمة المحتال والتشكيك بالذات',
     subtitle: 'Discounting Positive / Fear of Exposure',
+    subtitleAr: 'تجاهل الإنجازات والخوف من الانكشاف',
     icon: 'fa-mask',
     color: '#8B5CF6',
     bg: 'rgba(139, 92, 246, 0.12)',
     summary: 'Attributing your achievements to luck, flukes, or mistakes, while secretly fearing you will be exposed as inadequate.',
+    summaryAr: 'عزو نجاحاتك للحظ أو الصدفة وحدها، مع خوف داخلي مستمر من أن يكتشف الآخرون أنك غير كفء.',
     trapPrompt: 'I only got a good mark because the test was easy. I don’t truly belong in this class.',
+    trapPromptAr: 'حصلت على درجة جيدة فقط لأن الامتحان كان سهلاً؛ أنا لا أستحق التواجد في هذا الصف المتقدم حقًا.',
     counterQuestion: 'What genuine effort, practice, knowledge, or persistence did I put in? Would I judge a friend this harshly?',
-    starterTemplate: 'My achievements are the result of my actual effort and learning, not an accident. I belong in this space.'
+    counterQuestionAr: 'ما هو الجهد الحقيقي والممارسة والمثابرة التي بذلتها؟ هل كنت سأحكم على أعز أصدقائي بمثل هذه القسوة؟',
+    starterTemplate: 'My achievements are the result of my actual effort and learning, not an accident. I belong in this space.',
+    starterTemplateAr: 'نجاحاتي هي ثمرة جهدي الحقيقي ومذاكرتي وليست مجرد صدفة عابرة. أنا أستحق مكاني هنا عن جدارة.'
   },
   {
     id: 'overgeneralization',
     name: 'Overgeneralization',
+    nameAr: 'التعميم المفرط (فخ دائمًا وأبدًا)',
     subtitle: 'The "Always / Never" Trap',
+    subtitleAr: 'تحويل عثرة واحدة إلى قاعدة دائمة',
     icon: 'fa-infinity',
     color: '#3B82F6',
     bg: 'rgba(59, 130, 246, 0.12)',
     summary: 'Taking a single isolated negative experience and projecting it as a permanent, inevitable rule across your entire life.',
+    summaryAr: 'أخذ موقف سلبي عابر وتعميمه كقاعدة حتمية وأبدية على مسيرتك وقدراتك بأكملها.',
     trapPrompt: 'I forgot my notes today. I always mess up; I will never be an organized student.',
+    trapPromptAr: 'نسيت دفاتري اليوم؛ أنا دائمًا أفسد الأمور، ولن أكون طالبًا منظمًا أبدًا.',
     counterQuestion: 'Is this truly happening "always" without exception? When has something gone well?',
-    starterTemplate: 'This is one specific setback on one day, not a permanent pattern. In the past, I have [counter-example].'
+    counterQuestionAr: 'هل يحدث هذا حقًا "دائمًا" بلا أي استثناء؟ متى سارت الأمور بشكل جيد ومنظم في السابق؟',
+    starterTemplate: 'This is one specific setback on one day, not a permanent pattern. In the past, I have [counter-example].',
+    starterTemplateAr: 'هذه عثرة محددة في يوم واحد، وليست نمطًا دائمًا لشخصيتي. في السابق تمكنت بنجاح من [مثال إيجابي سابق].'
   },
   {
     id: 'mind-reading',
     name: 'Mind Reading',
+    nameAr: 'قراءة الأفكار وافتراض سوء الظن',
     subtitle: 'Jumping to Critical Conclusions',
+    subtitleAr: 'القفز لاستنتاجات نقدية غير مثبتة',
     icon: 'fa-eye',
     color: '#EC4899',
     bg: 'rgba(236, 72, 153, 0.12)',
     summary: 'Assuming you know what classmates or teachers think about you, usually assuming disapproval or contempt.',
+    summaryAr: 'افتراض معرفتك المسبقة بما يدور في رؤوس المعلمين أو الزملاء تجاهك، وافتراض أنهم يحكمون عليك سلبًا.',
     trapPrompt: 'The teacher answered my question abruptly. They must think I am annoying and incapable.',
+    trapPromptAr: 'أجاب المعلم عن سؤالي باقتضاب وسرعة؛ لا بد أنه يراني مزعجًا وغير قادر على الفهم.',
     counterQuestion: 'What verifiable facts do I have? Could other explanations (teacher fatigue, busy schedule) explain their tone?',
-    starterTemplate: 'I cannot read minds. Their reaction could easily be due to [alternative reason], and I have no proof they think poorly of me.'
+    counterQuestionAr: 'ما هي الأدلة المادية الملموسة لدي؟ ألا يمكن أن يكون انشغال المعلم أو تعبه هو السبب الحقيقي لنبرته؟',
+    starterTemplate: 'I cannot read minds. Their reaction could easily be due to [alternative reason], and I have no proof they think poorly of me.',
+    starterTemplateAr: 'أنا لا أقرأ الغيب ولا عقول الناس. قد يكون تصرفهم ناتجًا عن [سبب بديل محتمل]، وليس لدي أي دليل على أنهم يظنون بي سوءًا.'
   },
   {
     id: 'emotional-reasoning',
     name: 'Emotional Reasoning',
+    nameAr: 'الاستدلال العاطفي (الخلط بين الشعور والحقيقة)',
     subtitle: 'Feelings Mistaken for Facts',
+    subtitleAr: 'اعتبار الإحساس حقيقة واقعية لا جدال فيها',
     icon: 'fa-heart-crack',
     color: '#10B981',
     bg: 'rgba(16, 185, 129, 0.12)',
     summary: 'Believing that because you feel intense anxiety, dread, or inadequacy, the objective reality must match that feeling.',
+    summaryAr: 'الاعتقاد بأنه لمجرد أنك تشعر بالتوتر أو الارتباك أو العجز، فإن الواقع الموضوعي حتمًا يطابق هذا الشعور.',
     trapPrompt: 'I feel completely overwhelmed and stupid, which proves that I am unable to learn this subject.',
+    trapPromptAr: 'أشعر بضغط هائل وعجز؛ وهذا يثبت بالدليل القاطع أنني غير مؤهل لفهم هذه المادة.',
     counterQuestion: 'Feelings are biological sensations, not court-admissible facts. What does the objective evidence say?',
-    starterTemplate: 'I am experiencing intense feelings of [emotion], but feelings are not facts. The objective reality is [fact].'
+    counterQuestionAr: 'المشاعر مجرد إشارات فسيولوجية مؤقتة وليست حقائق علمية. ماذا تقول الأدلة الموضوعية الحقيقية؟',
+    starterTemplate: 'I am experiencing intense feelings of [emotion], but feelings are not facts. The objective reality is [fact].',
+    starterTemplateAr: 'أنا أمر الآن بمشاعر قوية من [الشعور]، لكن المشاعر ليست حقائق قطعية. الحقيقة الموضوعية هي [الحقيقة].'
   },
   {
     id: 'should-statements',
     name: '"Should" / "Must" Tyranny',
+    nameAr: 'استبداد "يجب" و "يلزم" (جلد الذات)',
     subtitle: 'Rigid Guilt Demands',
+    subtitleAr: 'مطالب صارمة تغذي الذنب والإرهاق',
     icon: 'fa-scale-unbalanced',
     color: '#6366F1',
     bg: 'rgba(99, 102, 241, 0.12)',
     summary: 'Imposing rigid, unforgiving moralistic rules on yourself or others, leading to chronic guilt, shame, and burnout.',
+    summaryAr: 'فرض قواعد حديدية قاسية لا ترحم على نفسك، مما يورث شعورًا مستمرًا بالذنب والخجل والإنهاك العصبي.',
     trapPrompt: 'I should be able to focus for 4 hours straight without getting distracted like normal people.',
+    trapPromptAr: 'يجب أن أكون قادرًا على التركيز لـ 4 ساعات متواصلة دون تشتت كباقي الطلاب الطبيعيين.',
     counterQuestion: 'Says who? What happens if I replace "I should" with "I prefer" or "It is normal for humans to need breaks"?',
-    starterTemplate: 'It is natural that my brain needs breaks. Instead of demanding perfection, I choose to work with my needs.'
+    counterQuestionAr: 'من قرر ذلك؟ ماذا يحدث إذا استبدلت "يجب عليّ" بـ "أفضّل" أو "من الطبيعي لبني البشر أخذ فترات استراحة"؟',
+    starterTemplate: 'It is natural that my brain needs breaks. Instead of demanding perfection, I choose to work with my needs.',
+    starterTemplateAr: 'من الطبيعي تمامًا أن يحتاج عقلي لفواصل راحة. بدلاً من مطالبة نفسي بالكمال الخيالي، أختار التعامل بحكمة مع طاقتي.'
   },
   {
     id: 'labeling',
     name: 'Labeling & Personalization',
+    nameAr: 'إلصاق التسميات وتشويه الهوية',
     subtitle: 'Error Turned Into Identity',
+    subtitleAr: 'تحويل الخطأ العابر إلى وصمة شخصية',
     icon: 'fa-tag',
     color: '#14B8A6',
     bg: 'rgba(20, 184, 166, 0.12)',
     summary: 'Taking a specific mistake and turning it into a total character verdict ("I am a failure" instead of "I made an error").',
+    summaryAr: 'أخذ خطأ إجرائي محدد وتحويله إلى حُكم شامل على جوهرك ("أنا فاشل" بدلاً من "لقد ارتكبت خطأ يمكن إصلاحه").',
     trapPrompt: 'I made a mistake on that math calculation. I am just hopeless at math.',
+    trapPromptAr: 'أخطأت في تلك العملية الحسابية؛ أنا فاشل ولا أمل مني في مادة الرياضيات.',
     counterQuestion: 'Am I a mistake, or a person who made a mistake? What is the distinction between my behavior and my worth?',
-    starterTemplate: 'A mistake is something I did, not who I am. Making mistakes is an essential part of learning.'
+    counterQuestionAr: 'هل أنا نفسي "خطأ"، أم إنسان وقع في خطأ محدد؟ ما هو الفارق الجوهري بين سلوكي وقيمتي كإنسان؟',
+    starterTemplate: 'A mistake is something I did, not who I am. Making mistakes is an essential part of learning.',
+    starterTemplateAr: 'الخطأ هو تصرف قمت به، وليس هويتي. ارتكاب الأخطاء هو الخطوة الأولى والأساسية في رحلة التعلم الحقيقي.'
   }
 ];
 
@@ -7371,50 +9052,77 @@ const CBT_PRESETS = [
   {
     id: 'exam-panic',
     name: 'Pre-Exam Catastrophizing',
+    nameAr: 'توقع الكوارث قبل الامتحان',
     icon: 'fa-graduation-cap',
     trigger: 'Upcoming midterm in 2 days with 4 chapters left to review',
+    triggerAr: 'اختبار نصفي بعد يومين وما زالت هناك 4 فصول للمراجعة',
     stumble: 'I haven’t memorized all the formulas yet. I am going to bomb this exam, ruin my GPA, and disappoint everyone.',
+    stumbleAr: 'لم أحفظ جميع القوانين بعد. سأرسب في الامتحان وأفسد معدلي وأخيّب آمال الجميع.',
     belief: 90,
     emotion: 'Panic & Overwhelm',
+    emotionAr: 'هلع وضغط شديد',
     distortions: ['catastrophizing', 'all-or-nothing'],
     evidenceFor: 'I have 4 chapters left and feel stressed when looking at the formula sheet.',
+    evidenceForAr: 'متبقي 4 فصول وأشعر بالتوتر عند النظر إلى قائمة القوانين.',
     evidenceAgainst: 'I still have 48 hours. I attended the lectures and have homework solutions. Even if I get a B or C, one exam does not ruin my life or GPA.',
+    evidenceAgainstAr: 'ما زال لدي 48 ساعة كاملة. حضرت المحاضرات ولدي حلول الواجبات. وحتى لو حصلت على درجة متوسطة، فاختبار واحد لا ينهي مستقبلي أو معدلي.',
     friendAdvice: 'You don’t need 100% to pass and do well. Pick the high-yield topics, do practice problems, and get good sleep.',
+    friendAdviceAr: 'لست بحاجة لعلامة 100% لتنجح وتتفوق. ركز على الموضوعات الأساسية المهمة، وحل بعض المسائل التدريبية، ونم جيدًا الليلة.',
     reframe: 'I don’t need to know every detail to succeed. Prioritizing the top 3 high-yield concepts today gives me plenty of points to pass comfortably.',
+    reframeAr: 'لست بحاجة لمعرفة كل تفصيلة صغيرة لأنجح. التركيز اليوم على أهم 3 مفاهيم أساسية سيعطيني درجات كافية للنجاح والارتياح.',
     finalBelief: 25,
-    microAction: 'Pick chapter 3 and do 5 practice problems with a 15-minute timer'
+    microAction: 'Pick chapter 3 and do 5 practice problems with a 15-minute timer',
+    microActionAr: 'اختيار الفصل الثالث وحل 5 مسائل تدريبية بمؤقت 15 دقيقة'
   },
   {
     id: 'broken-streak',
     name: 'Streak Break All-or-Nothing',
+    nameAr: 'انقطاع السلسلة واليأس الكلي',
     icon: 'fa-fire-flame-curved',
     trigger: 'Missed yesterday’s scheduled study block due to family dinner',
+    triggerAr: 'فاتتني فترة المذاكرة المحددة بالأمس بسبب عشاء عائلي',
     stumble: 'I ruined my 6-day study streak. My momentum is gone, so this whole week is wasted and I might as well give up.',
+    stumbleAr: 'أفسدت سلسلة المذاكرة لـ 6 أيام متتالية. ضاع كل حماسي، وذهب هذا الأسبوع سدى، ومن الأفضل أن أستسلم.',
     belief: 85,
     emotion: 'Frustrated & Defeated',
+    emotionAr: 'إحباط وشعور بالهزيمة',
     distortions: ['all-or-nothing', 'overgeneralization'],
     evidenceFor: 'I did not study yesterday.',
+    evidenceForAr: 'لم أذاكر بالأمس.',
     evidenceAgainst: 'I studied 6 days in a row! That knowledge didn’t vanish overnight. A streak is just an arbitrary counter, not my brain’s actual learning.',
+    evidenceAgainstAr: 'لقد ذاكرت 6 أيام متتالية سابقة! تلك المعرفة لم تتبخر بين عشية وضحاها. السلسلة مجرد رقم رمزي وليست مقياسًا حقيقيًا لما تعلمه عقلي.',
     friendAdvice: 'One rest day doesn’t erase 6 days of hard work. The strongest people take breaks and get right back on track.',
+    friendAdviceAr: 'يوم استراحة واحد لا يلغي 6 أيام من الجهد والاجتهاد. حتى الأبطال يأخذون فترات راحة ويعودون للمسار أقوى.',
     reframe: 'One missed day is just life happening, not a ruined week. My 6 days of learning are banked, and starting today proves my resilience.',
+    reframeAr: 'فوات يوم واحد هو مجرد ظرف طبيعي في الحياة وليس ضياعًا للأسبوع. معرفتي محفوظة، والبدء مجددًا اليوم يثبت مرونتي وقوتي.',
     finalBelief: 15,
-    microAction: 'Do a quick 10-minute flashcard review right now to reset momentum'
+    microAction: 'Do a quick 10-minute flashcard review right now to reset momentum',
+    microActionAr: 'إجراء مراجعة سريعة لـ 10 دقائق على البطاقات التعليمية الآن لاستعادة الحماس'
   },
   {
     id: 'imposter-syndrome-doubt',
     name: 'Advanced Class Imposter Doubt',
+    nameAr: 'شكوك متلازمة المحتال في الفصول المتقدمة',
     icon: 'fa-brain',
     trigger: 'Sitting in AP/Advanced Physics while classmates seem to answer instantly',
+    triggerAr: 'الجلوس في فصل الفيزياء المتقدمة بينما يبدو الزملاء يجيبون فورًا',
     stumble: 'Everyone else here gets it naturally. I was only placed here by mistake and soon the teacher will realize I don’t belong.',
+    stumbleAr: 'الجميع هنا يفهمون بالفطرة ودون جهد. تم قبولي هنا بالخطأ وسيكتشف المعلم قريبًا أنني لا أنتمي لهذا المكان.',
     belief: 80,
     emotion: 'Inadequate & Isolated',
+    emotionAr: 'شعور بعدم الكفاءة والعزلة',
     distortions: ['imposter-syndrome', 'mind-reading'],
     evidenceFor: 'Two classmates raised their hands before I finished reading the problem.',
+    evidenceForAr: 'رفع زميلان يديهما للإجابة قبل أن أنهي حتى قراءة المسألة.',
     evidenceAgainst: 'I passed the prerequisite with high marks. Fast hand-raising isn’t deep understanding. Most people are also too shy to admit when they’re confused.',
+    evidenceAgainstAr: 'اجتزت المتطلبات السابقة بدرجات عالية جدًا. سرعة رفع اليد ليست مقياسًا للعمق أو الفهم. أغلب الطلاب يخجلون من الاعتراف بحيرتهم أيضًا.',
     friendAdvice: 'You worked hard to earn your seat in this class. Asking questions is a sign of bravery and curiosity, not stupidity.',
+    friendAdviceAr: 'لقد اجتهدت ونلت مقعدك في هذا الفصل بجدارة. طرح الأسئلة دليل شجاعة ورغبة بالتعلم وليس دليلاً على الضعف.',
     reframe: 'Classmates answering quickly doesn’t mean I am behind. My brain processes methodically, and I earned my spot in this room through demonstrated ability.',
+    reframeAr: 'إجابة زملائي بسرعة لا تعني أنني متأخر. عقلي يعالج المعلومات بتأنٍ ومنهجية، وقد اكتسبت مقعدي هنا بناءً على قدراتي الحقيقية.',
     finalBelief: 20,
-    microAction: 'Write down one question to ask the teacher at the end of class'
+    microAction: 'Write down one question to ask the teacher at the end of class',
+    microActionAr: 'كتابة سؤال محدد لطرحه على المعلم في نهاية الحصة'
   }
 ];
 
@@ -7441,39 +9149,60 @@ let cbtDraft = {
 const ADHD_REFRAMES = [
   {
     title: 'Task Paralysis',
+    titleAr: 'شلل المهام والتسويف القهري',
     problem: 'I have so much to do, I am overwhelmed and doing nothing at all.',
+    problemAr: 'لدي مهام كثيرة جدًا لدرجة أنني أشعر بالعجز التام ولا أفعل أي شيء على الإطلاق.',
     reframe: 'You do not have to finish the whole project today. Lower the bar completely: just do 2 minutes or open the document. Starting micro builds momentum.',
+    reframeAr: 'لست مجبرًا على إنهاء المشروع بأكمله اليوم. اخفض سقف التوقعات لأقصى حد: ابدأ بدقيقتين فقط أو مجرد فتح الملف. البدايات المجهرية تبني الزخم.',
     icon: 'fa-cubes-stacked'
   },
   {
     title: 'Perfectionism Trap',
+    titleAr: 'فخ الكمال والمثالية',
     problem: 'If I cannot do this assignment perfectly, it is not worth doing.',
+    problemAr: 'إذا لم أتمكن من أداء هذا الواجب على نحو مثالي وخالٍ من أي نقص، فلا فائدة من البدء به.',
     reframe: 'B-minus work submitted on time beats an unsubmitted masterwork every time. Done is infinite times better than perfect.',
+    reframeAr: 'واجب مكتمل بجودة مقبولة يُسلَّم في موعده خيرٌ بمئات المرات من عمل مثالي متخيَّل لا يُسلَّم أبدًا. الإنجاز أهم من الكمال.',
     icon: 'fa-bullseye'
   },
   {
     title: 'Distraction Guilt',
+    titleAr: 'جلد الذات بعد التشتت',
     problem: 'I lost 30 minutes on my phone. I ruined my entire focus routine.',
+    problemAr: 'أمضيت 30 دقيقة أتصفح الهاتف وأضعت وقتي. أفسدت روتين مذاكرتي بالكامل.',
     reframe: 'A distraction is a temporary detour, not a crash. Take a deep breath, reset right now, and give yourself credit for returning.',
+    reframeAr: 'التشتت هو مجرد منعطف مؤقت في الطريق وليس حادث تصادم مدمّر. خذ نفسًا عميقًا، وابدأ مجددًا الآن، وقدّر نفسك لأنك عدت.',
     icon: 'fa-rotate-left'
   },
   {
     title: 'Time Blindness Panic',
+    titleAr: 'هلع عمى الوقت والشعور بالتأخر',
     problem: 'It feels like time is slipping away and I am falling behind.',
+    problemAr: 'أشعر أن الوقت يفلت من بين يدي وأنني متأخر دائمًا عن الباقين.',
     reframe: 'Time is linear. Set a 10-minute timer for one single micro-task. You only need to focus on what is in front of you right now.',
+    reframeAr: 'الوقت يمشي خطوة بخطوة. اضبط مؤقتًا لـ 10 دقائق لمهمة واحدة صغيرة فقط. ركز فقط على ما هو أمام عينيك في هذه اللحظة.',
     icon: 'fa-hourglass-half'
   }
 ];
 
 function getRandomAffirmation() {
-  const affirmations = [
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const affirmationsEn = [
     "My worth is not measured by my productivity.",
     "Small steps taken consistently create incredible transformation.",
     "It is completely okay to pause, breathe, and restart at any point.",
     "I am capable, resilient, and learning how my brain works best.",
     "Imperfection is human. Progress is my only goal."
   ];
-  return affirmations[Math.floor(Math.random() * affirmations.length)];
+  const affirmationsAr = [
+    "قيمتي الحقيقية لا تُقاس فقط بإنتاجيتي؛ أنا أستحق التقدير في كل حال.",
+    "الخطوات الصغيرة المستمرة تصنع فارقًا هائلاً وإنجازًا عظيمًا.",
+    "من الطبيعي تمامًا أن تتوقف للحظات، تتنفس بعمق، ثم تبدأ من جديد دون لوم.",
+    "أنا قادر، مرن، وأتعلم باستمرار كيف يعمل عقلي بأفضل صورة ممكنة.",
+    "الكمال مجرد وهم؛ والتقدم التدريجي هو هدفي الحقيقي الوحيد."
+  ];
+  const pool = isAr ? affirmationsAr : affirmationsEn;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function renderWellness() {
@@ -7481,6 +9210,7 @@ function renderWellness() {
   const el = document.getElementById('view-wellness');
   if (!el) return;
 
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const logs = Store.get('moodLogs') || [];
   const recentLog = logs[0];
   const activeMoodData = selectedMood ? MOOD_DATA[selectedMood] : MOOD_DATA.calm;
@@ -7489,45 +9219,45 @@ function renderWellness() {
     <div style="max-width:960px; margin:0 auto;">
       <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
         <div>
-          <h1 style="font-size:26px; font-weight:700; margin-bottom:4px;">Mind & Emotional Wellness Hub</h1>
-          <p style="color:var(--text2); font-size:15px;">Compassionate mental health tools designed specifically for student focus & ADHD clarity.</p>
+          <h1 style="font-size:26px; font-weight:700; margin-bottom:4px;">${isAr ? 'مركز الراحة والمزاج والصحة النفسية' : 'Mind & Emotional Wellness Hub'}</h1>
+          <p style="color:var(--text2); font-size:15px;">${isAr ? 'أدوات داعمة ومصممة خصيصًا لصفاء الذهن، تنظيم المشاعر، وتخفيف تشتت ADHD للطلاب.' : 'Compassionate mental health tools designed specifically for student focus & ADHD clarity.'}</p>
         </div>
         <button class="btn btn-sm btn-ghost" onclick="toast(getRandomAffirmation(), 'info')" style="border:1px solid var(--border); color:var(--teal);">
-          <i class="fas fa-sparkles"></i> Daily Affirmation
+          <i class="fas fa-sparkles"></i> ${isAr ? 'توكيدة اليوم' : 'Daily Affirmation'}
         </button>
       </div>
 
       <!-- Tab Navigation -->
       <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:24px;" class="no-scrollbar">
         <button class="grade-pill ${wellnessTab==='checkin'?'selected':''}" onclick="wellnessTab='checkin'; SFX.click(); renderWellness();">
-          <i class="fas fa-face-smile"></i> Mood Check-In
+          <i class="fas fa-face-smile"></i> ${isAr ? 'تسجيل المزاج' : 'Mood Check-In'}
         </button>
         <button class="grade-pill ${wellnessTab==='firstaid'?'selected':''}" style="background:${wellnessTab==='firstaid'?'var(--red)':'rgba(239,68,68,0.12)'}; color:${wellnessTab==='firstaid'?'#fff':'var(--red)'}; font-weight:700;" onclick="wellnessTab='firstaid'; SFX.click(); renderWellness();">
-          <i class="fas fa-kit-medical"></i> Panic / Anxiety SOS
+          <i class="fas fa-kit-medical"></i> ${isAr ? 'إسعاف القلق SOS' : 'Panic / Anxiety SOS'}
         </button>
         <button class="grade-pill ${wellnessTab==='journal'?'selected':''}" onclick="wellnessTab='journal'; SFX.click(); renderWellness();">
-          <i class="fas fa-book-heart"></i> Small Wins Journal
+          <i class="fas fa-book-heart"></i> ${isAr ? 'دفتر الإنجازات اليومية' : 'Small Wins Journal'}
         </button>
         <button class="grade-pill ${wellnessTab==='bodyscan'?'selected':''}" onclick="wellnessTab='bodyscan'; SFX.click(); renderWellness();">
-          <i class="fas fa-spa"></i> Body Scan & PMR
+          <i class="fas fa-spa"></i> ${isAr ? 'فحص الجسد والاسترخاء' : 'Body Scan & PMR'}
         </button>
         <button class="grade-pill ${wellnessTab==='affirmations'?'selected':''}" onclick="wellnessTab='affirmations'; SFX.click(); renderWellness();">
-          <i class="fas fa-quote-left"></i> Self-Talk Cards
+          <i class="fas fa-quote-left"></i> ${isAr ? 'بطاقات الحديث الذاتي' : 'Self-Talk Cards'}
         </button>
         <button class="grade-pill ${wellnessTab==='breathing'?'selected':''}" onclick="wellnessTab='breathing'; SFX.click(); renderWellness();">
-          <i class="fas fa-wind"></i> Guided Breathing
+          <i class="fas fa-wind"></i> ${isAr ? 'التنفس الموجّه' : 'Guided Breathing'}
         </button>
         <button class="grade-pill ${wellnessTab==='grounding'?'selected':''}" onclick="wellnessTab='grounding'; SFX.click(); renderWellness();">
-          <i class="fas fa-anchor"></i> 5-4-3-2-1 Grounding
+          <i class="fas fa-anchor"></i> ${isAr ? 'تثبيت الحواس 5-4-3-2-1' : '5-4-3-2-1 Grounding'}
         </button>
         <button class="grade-pill ${wellnessTab==='dissolver'?'selected':''}" onclick="wellnessTab='dissolver'; SFX.click(); renderWellness();">
-          <i class="fas fa-cloud-moon"></i> Worry Dissolver
+          <i class="fas fa-cloud-moon"></i> ${isAr ? 'مذيب القلق والهموم' : 'Worry Dissolver'}
         </button>
         <button class="grade-pill ${wellnessTab==='reframes'?'selected':''}" onclick="wellnessTab='reframes'; SFX.click(); renderWellness();">
-          <i class="fas fa-brain"></i> CBT Reframing Journal
+          <i class="fas fa-brain"></i> ${isAr ? 'دفتر إعادة الصياغة (CBT)' : 'CBT Reframing Journal'}
         </button>
         <button class="grade-pill ${wellnessTab==='analytics'?'selected':''}" onclick="wellnessTab='analytics'; SFX.click(); renderWellness();">
-          <i class="fas fa-chart-line"></i> Mood Insights
+          <i class="fas fa-chart-line"></i> ${isAr ? 'رؤى وتحليلات المزاج' : 'Mood Insights'}
         </button>
       </div>
 
@@ -7546,6 +9276,7 @@ function renderWellness() {
 }
 
 function renderWellnessFirstAidSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
     <div class="card card-glow" style="border-left: 5px solid var(--red); padding:28px;">
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
@@ -7554,12 +9285,12 @@ function renderWellnessFirstAidSection() {
             <i class="fas fa-heart-pulse" style="color:var(--red); font-size:24px;"></i>
           </div>
           <div>
-            <h3 style="font-size:20px; font-weight:800; color:var(--text);">Panic & Acute Anxiety Rapid First-Aid</h3>
-            <p style="font-size:13px; color:var(--text2);">Immediate 4-step physiological reset for intense anxiety, racing heart, or overwhelm.</p>
+            <h3 style="font-size:20px; font-weight:800; color:var(--text);">${isAr ? 'الإسعاف السريع لنوبات الهلع والقلق الحاد' : 'Panic & Acute Anxiety Rapid First-Aid'}</h3>
+            <p style="font-size:13px; color:var(--text2);">${isAr ? 'خطة فورية من 4 خطوات لإعادة ضبط الجهاز العصبي عند تسارع ضربات القلب أو الشعور بالاختناق والضغط.' : 'Immediate 4-step physiological reset for intense anxiety, racing heart, or overwhelm.'}</p>
           </div>
         </div>
-        <button class="btn btn-sm btn-teal" onclick="playSoundscape('brown'); toast('Playing calming Brown Noise soundscape...', 'info');">
-          <i class="fas fa-headphones"></i> Play Calming Brown Noise
+        <button class="btn btn-sm btn-teal" onclick="playSoundscape('brown'); toast('${isAr ? 'جاري تشغيل الضوضاء البنية المهدئة للذهن...' : 'Playing calming Brown Noise soundscape...'}', 'info');">
+          <i class="fas fa-headphones"></i> ${isAr ? 'تشغيل الضوضاء البنية المهدئة' : 'Play Calming Brown Noise'}
         </button>
       </div>
 
@@ -7567,52 +9298,52 @@ function renderWellnessFirstAidSection() {
         <div style="background:var(--bg); padding:18px; border-radius:12px; border:1px solid var(--border);">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:800; color:var(--red);">
             <span style="background:var(--red); color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px;">1</span>
-            Physiological Double-Inhale
+            ${isAr ? 'الشهيق المزدوج الفسيولوجي' : 'Physiological Double-Inhale'}
           </div>
           <p style="font-size:13px; color:var(--text2); margin-bottom:12px; line-height:1.5;">
-            Take <strong>2 quick inhales</strong> through your nose, then 1 long slow exhale through your mouth. Doing this 3 times pops collapsed lung alveoli and rapidly drops adrenaline.
+            ${isAr ? 'خذ <strong>شهيقين سريعين متتاليين</strong> من الأنف، متبوعين بزفير طويل وبطيء من الفم. تكرار هذا 3 مرات يفتح الحويصلات الهوائية ويخفض هرمون الأدرينالين فورًا.' : 'Take <strong>2 quick inhales</strong> through your nose, then 1 long slow exhale through your mouth. Doing this 3 times pops collapsed lung alveoli and rapidly drops adrenaline.'}
           </p>
           <button class="btn btn-sm btn-secondary" style="width:100%; justify-content:center;" onclick="startBreathing('slow')">
-            <i class="fas fa-wind"></i> Start Guided Reset Breath
+            <i class="fas fa-wind"></i> ${isAr ? 'بدء تمرين التنفس المهدئ' : 'Start Guided Reset Breath'}
           </button>
         </div>
 
         <div style="background:var(--bg); padding:18px; border-radius:12px; border:1px solid var(--border);">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:800; color:var(--blue);">
             <span style="background:var(--blue); color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px;">2</span>
-            Cold Temperature Shock
+            ${isAr ? 'صدمة الماء البارد للوجه' : 'Cold Temperature Shock'}
           </div>
           <p style="font-size:13px; color:var(--text2); margin-bottom:12px; line-height:1.5;">
-            Splash ice cold water on your face or press a cold bottle / ice cube against your wrists. Triggers the <em>Mammalian Dive Reflex</em>, dropping heart rate.
+            ${isAr ? 'اغسل وجهك بماء مثلج أو ضع زجاجة ماء باردة على معصمك. هذا يُحفز رد فعل الغطس الطبيعي ويبطئ نبضات القلب المتسارعة.' : 'Splash ice cold water on your face or press a cold bottle / ice cube against your wrists. Triggers the <em>Mammalian Dive Reflex</em>, dropping heart rate.'}
           </p>
           <div style="font-size:12px; color:var(--teal); font-weight:700;">
-            <i class="fas fa-temperature-arrow-down"></i> Quickest physical circuit breaker.
+            <i class="fas fa-temperature-arrow-down"></i> ${isAr ? 'أسرع قاطع مادي لنوبات التوتر.' : 'Quickest physical circuit breaker.'}
           </div>
         </div>
 
         <div style="background:var(--bg); padding:18px; border-radius:12px; border:1px solid var(--border);">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:800; color:var(--purple);">
             <span style="background:var(--purple); color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px;">3</span>
-            Safety Anchor Truth
+            ${isAr ? 'مرساة الأمان الحقيقية' : 'Safety Anchor Truth'}
           </div>
           <p style="font-size:13px; color:var(--text2); margin-bottom:12px; line-height:1.5;">
-            Say aloud: <em>"My body is feeling adrenaline, but I am safe right now. Anxiety always peaks and passes within minutes."</em>
+            ${isAr ? 'ردد بصوت واضح: <em>"جسدي يفرز الأدرينالين الآن، لكني في أمان تام هنا. القلق يبلغ ذروته ثم يتلاشى خلال دقائق معدودة."</em>' : 'Say aloud: <em>"My body is feeling adrenaline, but I am safe right now. Anxiety always peaks and passes within minutes."</em>'}
           </p>
-          <button class="btn btn-sm btn-ghost" style="width:100%; justify-content:center; border:1px solid var(--border);" onclick="createNewStickyNote('🚨 I am in a safe space right now. This feeling will pass soon.')">
-            <i class="fas fa-thumbtack"></i> Stick Anchor Note on Screen
+          <button class="btn btn-sm btn-ghost" style="width:100%; justify-content:center; border:1px solid var(--border);" onclick="createNewStickyNote('${isAr ? '🚨 أنا في مكان آمن الآن. هذا الشعور مؤقت وسيزول قريبًا.' : '🚨 I am in a safe space right now. This feeling will pass soon.'}')">
+            <i class="fas fa-thumbtack"></i> ${isAr ? 'تثبيت ملحوظة الأمان على الشاشة' : 'Stick Anchor Note on Screen'}
           </button>
         </div>
 
         <div style="background:var(--bg); padding:18px; border-radius:12px; border:1px solid var(--border);">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:800; color:var(--green);">
             <span style="background:var(--green); color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px;">4</span>
-            Grounding & Body Unplug
+            ${isAr ? 'التأريض وتفريغ توتر الجسد' : 'Grounding & Body Unplug'}
           </div>
           <p style="font-size:13px; color:var(--text2); margin-bottom:12px; line-height:1.5;">
-            Unclench jaw, drop shoulders down, press feet flat on the floor. You do not need to solve anything in this exact minute.
+            ${isAr ? 'أرخِ فكك، أنزل كتفيك المشدودين، وضع قدميك منبسطتين على الأرض. لست مطالبًا بحل أي مشكلة في هذه الدقيقة بالذات.' : 'Unclench jaw, drop shoulders down, press feet flat on the floor. You do not need to solve anything in this exact minute.'}
           </p>
           <button class="btn btn-sm btn-teal" style="width:100%; justify-content:center;" onclick="wellnessTab='grounding'; renderWellness();">
-            <i class="fas fa-anchor"></i> Go to 5-4-3-2-1 Grounding
+            <i class="fas fa-anchor"></i> ${isAr ? 'الانتقال لتمرين الحواس 5-4-3-2-1' : 'Go to 5-4-3-2-1 Grounding'}
           </button>
         </div>
       </div>
@@ -7621,6 +9352,7 @@ function renderWellnessFirstAidSection() {
 }
 
 function renderWellnessJournalSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const journals = Store.get('journalLogs') || [];
 
   return `
@@ -7628,59 +9360,59 @@ function renderWellnessJournalSection() {
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
         <div>
           <h3 style="font-size:20px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-book-heart" style="color:var(--teal);"></i> Small Wins & Gratitude Journal
+            <i class="fas fa-book-heart" style="color:var(--teal);"></i> ${isAr ? 'دفتر الإنجازات اليومية وملاحظة النعم' : 'Small Wins & Gratitude Journal'}
           </h3>
           <p style="font-size:14px; color:var(--text2);">
-            Training your brain to notice micro-wins builds emotional resilience and combats study burnout.
+            ${isAr ? 'تدريب عقلك على ملاحظة الإنجازات الصغيرة يبني مناعة عاطفية قوية ويحميك من الاحتراق النفسي.' : 'Training your brain to notice micro-wins builds emotional resilience and combats study burnout.'}
           </p>
         </div>
         <span class="tag" style="background:var(--teal-g); color:var(--teal); font-weight:700; font-size:13px;">
-          <i class="fas fa-fire"></i> ${journals.length} Entries Saved
+          <i class="fas fa-fire"></i> ${isAr ? `${journals.length} تدوينات مسجلة` : `${journals.length} Entries Saved`}
         </span>
       </div>
 
       <div style="background:var(--bg); padding:20px; border-radius:14px; border:1px solid var(--border); margin-bottom:24px;">
-        <h4 style="font-size:15px; font-weight:700; margin-bottom:12px;">What are 3 small things that went well or you appreciate today?</h4>
+        <h4 style="font-size:15px; font-weight:700; margin-bottom:12px;">${isAr ? 'ما هي 3 إنجازات صغيرة أو أشياء أنت ممتن لحدوثها اليوم؟' : 'What are 3 small things that went well or you appreciate today?'}</h4>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-          <input class="input" id="journal-win-1" placeholder="1. E.g., Started my math homework early / Drank a glass of water..." style="font-size:14px;">
-          <input class="input" id="journal-win-2" placeholder="2. E.g., Took a 10-minute walk outside / Helped a friend..." style="font-size:14px;">
-          <input class="input" id="journal-win-3" placeholder="3. E.g., Proud of showing up even when tired..." style="font-size:14px;">
+          <input class="input" id="journal-win-1" placeholder="${isAr ? '1. مثل: بدأت واجب الرياضيات مبكرًا / شربت كوب ماء منعش...' : '1. E.g., Started my math homework early / Drank a glass of water...'}" style="font-size:14px;">
+          <input class="input" id="journal-win-2" placeholder="${isAr ? '2. مثل: مشيت 10 دقائق في الهواء الطلق / ساعدت زميلي...' : '2. E.g., Took a 10-minute walk outside / Helped a friend...'}" style="font-size:14px;">
+          <input class="input" id="journal-win-3" placeholder="${isAr ? '3. مثل: فخور بأنني واصلت المحاولة رغم تعبي...' : '3. E.g., Proud of showing up even when tired...'}" style="font-size:14px;">
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <select class="input" id="journal-category" style="width:auto; font-size:13px;">
-            <option value="Study & Focus">📚 Study & Focus</option>
-            <option value="Health & Energy">🌿 Health & Energy</option>
-            <option value="Personal Growth">🌱 Personal Growth</option>
-            <option value="Mindset & Peace">💖 Mindset & Peace</option>
+            <option value="Study & Focus">${isAr ? '📚 المذاكرة والتركيز' : '📚 Study & Focus'}</option>
+            <option value="Health & Energy">${isAr ? '🌿 الصحة والنشاط' : '🌿 Health & Energy'}</option>
+            <option value="Personal Growth">${isAr ? '🌱 التطور الشخصي' : '🌱 Personal Growth'}</option>
+            <option value="Mindset & Peace">${isAr ? '💖 راحة البال والسكينة' : '💖 Mindset & Peace'}</option>
           </select>
           <button class="btn btn-teal" onclick="saveJournalEntry()">
-            <i class="fas fa-bookmark"></i> Save Daily Wins (+15 XP)
+            <i class="fas fa-bookmark"></i> ${isAr ? 'حفظ إنجازات اليوم (+15 نقطة خبرة)' : 'Save Daily Wins (+15 XP)'}
           </button>
         </div>
       </div>
 
       <div>
-        <h4 style="font-size:16px; font-weight:700; margin-bottom:12px;">Your Journal Log History</h4>
+        <h4 style="font-size:16px; font-weight:700; margin-bottom:12px;">${isAr ? 'سجل إنجازاتك ويومياتك السابقة' : 'Your Journal Log History'}</h4>
         ${journals.length === 0 ? `
           <div style="text-align:center; padding:24px; color:var(--text2); font-size:14px;">
-            No journal entries yet! Write down 3 small wins above to start your streak.
+            ${isAr ? 'لا توجد تدوينات بعد! اكتب 3 إنجازات صغيرة بالأعلى لبدء سلسلتك اليومية.' : 'No journal entries yet! Write down 3 small wins above to start your streak.'}
           </div>
         ` : `
           <div style="display:flex; flex-direction:column; gap:12px;">
             ${journals.slice().reverse().map((j) => {
-              const dateStr = new Date(j.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+              const dateStr = new Date(j.date).toLocaleDateString(isAr ? 'ar-EG' : undefined, { month: 'short', day: 'numeric', year: 'numeric' });
               return `
                 <div style="background:var(--bg); padding:16px; border-radius:12px; border-left:4px solid var(--teal); display:flex; flex-direction:column; gap:8px;">
                   <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <span style="font-weight:800; font-size:13px; color:var(--teal);">${j.category || 'Small Wins'}</span>
+                    <span style="font-weight:800; font-size:13px; color:var(--teal);">${j.category || (isAr ? 'إنجازات صغيرة' : 'Small Wins')}</span>
                     <span style="font-size:12px; color:var(--text2);">${dateStr}</span>
                   </div>
-                  <ul style="margin:0; padding-left:18px; font-size:13px; color:var(--text); line-height:1.6;">
+                  <ul style="margin:0; padding-left:${isAr ? '0' : '18px'}; padding-right:${isAr ? '18px' : '0'}; font-size:13px; color:var(--text); line-height:1.6;">
                     ${j.wins.map(w => `<li>${escHtml(w)}</li>`).join('')}
                   </ul>
                   <div style="display:flex; justify-content:flex-end;">
-                    <button class="btn btn-sm btn-ghost" style="font-size:11px;" onclick="createNewStickyNote('🌟 Small Win (${dateStr}):\\n• ${j.wins.join('\\n• ')}')">
-                      <i class="fas fa-thumbtack"></i> Pin to Sticky Note
+                    <button class="btn btn-sm btn-ghost" style="font-size:11px;" onclick="createNewStickyNote('${isAr ? '🌟 إنجازات صغيرة' : '🌟 Small Win'} (${dateStr}):\\n• ${j.wins.join('\\n• ')}')">
+                      <i class="fas fa-thumbtack"></i> ${isAr ? 'تثبيت كملحوظة لاصقة' : 'Pin to Sticky Note'}
                     </button>
                   </div>
                 </div>
@@ -7694,6 +9426,7 @@ function renderWellnessJournalSection() {
 }
 
 function saveJournalEntry() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const w1 = document.getElementById('journal-win-1').value.trim();
   const w2 = document.getElementById('journal-win-2').value.trim();
   const w3 = document.getElementById('journal-win-3').value.trim();
@@ -7701,7 +9434,7 @@ function saveJournalEntry() {
 
   const wins = [w1, w2, w3].filter(w => w.length > 0);
   if (wins.length === 0) {
-    toast('Please enter at least 1 win or moment of gratitude!', 'warn');
+    toast(isAr ? 'يرجى كتابة إنجاز واحد على الأقل أو لحظة امتنان!' : 'Please enter at least 1 win or moment of gratitude!', 'warn');
     return;
   }
 
@@ -7716,7 +9449,7 @@ function saveJournalEntry() {
   Store.set('journalLogs', journals);
   Store.addXP(15);
   SFX.complete();
-  toast('Journal entry saved! +15 XP earned 🎉', 'success');
+  toast(isAr ? 'تم حفظ التدوينة بنجاح! نلت +15 نقطة خبرة 🎉' : 'Journal entry saved! +15 XP earned 🎉', 'success');
   renderWellness();
 }
 
@@ -7725,30 +9458,31 @@ let pmrIsTense = true;
 let pmrSecondsLeft = 5;
 
 const PMR_STEPS = [
-  { name: 'Shoulders & Neck', instruction: 'Shrug your shoulders up high towards your ears and hold tight!', icon: 'fa-user-nurse' },
-  { name: 'Hands & Arms', instruction: 'Clench both fists tightly as if squeezing lemons!', icon: 'fa-hand-back-fist' },
-  { name: 'Face & Jaw', instruction: 'Scrunch up your facial muscles, squeeze eyes shut and clench jaw gently.', icon: 'fa-face-grimace' },
-  { name: 'Stomach & Core', instruction: 'Tighten your abdominal muscles as if bracing for impact.', icon: 'fa-child-reaching' },
-  { name: 'Legs & Feet', instruction: 'Curl your toes downward and tense your calf muscles tight.', icon: 'fa-shoe-prints' }
+  { name: 'Shoulders & Neck', nameAr: 'الأكتاف والرقبة', instruction: 'Shrug your shoulders up high towards your ears and hold tight!', instructionAr: 'ارفع كتفيك عاليًا باتجاه أذنيك واضغط عليهما بقوة وثبّت الشد!', icon: 'fa-user-nurse' },
+  { name: 'Hands & Arms', nameAr: 'اليدان والذراعان', instruction: 'Clench both fists tightly as if squeezing lemons!', instructionAr: 'اقبض كفيك بإحكام شديد كأنك تعصر ليمونة بكل قوتك!', icon: 'fa-hand-back-fist' },
+  { name: 'Face & Jaw', nameAr: 'الوجه والفك', instruction: 'Scrunch up your facial muscles, squeeze eyes shut and clench jaw gently.', instructionAr: 'قطّب عضلات وجهك، وأغمض عينيك بقوة، واضغط على فكك برفق.', icon: 'fa-face-grimace' },
+  { name: 'Stomach & Core', nameAr: 'البطن والجذع', instruction: 'Tighten your abdominal muscles as if bracing for impact.', instructionAr: 'شد عضلات بطنك بقوة كأنك تستعد لتلقي ضربة خفيفة.', icon: 'fa-child-reaching' },
+  { name: 'Legs & Feet', nameAr: 'الساقان والقدمان', instruction: 'Curl your toes downward and tense your calf muscles tight.', instructionAr: 'اثنِ أصابع قدميك للأسفل وشد عضلات ساقيك بإحكام.', icon: 'fa-shoe-prints' }
 ];
 
 function renderWellnessBodyScanSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const step = PMR_STEPS[pmrStep] || PMR_STEPS[0];
 
   return `
     <div class="card card-glow" style="text-align:center; padding:32px 24px;">
       <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
         <i class="fas fa-spa" style="font-size:28px; color:var(--teal);"></i>
-        <h3 style="font-size:22px; font-weight:800;">Progressive Muscle Relaxation (PMR)</h3>
+        <h3 style="font-size:22px; font-weight:800;">${isAr ? 'استرخاء العضلات التدريجي (PMR)' : 'Progressive Muscle Relaxation (PMR)'}</h3>
       </div>
       <p style="color:var(--text2); font-size:14px; max-width:520px; margin:0 auto 24px;">
-        Physical tension directly feeds mental anxiety. Tensing each muscle group for 5s then dropping it instantly trains your body to release stress held while sitting.
+        ${isAr ? 'التوتر الجسدي يغذي القلق الذهني مباشرة. شد مجموعة عضلية لـ 5 ثوانٍ ثم إرخاؤها فجأة يدرب جسدك على تفريغ الإجهاد المتراكم من الجلوس.' : 'Physical tension directly feeds mental anxiety. Tensing each muscle group for 5s then dropping it instantly trains your body to release stress held while sitting.'}
       </p>
 
       <div style="display:flex; justify-content:center; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
         ${PMR_STEPS.map((s, idx) => `
           <div class="grade-pill ${idx === pmrStep ? 'selected' : ''}" style="cursor:default; font-size:12px;">
-            Step ${idx + 1}: ${s.name}
+            ${isAr ? `الخطوة ${idx + 1}: ${s.nameAr || s.name}` : `Step ${idx + 1}: ${s.name}`}
           </div>
         `).join('')}
       </div>
@@ -7758,24 +9492,24 @@ function renderWellnessBodyScanSection() {
           <i class="fas ${step.icon}" style="font-size:28px; color:${pmrIsTense ? 'var(--accent)' : 'var(--teal)'};"></i>
         </div>
         <h4 style="font-size:18px; font-weight:800; margin-bottom:8px; color:${pmrIsTense ? 'var(--accent)' : 'var(--teal)'};">
-          ${pmrIsTense ? '1. TENSE MUSCLES NOW' : '2. RELEASE & LET DROP'}
+          ${pmrIsTense ? (isAr ? '1. شد العضلات الآن بقوة' : '1. TENSE MUSCLES NOW') : (isAr ? '2. أرخِ العضلات تمامًا واسترخِ' : '2. RELEASE & LET DROP')}
         </h4>
         <p style="font-size:15px; color:var(--text); font-weight:600; line-height:1.5; margin-bottom:20px;">
-          ${pmrIsTense ? step.instruction : 'Let all tension melt away. Notice the warm, relaxed sensation.'}
+          ${pmrIsTense ? (isAr ? (step.instructionAr || step.instruction) : step.instruction) : (isAr ? 'دع كل التشنج يذوب ويتلاشى. اشعر بالدفء والراحة يتدفقان في عضلاتك.' : 'Let all tension melt away. Notice the warm, relaxed sensation.')}
         </p>
 
         <div style="font-family:Fredoka; font-size:36px; font-weight:700; color:var(--teal);">
-          ${pmrSecondsLeft}s
+          ${pmrSecondsLeft}${isAr ? ' ث' : 's'}
         </div>
       </div>
 
       <div style="display:flex; gap:12px; justify-content:center;">
         <button class="btn btn-lg btn-teal" onclick="nextPMRStep()">
           <i class="fas ${pmrStep === PMR_STEPS.length - 1 && !pmrIsTense ? 'fa-circle-check' : 'fa-step-forward'}"></i>
-          ${pmrStep === PMR_STEPS.length - 1 && !pmrIsTense ? 'Complete Session (+10 XP)' : 'Next Muscle Group'}
+          ${pmrStep === PMR_STEPS.length - 1 && !pmrIsTense ? (isAr ? 'إنهاء جلسة الاسترخاء (+10 نقاط)' : 'Complete Session (+10 XP)') : (isAr ? 'المجموعة العضلية التالية' : 'Next Muscle Group')}
         </button>
         <button class="btn btn-lg btn-ghost" onclick="resetPMR()">
-          <i class="fas fa-rotate-left"></i> Reset
+          <i class="fas fa-rotate-left"></i> ${isAr ? 'إعادة البدء' : 'Reset'}
         </button>
       </div>
     </div>
@@ -7784,6 +9518,7 @@ function renderWellnessBodyScanSection() {
 
 function nextPMRStep() {
   SFX.click();
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   if (pmrIsTense) {
     pmrIsTense = false;
     pmrSecondsLeft = 5;
@@ -7795,7 +9530,7 @@ function nextPMRStep() {
       pmrSecondsLeft = 5;
     } else {
       Store.addXP(10);
-      toast('Full Progressive Muscle Relaxation Complete! Body refreshed.', 'bonus');
+      toast(isAr ? 'اكتمل تمرين استرخاء العضلات بنجاح! جسدك الآن مسترخٍ ونشيط.' : 'Full Progressive Muscle Relaxation Complete! Body refreshed.', 'bonus');
       resetPMR();
     }
   }
@@ -7812,83 +9547,113 @@ function resetPMR() {
 const AFFIRMATION_DECKS = [
   {
     category: '🎓 Test & Exam Anxiety',
+    categoryAr: '🎓 التخلص من قلق الامتحانات',
     icon: 'fa-graduation-cap',
     items: [
       "I have prepared to the best of my ability, and my worth is not defined by a score.",
       "Anxiety is just energy looking for direction. I can take one calm question at a time.",
       "If I encounter a difficult problem, I can pause, skip, and come back with fresh eyes."
+    ],
+    itemsAr: [
+      "لقد استعددت بأفضل ما لدي من طاقة، وقيمتي لا تُختصر أبدًا في رقم أو درجة.",
+      "القلق هو مجرد طاقة تبحث عن اتجاه. يمكنني التعامل مع كل سؤال بهدوء ورويّة.",
+      "إذا واجهت مسألة صعبة، يمكنني التوقف، تجاوزها مؤقتًا، والعودة إليها بذهن متجدد."
     ]
   },
   {
     category: '⏳ Feeling Behind & Overwhelmed',
+    categoryAr: '⏳ الشعور بالتأخر والضغط',
     icon: 'fa-hourglass-half',
     items: [
       "I don't have to fix my whole life today. I just need to do the next 5 minutes.",
       "Starting late is infinitely better than never starting. I am starting right now.",
       "It is safe to slow down. High panic does not equal high speed."
+    ],
+    itemsAr: [
+      "لست مطالبًا بإصلاح كل شيء في حياتي اليوم؛ أحتاج فقط إلى التركيز على الـ 5 دقائق التالية.",
+      "البدء متأخرًا خيرٌ ألف مرة من عدم البدء إطلاقًا. أنا أبدأ الآن بكل ثقة.",
+      "من الآمن أن أبطئ وتيرتي؛ فالذعر العالي لا يعني سرعة إنجاز حقيقية."
     ]
   },
   {
     category: '🧠 ADHD Brain Appreciation',
+    categoryAr: '🧠 تقدير عقل ADHD الفريد',
     icon: 'fa-bolt',
     items: [
       "My brain works differently, and that includes incredible creativity and hyperfocus gifts.",
       "Taking frequent short breaks is not laziness — it is smart energy management.",
       "I forgive myself for yesterday's distractions. Today is a brand new canvas."
+    ],
+    itemsAr: [
+      "عقلي يعمل بأسلوب مختلف، وهذا يتضمن إبداعًا استثنائيًا وقدرة مذهلة على التركيز الفائق.",
+      "أخذ فترات راحة قصيرة متكررة ليس كسلاً؛ بل هو إدارة ذكية ومحترفة للطاقة.",
+      "أسامح نفسي على تشتت الأمس. اليوم صفحة بيضاء جديدة ومجال جديد للنجاح."
     ]
   },
   {
     category: '🌿 Self-Compassion & Peace',
+    categoryAr: '🌿 الرأفة بالنفس وسكينة الروح',
     icon: 'fa-heart',
     items: [
       "I talk to myself with the same kindness and patience I give my best friends.",
       "Resting is a productive part of learning and memory consolidation.",
       "I am doing my best, and my best is enough."
+    ],
+    itemsAr: [
+      "أتحدث مع نفسي بنفس اللطف والصبر والتفهم الذي أمنحه لأعز أصدقائي.",
+      "الراحة والاسترخاء جزء منتج وأساسي من عملية التعلم وتثبيت الذكريات في الدماغ.",
+      "أنا أبذل قصارى جهدي اليوم، وما أقدمه كافٍ ومحل فخر وتقدير."
     ]
   }
 ];
 
 function renderWellnessAffirmationsSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
     <div style="display:flex; flex-direction:column; gap:20px;">
       <div class="card" style="background:var(--card); border-left:4px solid var(--teal);">
         <h3 style="font-size:18px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-quote-left" style="color:var(--teal);"></i> Compassionate Self-Talk Decks
+          <i class="fas fa-quote-left" style="color:var(--teal);"></i> ${isAr ? 'بطاقات الحديث الذاتي الإيجابي والرحمة بالنفس' : 'Compassionate Self-Talk Decks'}
         </h3>
         <p style="color:var(--text2); font-size:14px;">
-          Select any affirmation card below to copy or pin it directly onto your screen as a Sticky Note!
+          ${isAr ? 'اختر أي بطاقة توكيد لنسخها أو تثبيتها كملحوظة لاصقة ملهمة أمامك على الشاشة!' : 'Select any affirmation card below to copy or pin it directly onto your screen as a Sticky Note!'}
         </p>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:18px;">
-        ${AFFIRMATION_DECKS.map(deck => `
+        ${AFFIRMATION_DECKS.map(deck => {
+          const cat = isAr ? (deck.categoryAr || deck.category) : deck.category;
+          const items = isAr ? (deck.itemsAr || deck.items) : deck.items;
+          return `
           <div class="card" style="display:flex; flex-direction:column; gap:12px;">
             <div style="display:flex; align-items:center; gap:8px; font-weight:800; font-size:15px; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:8px;">
-              <i class="fas ${deck.icon}" style="color:var(--teal);"></i> ${deck.category}
+              <i class="fas ${deck.icon}" style="color:var(--teal);"></i> ${cat}
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-              ${deck.items.map(quote => `
+              ${items.map(quote => `
                 <div style="background:var(--bg); padding:12px; border-radius:10px; font-size:13px; line-height:1.5; color:var(--text); border:1px solid var(--border); display:flex; flex-direction:column; gap:8px;">
                   <div>"${escHtml(quote)}"</div>
                   <div style="display:flex; justify-content:flex-end; gap:6px;">
-                    <button class="btn btn-sm btn-ghost" style="font-size:11px;" onclick="navigator.clipboard.writeText('${escHtml(quote)}'); toast('Copied affirmation to clipboard!', 'info');">
-                      <i class="fas fa-copy"></i> Copy
+                    <button class="btn btn-sm btn-ghost" style="font-size:11px;" onclick="navigator.clipboard.writeText('${escHtml(quote)}'); toast('${isAr ? 'تم نسخ التوكيدة إلى الحافظة!' : 'Copied affirmation to clipboard!'}', 'info');">
+                      <i class="fas fa-copy"></i> ${isAr ? 'نسخ' : 'Copy'}
                     </button>
-                    <button class="btn btn-sm btn-teal" style="font-size:11px;" onclick="createNewStickyNote('✨ Affirmation:\\n${escHtml(quote)}')">
-                      <i class="fas fa-thumbtack"></i> Pin to Desktop
+                    <button class="btn btn-sm btn-teal" style="font-size:11px;" onclick="createNewStickyNote('${isAr ? '✨ توكيدة ملهمة' : '✨ Affirmation'}:\\n${escHtml(quote)}')">
+                      <i class="fas fa-thumbtack"></i> ${isAr ? 'تثبيت على الشاشة' : 'Pin to Desktop'}
                     </button>
                   </div>
                 </div>
               `).join('')}
             </div>
           </div>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
     </div>
   `;
 }
 
 function renderWellnessAnalyticsSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const logs = Store.get('moodLogs') || [];
   const totalLogs = logs.length;
 
@@ -7900,42 +9665,43 @@ function renderWellnessAnalyticsSection() {
   return `
     <div class="card card-glow" style="padding:28px;">
       <h3 style="font-size:20px; font-weight:800; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-        <i class="fas fa-chart-line" style="color:var(--teal);"></i> Emotional Pattern Insights
+        <i class="fas fa-chart-line" style="color:var(--teal);"></i> ${isAr ? 'رؤى وتحليلات الأنماط المزاجية' : 'Emotional Pattern Insights'}
       </h3>
       <p style="font-size:14px; color:var(--text2); margin-bottom:20px;">
-        Understanding your emotional patterns helps tailor study schedules around your natural energy levels.
+        ${isAr ? 'فهم تقلباتك ومستويات طاقتك النفسية يساعدك في تنظيم جدول مذاكرتك وفق طاقتك الطبيعية.' : 'Understanding your emotional patterns helps tailor study schedules around your natural energy levels.'}
       </p>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:24px;">
         <div style="background:var(--bg); padding:16px; border-radius:12px; text-align:center;">
           <div style="font-size:28px; font-weight:800; color:var(--teal);">${totalLogs}</div>
-          <div style="font-size:12px; color:var(--text2); font-weight:700;">Total Mood Check-Ins</div>
+          <div style="font-size:12px; color:var(--text2); font-weight:700;">${isAr ? 'إجمالي تسجيلات المزاج' : 'Total Mood Check-Ins'}</div>
         </div>
         <div style="background:var(--bg); padding:16px; border-radius:12px; text-align:center;">
           <div style="font-size:28px; font-weight:800; color:var(--accent);">
             ${Object.keys(moodCounts).length ? MOOD_DATA[Object.keys(moodCounts).reduce((a,b) => moodCounts[a] > moodCounts[b] ? a : b)]?.emoji || '🧘' : '🧘'}
           </div>
-          <div style="font-size:12px; color:var(--text2); font-weight:700;">Primary Mood State</div>
+          <div style="font-size:12px; color:var(--text2); font-weight:700;">${isAr ? 'الحالة المزاجية الغالبة' : 'Primary Mood State'}</div>
         </div>
         <div style="background:var(--bg); padding:16px; border-radius:12px; text-align:center;">
           <div style="font-size:28px; font-weight:800; color:var(--blue);">
             ${(Store.get('journalLogs') || []).length}
           </div>
-          <div style="font-size:12px; color:var(--text2); font-weight:700;">Small Wins Recorded</div>
+          <div style="font-size:12px; color:var(--text2); font-weight:700;">${isAr ? 'الإنجازات المسجلة' : 'Small Wins Recorded'}</div>
         </div>
       </div>
 
-      <h4 style="font-size:15px; font-weight:700; margin-bottom:12px;">Logged Mood Breakdown</h4>
+      <h4 style="font-size:15px; font-weight:700; margin-bottom:12px;">${isAr ? 'توزيع الحالات المزاجية المسجلة' : 'Logged Mood Breakdown'}</h4>
       <div style="display:flex; flex-direction:column; gap:10px;">
         ${Object.keys(MOOD_DATA).map(key => {
           const item = MOOD_DATA[key];
           const count = moodCounts[key] || 0;
           const pct = totalLogs > 0 ? Math.round((count / totalLogs) * 100) : 0;
+          const label = isAr ? (item.labelAr || item.label) : item.label;
           return `
             <div>
               <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700; margin-bottom:4px;">
-                <span>${item.emoji} ${item.label}</span>
-                <span style="color:var(--text2);">${count} times (${pct}%)</span>
+                <span>${item.emoji} ${label}</span>
+                <span style="color:var(--text2);">${isAr ? `${count} مرات (${pct}%)` : `${count} times (${pct}%)`}</span>
               </div>
               <div style="height:10px; background:var(--bg); border-radius:5px; overflow:hidden;">
                 <div style="height:100%; width:${pct}%; background:var(--teal); border-radius:5px; transition:width 0.4s ease;"></div>
@@ -7949,13 +9715,17 @@ function renderWellnessAnalyticsSection() {
 }
 
 function renderWellnessCheckinSection(logs, activeMoodData) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  const label = isAr ? (activeMoodData.labelAr || activeMoodData.label) : activeMoodData.label;
+  const rec = isAr ? (activeMoodData.recAr || activeMoodData.rec) : activeMoodData.rec;
+
   return `
     <div class="card card-glow" style="margin-bottom:24px;">
       <h3 style="font-size:18px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-        <i class="fas fa-heart-circle-check" style="color:var(--teal);"></i> Daily Emotional & Energy Check-In
+        <i class="fas fa-heart-circle-check" style="color:var(--teal);"></i> ${isAr ? 'تفقّد الحالة النفسية ومستوى الطاقة اليومي' : 'Daily Emotional & Energy Check-In'}
       </h3>
       <p style="color:var(--text2); font-size:14px; margin-bottom:16px;">
-        Checking in with yourself builds emotional awareness and prevents burnout. Select your current state:
+        ${isAr ? 'تفقّد مشاعرك ينمي وعيك الذاتي ويحميك من الإنهاك الدراسي. اختر حالتك الحالية الآن:' : 'Checking in with yourself builds emotional awareness and prevents burnout. Select your current state:'}
       </p>
 
       <!-- Emoji Picker -->
@@ -7963,10 +9733,11 @@ function renderWellnessCheckinSection(logs, activeMoodData) {
         ${Object.keys(MOOD_DATA).map(key => {
           const item = MOOD_DATA[key];
           const isSel = selectedMood === key;
+          const chipLabel = isAr ? (item.labelAr || item.label) : item.label;
           return `
             <div class="mood-chip ${isSel ? 'selected' : ''}" onclick="selectedMood='${key}'; SFX.click(); renderWellness();">
               <div class="mood-emoji">${item.emoji}</div>
-              <div class="mood-label">${item.label}</div>
+              <div class="mood-label">${chipLabel}</div>
             </div>
           `;
         }).join('')}
@@ -7975,15 +9746,15 @@ function renderWellnessCheckinSection(logs, activeMoodData) {
       <!-- Recommendation Card -->
       <div style="padding:16px; background:var(--bg); border-radius:12px; border-left:4px solid var(--teal); margin-bottom:20px;">
         <div style="font-weight:700; font-size:14px; margin-bottom:4px; color:var(--teal);">
-          <i class="fas fa-lightbulb"></i> Personal Recommendation
+          <i class="fas fa-lightbulb"></i> ${isAr ? 'توصية مخصصة لحالتك الآن' : 'Personal Recommendation'}
         </div>
-        <div style="font-size:14px; color:var(--text);">${activeMoodData.rec}</div>
+        <div style="font-size:14px; color:var(--text);">${rec}</div>
         <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn-sm btn-teal" onclick="quickLogMood('${selectedMood}')">
-            <i class="fas fa-check"></i> Log Mood (+10 XP)
+            <i class="fas fa-check"></i> ${isAr ? 'تسجيل الحالة (+10 نقاط خبرة)' : 'Log Mood (+10 XP)'}
           </button>
           <button class="btn btn-sm btn-secondary" onclick="navigate('focus')">
-            <i class="fas fa-bullseye"></i> Start ${activeMoodData.label} Session
+            <i class="fas fa-bullseye"></i> ${isAr ? `بدء جلسة تناسب حالة ${label}` : `Start ${label} Session`}
           </button>
         </div>
       </div>
@@ -7991,16 +9762,17 @@ function renderWellnessCheckinSection(logs, activeMoodData) {
       <!-- Past Logs History -->
       ${logs.length ? `
         <div>
-          <h4 style="font-size:14px; font-weight:700; color:var(--text2); margin-bottom:10px;">Recent Check-Ins</h4>
+          <h4 style="font-size:14px; font-weight:700; color:var(--text2); margin-bottom:10px;">${isAr ? 'أحدث تسجيلاتك' : 'Recent Check-Ins'}</h4>
           <div style="display:flex; flex-direction:column; gap:8px;">
             ${logs.slice(0, 5).map(l => {
               const info = MOOD_DATA[l.mood] || MOOD_DATA.calm;
-              const dateStr = new Date(l.date).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const dateStr = new Date(l.date).toLocaleString(isAr ? 'ar-EG' : undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const histLabel = isAr ? (info.labelAr || info.label) : info.label;
               return `
                 <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg); border-radius:10px; font-size:13px;">
                   <div style="display:flex; align-items:center; gap:10px;">
                     <span style="font-size:18px;">${info.emoji}</span>
-                    <span style="font-weight:700;">${info.label}</span>
+                    <span style="font-weight:700;">${histLabel}</span>
                   </div>
                   <span style="color:var(--text2); font-size:12px;">${dateStr}</span>
                 </div>
@@ -8014,41 +9786,42 @@ function renderWellnessCheckinSection(logs, activeMoodData) {
 }
 
 function renderWellnessBreathingSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const isRun = breathingState.running;
-  let phaseText = 'Click Start to Begin';
+  let phaseText = isAr ? 'اضغط ابدأ لبدء التمرين' : 'Click Start to Begin';
   if (isRun) {
-    if (breathingState.phase === 'inhale') phaseText = 'Breathe In Slowly...';
-    else if (breathingState.phase === 'hold' || breathingState.phase === 'hold2') phaseText = 'Hold Breath Calmly...';
-    else if (breathingState.phase === 'exhale') phaseText = 'Exhale Gently...';
+    if (breathingState.phase === 'inhale') phaseText = isAr ? 'شهيق هادئ وعميق...' : 'Breathe In Slowly...';
+    else if (breathingState.phase === 'hold' || breathingState.phase === 'hold2') phaseText = isAr ? 'احبس النفس باسترخاء...' : 'Hold Breath Calmly...';
+    else if (breathingState.phase === 'exhale') phaseText = isAr ? 'زفير بطيء ومريح...' : 'Exhale Gently...';
   }
 
   return `
     <div class="card card-glow" style="text-align:center; padding:32px 24px;">
-      <h3 style="font-size:22px; font-weight:700; margin-bottom:6px;">Guided Mind Reset & Breathing</h3>
+      <h3 style="font-size:22px; font-weight:700; margin-bottom:6px;">${isAr ? 'تمرين التنفس الموجّه وصفاء الذهن' : 'Guided Mind Reset & Breathing'}</h3>
       <p style="color:var(--text2); font-size:14px; margin-bottom:20px; max-width:500px; margin-left:auto; margin-right:auto;">
-        Slowing down your respiration signals your nervous system that you are safe, dissolving panic & focus fatigue.
+        ${isAr ? 'إبطاء وتيرة التنفس يبعث إشارة فورية لجهازك العصبي بأنك في أمان تام، مما يبدد نوبات الذعر وإجهاد التركيز.' : 'Slowing down your respiration signals your nervous system that you are safe, dissolving panic & focus fatigue.'}
       </p>
 
       <!-- Breathing Technique Selector -->
       <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:24px;">
         <button class="grade-pill ${breathingState.mode==='box'?'selected':''}" onclick="startBreathing('box')">
-          Box Breathing (4-4-4-4)
+          ${isAr ? 'التنفس الصندوقي (4-4-4-4)' : 'Box Breathing (4-4-4-4)'}
         </button>
         <button class="grade-pill ${breathingState.mode==='478'?'selected':''}" onclick="startBreathing('478')">
-          4-7-8 Deep Calm
+          ${isAr ? 'تنفس الهدوء العميق (4-7-8)' : '4-7-8 Deep Calm'}
         </button>
         <button class="grade-pill ${breathingState.mode==='slow'?'selected':''}" onclick="startBreathing('slow')">
-          Slow Reset (5-5)
+          ${isAr ? 'التهدئة البطيئة (5-5)' : 'Slow Reset (5-5)'}
         </button>
       </div>
 
       <!-- Animated Breathing Circle -->
       <div class="guided-breath-circle ${isRun ? breathingState.phase : ''}" id="guided-breath-circle">
         <div style="font-family:Fredoka; font-size:48px; font-weight:700; color:var(--teal);" id="breath-timer-display">
-          ${isRun ? breathingState.seconds + 's' : 'Ready'}
+          ${isRun ? breathingState.seconds + (isAr ? ' ث' : 's') : (isAr ? 'جاهز' : 'Ready')}
         </div>
         <div style="font-size:12px; font-weight:700; color:var(--text2);" id="breath-cycle-count">
-          ${breathingState.cycles} cycles done
+          ${isAr ? `${breathingState.cycles} دورات مكتملة` : `${breathingState.cycles} cycles done`}
         </div>
       </div>
 
@@ -8059,9 +9832,9 @@ function renderWellnessBreathingSection() {
       <!-- Controls -->
       <div style="display:flex; gap:12px; justify-content:center;">
         ${!isRun ? `
-          <button class="btn btn-lg btn-teal" onclick="startBreathing()"><i class="fas fa-play"></i> Start Breathing</button>
+          <button class="btn btn-lg btn-teal" onclick="startBreathing()"><i class="fas fa-play"></i> ${isAr ? 'بدء تمرين التنفس' : 'Start Breathing'}</button>
         ` : `
-          <button class="btn btn-lg btn-secondary" onclick="stopBreathing()"><i class="fas fa-pause"></i> Pause</button>
+          <button class="btn btn-lg btn-secondary" onclick="stopBreathing()"><i class="fas fa-pause"></i> ${isAr ? 'إيقاف مؤقت' : 'Pause'}</button>
         `}
       </div>
     </div>
@@ -8069,25 +9842,26 @@ function renderWellnessBreathingSection() {
 }
 
 function renderWellnessGroundingSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const stepsMeta = [
-    { num: 5, icon: 'fa-eye', title: '5 Things You Can SEE', desc: 'Look around your room. Find 5 distinct objects.', key: 'see' },
-    { num: 4, icon: 'fa-hand', title: '4 Things You Can TOUCH', desc: 'Feel your clothes, desk, chair, or cool air.', key: 'touch' },
-    { num: 3, icon: 'fa-ear-listen', title: '3 Things You HEAR', desc: 'Listen closely for ambient background sounds.', key: 'hear' },
-    { num: 2, icon: 'fa-nose', title: '2 Things You SMELL', desc: 'Notice smells around you or take a fresh breath.', key: 'smell' },
-    { num: 1, icon: 'fa-heart', title: '1 Good Thing You Appreciate', desc: 'Acknowledge one positive thing about yourself or today.', key: 'appreciate' }
+    { num: 5, icon: 'fa-eye', title: isAr ? '5 أشياء يمكنك رؤيتها' : '5 Things You Can SEE', desc: isAr ? 'انظر حولك في الغرفة. حدد 5 أشياء واضحة بعينيك.' : 'Look around your room. Find 5 distinct objects.', key: 'see' },
+    { num: 4, icon: 'fa-hand', title: isAr ? '4 أشياء يمكنك لمسها' : '4 Things You Can TOUCH', desc: isAr ? 'تحسس ملابسك، سطح المكتب، الكرسي، أو برودة الهواء.' : 'Feel your clothes, desk, chair, or cool air.', key: 'touch' },
+    { num: 3, icon: 'fa-ear-listen', title: isAr ? '3 أصوات يمكنك سماعها' : '3 Things You HEAR', desc: isAr ? 'أنصت بدقة للأصوات المحيطة بك في الخلفية.' : 'Listen closely for ambient background sounds.', key: 'hear' },
+    { num: 2, icon: 'fa-nose', title: isAr ? 'شيئان يمكنك شمهما' : '2 Things You SMELL', desc: isAr ? 'لاحظ الروائح من حولك أو خذ نفسًا منعشًا.' : 'Notice smells around you or take a fresh breath.', key: 'smell' },
+    { num: 1, icon: 'fa-heart', title: isAr ? 'شيء إيجابي تقدره وتشكره' : '1 Good Thing You Appreciate', desc: isAr ? 'تذكر أمرًا إيجابيًا واحدًا عن نفسك أو عن يومك.' : 'Acknowledge one positive thing about yourself or today.', key: 'appreciate' }
   ];
 
   if (groundingStep >= 5) {
     return `
       <div class="card card-glow" style="text-align:center; padding:40px 24px;">
         <i class="fas fa-anchor" style="font-size:48px; color:var(--teal); margin-bottom:16px;"></i>
-        <h3 style="font-size:22px; font-weight:700; margin-bottom:8px;">You Are Grounded & Present</h3>
+        <h3 style="font-size:22px; font-weight:700; margin-bottom:8px;">${isAr ? 'أنت الآن حاضر ومتصل بالواقع' : 'You Are Grounded & Present'}</h3>
         <p style="color:var(--text2); font-size:14px; margin-bottom:24px; max-width:480px; margin-left:auto; margin-right:auto;">
-          Sensory grounding brings your hyperactive or anxious brain back to the immediate physical present. Great job!
+          ${isAr ? 'تثبيت الحواس يعيد عقلك المشتت أو القلق إلى اللحظة الملموسة الحالية. أحسنت صنعًا!' : 'Sensory grounding brings your hyperactive or anxious brain back to the immediate physical present. Great job!'}
         </p>
         <div style="display:flex; gap:12px; justify-content:center;">
-          <button class="btn btn-teal" onclick="resetGroundingWizard()"><i class="fas fa-rotate-left"></i> Repeat Grounding</button>
-          <button class="btn btn-primary" onclick="navigate('focus')"><i class="fas fa-play"></i> Ready to Focus</button>
+          <button class="btn btn-teal" onclick="resetGroundingWizard()"><i class="fas fa-rotate-left"></i> ${isAr ? 'تكرار التمرين' : 'Repeat Grounding'}</button>
+          <button class="btn btn-primary" onclick="navigate('focus')"><i class="fas fa-play"></i> ${isAr ? 'جاهز للتركيز الآن' : 'Ready to Focus'}</button>
         </div>
       </div>
     `;
@@ -8099,9 +9873,9 @@ function renderWellnessGroundingSection() {
     <div class="card card-glow" style="padding:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <span class="tag" style="background:var(--teal-g); color:var(--teal); font-weight:700;">
-          Step ${groundingStep + 1} of 5
+          ${isAr ? `الخطوة ${groundingStep + 1} من 5` : `Step ${groundingStep + 1} of 5`}
         </span>
-        <button class="btn btn-sm btn-ghost" onclick="resetGroundingWizard()" style="font-size:12px;"><i class="fas fa-rotate-left"></i> Restart</button>
+        <button class="btn btn-sm btn-ghost" onclick="resetGroundingWizard()" style="font-size:12px;"><i class="fas fa-rotate-left"></i> ${isAr ? 'إعادة البدء' : 'Restart'}</button>
       </div>
 
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
@@ -8115,18 +9889,19 @@ function renderWellnessGroundingSection() {
       </div>
 
       <div style="margin-bottom:24px;">
-        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:8px;">Type them out (or mentally acknowledge them):</label>
-        <input class="input" id="grounding-step-inp" placeholder="Type here..." style="font-size:14px;" autofocus onkeydown="if(event.key==='Enter')nextGroundingStep()">
+        <label style="font-size:13px; color:var(--text2); display:block; margin-bottom:8px;">${isAr ? 'اكتبها هنا (أو تأملها ذهنيًا):' : 'Type them out (or mentally acknowledge them):'}</label>
+        <input class="input" id="grounding-step-inp" placeholder="${isAr ? 'اكتب ما لاحظته هنا...' : 'Type here...'}" style="font-size:14px;" autofocus onkeydown="if(event.key==='Enter')nextGroundingStep()">
       </div>
 
       <div style="display:flex; justify-content:flex-end;">
-        <button class="btn btn-teal" onclick="nextGroundingStep()">Next Step <i class="fas fa-arrow-right"></i></button>
+        <button class="btn btn-teal" onclick="nextGroundingStep()">${isAr ? 'الخطوة التالية' : 'Next Step'} <i class="fas ${isAr ? 'fa-arrow-left' : 'fa-arrow-right'}"></i></button>
       </div>
     </div>
   `;
 }
 
 function renderWellnessDissolverSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
     <div class="card card-glow" style="padding:28px;">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
@@ -8134,18 +9909,18 @@ function renderWellnessDissolverSection() {
           <i class="fas fa-cloud-moon" style="color:#A855F7; font-size:20px;"></i>
         </div>
         <div>
-          <h3 style="font-size:20px; font-weight:700;">Worry & Thought Dissolver</h3>
-          <p style="font-size:13px; color:var(--text2);">Got a sticky, anxious thought in your head? Write it down and watch it fade into space.</p>
+          <h3 style="font-size:20px; font-weight:700;">${isAr ? 'مذيب القلق وتفكيك الأفكار السلبية' : 'Worry & Thought Dissolver'}</h3>
+          <p style="font-size:13px; color:var(--text2);">${isAr ? 'هل تعلق فكرة مقلقة أو مزعجة في ذهنك؟ اكتبها هنا وشاهدها تذوب وتتلاشى في الفضاء.' : 'Got a sticky, anxious thought in your head? Write it down and watch it fade into space.'}</p>
         </div>
       </div>
 
       <div id="worry-stage" style="min-height:100px; display:flex; align-items:center; justify-content:center; background:var(--bg); border-radius:12px; padding:16px; margin-bottom:16px;">
-        <input class="input" id="worry-dissolve-input" placeholder="e.g. What if I fail tomorrow's test? / I feel overwhelmed..." style="font-size:15px; border:none; background:transparent;" onkeydown="if(event.key==='Enter')dissolveWorryThought()">
+        <input class="input" id="worry-dissolve-input" placeholder="${isAr ? 'مثال: ماذا لو لم أنجح في اختبار الغد؟ / أشعر بضغط هائل...' : 'e.g. What if I fail tomorrow\'s test? / I feel overwhelmed...'}" style="font-size:15px; border:none; background:transparent;" onkeydown="if(event.key==='Enter')dissolveWorryThought()">
       </div>
 
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-        <span style="font-size:12px; color:var(--text2);"><i class="fas fa-shield-halved" style="color:var(--teal);"></i> Private & purely client-side. Nothing is permanently stored.</span>
-        <button class="btn btn-teal" onclick="dissolveWorryThought()"><i class="fas fa-sparkles"></i> Release & Dissolve Thought</button>
+        <span style="font-size:12px; color:var(--text2);"><i class="fas fa-shield-halved" style="color:var(--teal);"></i> ${isAr ? 'خاصة ومحفوظة على جهازك فقط. لا يتم تخزين أي شيء بشكل دائم.' : 'Private & purely client-side. Nothing is permanently stored.'}</span>
+        <button class="btn btn-teal" onclick="dissolveWorryThought()"><i class="fas fa-sparkles"></i> ${isAr ? 'إطلاق الفكرة وتذويبها' : 'Release & Dissolve Thought'}</button>
       </div>
     </div>
   `;
@@ -8196,23 +9971,24 @@ function syncCbtDraftInputs() {
 function loadCbtPreset(presetId) {
   const p = CBT_PRESETS.find(x => x.id === presetId);
   if (!p) return;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   cbtDraft = {
-    trigger: p.trigger,
-    stumble: p.stumble,
+    trigger: isAr ? (p.triggerAr || p.trigger) : p.trigger,
+    stumble: isAr ? (p.stumbleAr || p.stumble) : p.stumble,
     initialBelief: p.belief,
-    emotion: p.emotion,
+    emotion: isAr ? (p.emotionAr || p.emotion) : p.emotion,
     distortions: [...p.distortions],
-    evidenceFor: p.evidenceFor,
-    evidenceAgainst: p.evidenceAgainst,
-    friendAdvice: p.friendAdvice,
-    stepReframe: p.reframe,
+    evidenceFor: isAr ? (p.evidenceForAr || p.evidenceFor) : p.evidenceFor,
+    evidenceAgainst: isAr ? (p.evidenceAgainstAr || p.evidenceAgainst) : p.evidenceAgainst,
+    friendAdvice: isAr ? (p.friendAdviceAr || p.friendAdvice) : p.friendAdvice,
+    stepReframe: isAr ? (p.reframeAr || p.reframe) : p.reframe,
     finalBelief: p.finalBelief,
-    microAction: p.microAction
+    microAction: isAr ? (p.microActionAr || p.microAction) : p.microAction
   };
   cbtWizardStep = 1;
   cbtSubTab = 'worksheet';
   SFX.click();
-  toast(`Loaded scenario: "${p.name}". Follow each step!`, 'info');
+  toast(isAr ? `تم تحميل السيناريو: "${p.nameAr || p.name}". اتبع الخطوات الأربع!` : `Loaded scenario: "${p.name}". Follow each step!`, 'info');
   renderWellness();
 }
 
@@ -8236,6 +10012,7 @@ function selectCbtEmotion(emotion) {
 }
 
 function applyCbtTemplate(text) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const el = document.getElementById('cbt-step-reframe-input');
   if (el) {
     el.value = text;
@@ -8244,19 +10021,20 @@ function applyCbtTemplate(text) {
   } else {
     cbtDraft.stepReframe = text;
   }
-  toast('Template starter applied to your reframe!', 'info');
+  toast(isAr ? 'تم تطبيق القالب المقترح على صياغتك!' : 'Template starter applied to your reframe!', 'info');
 }
 
 function saveCbtReframe() {
   syncCbtDraftInputs();
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
 
   if (!cbtDraft.stumble || !cbtDraft.stumble.trim()) {
-    toast('Please describe the negative thought (The Stumble)', 'warn');
+    toast(isAr ? 'يرجى وصف الفكرة السلبية أولاً (العثرة)' : 'Please describe the negative thought (The Stumble)', 'warn');
     setCbtWizardStep(1);
     return;
   }
   if (!cbtDraft.stepReframe || !cbtDraft.stepReframe.trim()) {
-    toast('Please write your realistic reframing alternative (The Step)', 'warn');
+    toast(isAr ? 'يرجى كتابة الصياغة البديلة المتزنة (الخطوة)' : 'Please write your realistic reframing alternative (The Step)', 'warn');
     setCbtWizardStep(4);
     return;
   }
@@ -8265,17 +10043,17 @@ function saveCbtReframe() {
   const entry = {
     id: 'cbt_' + Date.now(),
     date: new Date().toISOString(),
-    trigger: cbtDraft.trigger.trim() || 'Study or school situation',
+    trigger: cbtDraft.trigger.trim() || (isAr ? 'موقف مذاكرة أو مدرسة' : 'Study or school situation'),
     stumble: cbtDraft.stumble.trim(),
     initialBelief: parseInt(cbtDraft.initialBelief, 10) || 75,
-    emotion: cbtDraft.emotion || 'Overwhelmed',
+    emotion: cbtDraft.emotion || (isAr ? 'قلق ومُثقل' : 'Overwhelmed'),
     distortions: cbtDraft.distortions.length ? [...cbtDraft.distortions] : ['catastrophizing'],
     evidenceFor: cbtDraft.evidenceFor.trim(),
     evidenceAgainst: cbtDraft.evidenceAgainst.trim(),
     friendAdvice: cbtDraft.friendAdvice.trim(),
     stepReframe: cbtDraft.stepReframe.trim(),
     finalBelief: parseInt(cbtDraft.finalBelief, 10) || 25,
-    microAction: cbtDraft.microAction.trim() || 'Take a 2-minute reset breath and continue with next step',
+    microAction: cbtDraft.microAction.trim() || (isAr ? 'أخذ دقيقتين للتنفس وإكمال الخطوة التالية' : 'Take a 2-minute reset breath and continue with next step'),
     actionDone: false,
     helpful: true
   };
@@ -8286,14 +10064,14 @@ function saveCbtReframe() {
   if (window.SFX && SFX.complete) SFX.complete();
 
   const drop = entry.initialBelief - entry.finalBelief;
-  toast(`Reframe saved to Journal! Belief shift: ${drop > 0 ? '-' + drop + '%' : 're-anchored'}. +25 XP!`, 'bonus');
+  toast(isAr ? `تم حفظ إعادة الصياغة في دفترك! تراجع تصديق الفكرة السلبية بنسبة ${drop > 0 ? drop + '%' : 'تراجع'}. +25 نقطة خبرة!` : `Reframe saved to Journal! Belief shift: ${drop > 0 ? '-' + drop + '%' : 're-anchored'}. +25 XP!`, 'bonus');
 
   // Reset draft
   cbtDraft = {
     trigger: '',
     stumble: '',
     initialBelief: 80,
-    emotion: 'Anxious & Overwhelmed',
+    emotion: isAr ? 'قلق ومُثقل' : 'Anxious & Overwhelmed',
     distortions: ['catastrophizing'],
     evidenceFor: '',
     evidenceAgainst: '',
@@ -8319,6 +10097,7 @@ function toggleCbtHelpful(id) {
 }
 
 function toggleCbtAction(id) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const logs = Store.get('cbtReframes') || [];
   const item = logs.find(x => x.id === id);
   if (item) {
@@ -8326,7 +10105,7 @@ function toggleCbtAction(id) {
     Store.set('cbtReframes', logs);
     if (item.actionDone) {
       Store.addXP(10);
-      toast('Micro-action completed! +10 XP', 'success');
+      toast(isAr ? 'أحسنت! أتممت الخطوة المجهرية بنجاح (+10 نقاط خبرة)' : 'Micro-action completed! +10 XP', 'success');
       if (window.SFX && SFX.complete) SFX.complete();
     } else {
       SFX.click();
@@ -8336,25 +10115,27 @@ function toggleCbtAction(id) {
 }
 
 function deleteCbtReframe(id) {
-  if (!confirm('Are you sure you want to delete this reframe entry?')) return;
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
+  if (!confirm(isAr ? 'هل أنت متأكد من رغبتك في حذف تدوينة إعادة الصياغة هذه؟' : 'Are you sure you want to delete this reframe entry?')) return;
   let logs = Store.get('cbtReframes') || [];
   logs = logs.filter(x => x.id !== id);
   Store.set('cbtReframes', logs);
   SFX.click();
-  toast('Reframe removed from journal', 'info');
+  toast(isAr ? 'تمت إزالة التدوينة من الدفتر' : 'Reframe removed from journal', 'info');
   renderWellness();
 }
 
 function practiceDistortionInWorksheet(distId) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const d = COGNITIVE_DISTORTIONS.find(x => x.id === distId);
   cbtDraft.distortions = [distId];
   if (d) {
-    cbtDraft.stumble = d.trapPrompt;
+    cbtDraft.stumble = isAr ? (d.trapPromptAr || d.trapPrompt) : d.trapPrompt;
   }
   cbtWizardStep = 1;
   cbtSubTab = 'worksheet';
   SFX.click();
-  toast(`Practicing distortion: ${d ? d.name : distId}. Start reframing!`, 'info');
+  toast(isAr ? `جاري التدرب على فخ: "${d ? (d.nameAr || d.name) : distId}". ابدأ الصياغة!` : `Practicing distortion: ${d ? d.name : distId}. Start reframing!`, 'info');
   renderWellness();
 }
 
@@ -8372,6 +10153,7 @@ window.deleteCbtReframe = deleteCbtReframe;
 window.practiceDistortionInWorksheet = practiceDistortionInWorksheet;
 
 function renderWellnessReframesSection() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const entries = Store.get('cbtReframes') || [];
   const totalEntries = entries.length;
   const totalCompletedActions = entries.filter(e => e.actionDone).length;
@@ -8386,28 +10168,28 @@ function renderWellnessReframesSection() {
         <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
           <div>
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-              <span class="badge" style="background:var(--teal-g); color:var(--teal); font-weight:700;">CBT Cognitive Reframing</span>
-              <span style="font-size:12px; color:var(--text2);"><i class="fas fa-shield-heart" style="color:var(--green);"></i> Evidence-Based Practice</span>
+              <span class="badge" style="background:var(--teal-g); color:var(--teal); font-weight:700;">${isAr ? 'إعادة الصياغة الإدراكية (CBT)' : 'CBT Cognitive Reframing'}</span>
+              <span style="font-size:12px; color:var(--text2);"><i class="fas fa-shield-heart" style="color:var(--green);"></i> ${isAr ? 'ممارسة معتمدة على أدلة علمية' : 'Evidence-Based Practice'}</span>
             </div>
-            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">Stumble-to-Step Interactive Worksheet & Journal</h2>
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">${isAr ? 'دفتر وورقة عمل تفكيك الأفكار وتحويل العثرات إلى خطوات' : 'Stumble-to-Step Interactive Worksheet & Journal'}</h2>
             <p style="color:var(--text2); font-size:14px; max-width:680px; line-height:1.5;">
-              Identify cognitive distortions (catastrophizing, all-or-nothing thinking, imposter syndrome) and disarm automatic negative thoughts into realistic, compassionate action steps.
+              ${isAr ? 'تعرف على تشوهات التفكير (توقع الكوارث، تفكير الكل أو لا شيء، متلازمة المحتال) وحوّل الأفكار السلبية التلقائية إلى خطوات عملية واقعية ورحيمة.' : 'Identify cognitive distortions (catastrophizing, all-or-nothing thinking, imposter syndrome) and disarm automatic negative thoughts into realistic, compassionate action steps.'}
             </p>
           </div>
 
           <!-- Section Tabs -->
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btn btn-sm ${cbtSubTab === 'worksheet' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('worksheet')" style="border:1px solid var(--border);">
-              <i class="fas fa-pen-to-square"></i> Stumble-to-Step Worksheet
+              <i class="fas fa-pen-to-square"></i> ${isAr ? 'ورقة عمل العثرات إلى خطوات' : 'Stumble-to-Step Worksheet'}
             </button>
             <button class="btn btn-sm ${cbtSubTab === 'journal' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('journal')" style="border:1px solid var(--border);">
-              <i class="fas fa-book-bookmark"></i> Reframe Journal (${totalEntries})
+              <i class="fas fa-book-bookmark"></i> ${isAr ? `دفتر إعادة الصياغة (${totalEntries})` : `Reframe Journal (${totalEntries})`}
             </button>
             <button class="btn btn-sm ${cbtSubTab === 'guide' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('guide')" style="border:1px solid var(--border);">
-              <i class="fas fa-compass"></i> Distortions Field Guide
+              <i class="fas fa-compass"></i> ${isAr ? 'دليل تشوهات التفكير' : 'Distortions Field Guide'}
             </button>
             <button class="btn btn-sm ${cbtSubTab === 'adhd' ? 'btn-teal' : 'btn-ghost'}" onclick="setCbtSubTab('adhd')" style="border:1px solid var(--border);">
-              <i class="fas fa-bolt"></i> ADHD Anti-Paralysis
+              <i class="fas fa-bolt"></i> ${isAr ? 'بطاقات مواجهة تشتت ADHD' : 'ADHD Anti-Paralysis'}
             </button>
           </div>
         </div>
@@ -8429,10 +10211,18 @@ function renderWellnessReframesSection() {
 }
 
 function renderCbtWorksheetTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const selectedDistortions = COGNITIVE_DISTORTIONS.filter(d => cbtDraft.distortions.includes(d.id));
   const beliefShift = (cbtDraft.initialBelief || 80) - (cbtDraft.finalBelief || 25);
 
-  const emotionsList = [
+  const emotionsList = isAr ? [
+    'قلق ومُثقل',
+    'محبط ومهزوم',
+    'شعور بعدم الكفاءة والشك',
+    'خجل ولوم للذات',
+    'يائس',
+    'مضغوط'
+  ] : [
     'Anxious & Overwhelmed',
     'Frustrated & Defeated',
     'Inadequate & Insecure',
@@ -8447,15 +10237,15 @@ function renderCbtWorksheetTab() {
       <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
           <span style="font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px;">
-            <i class="fas fa-sparkles" style="color:var(--accent);"></i> Quick Scenario Presets (1-Click Test & Practice)
+            <i class="fas fa-sparkles" style="color:var(--accent);"></i> ${isAr ? 'سيناريوهات جاهزة للتجربة والتدريب السريع' : 'Quick Scenario Presets (1-Click Test & Practice)'}
           </span>
-          <span style="font-size:11px; color:var(--text2);">Click a preset to see how CBT reframes realistic student traps</span>
+          <span style="font-size:11px; color:var(--text2);">${isAr ? 'انقر على سيناريو لرؤية كيف تعيد تقنيات CBT صياغة مواقف الطلاب الواقعية' : 'Click a preset to see how CBT reframes realistic student traps'}</span>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           ${CBT_PRESETS.map(p => `
             <button class="cbt-preset-card" onclick="loadCbtPreset('${p.id}')">
               <i class="fas ${p.icon}" style="color:var(--accent);"></i>
-              <span>${p.name}</span>
+              <span>${isAr ? (p.nameAr || p.name) : p.name}</span>
             </button>
           `).join('')}
         </div>
@@ -8465,19 +10255,19 @@ function renderCbtWorksheetTab() {
       <div class="cbt-wizard-steps">
         <button class="cbt-step-node ${cbtWizardStep === 1 ? 'active' : ''} ${cbtWizardStep > 1 ? 'completed' : ''}" onclick="setCbtWizardStep(1)">
           <div class="cbt-step-circle">${cbtWizardStep > 1 ? '<i class="fas fa-check"></i>' : '1'}</div>
-          <span class="cbt-step-label">1. The Stumble</span>
+          <span class="cbt-step-label">${isAr ? '1. العثرة (الفكرة السلبية)' : '1. The Stumble'}</span>
         </button>
         <button class="cbt-step-node ${cbtWizardStep === 2 ? 'active' : ''} ${cbtWizardStep > 2 ? 'completed' : ''}" onclick="setCbtWizardStep(2)">
           <div class="cbt-step-circle">${cbtWizardStep > 2 ? '<i class="fas fa-check"></i>' : '2'}</div>
-          <span class="cbt-step-label">2. Unmask Distortions</span>
+          <span class="cbt-step-label">${isAr ? '2. كشف تشوهات التفكير' : '2. Unmask Distortions'}</span>
         </button>
         <button class="cbt-step-node ${cbtWizardStep === 3 ? 'active' : ''} ${cbtWizardStep > 3 ? 'completed' : ''}" onclick="setCbtWizardStep(3)">
           <div class="cbt-step-circle">${cbtWizardStep > 3 ? '<i class="fas fa-check"></i>' : '3'}</div>
-          <span class="cbt-step-label">3. Reality Check</span>
+          <span class="cbt-step-label">${isAr ? '3. اختبار الواقع والأدلة' : '3. Reality Check'}</span>
         </button>
         <button class="cbt-step-node ${cbtWizardStep === 4 ? 'active' : ''}" onclick="setCbtWizardStep(4)">
           <div class="cbt-step-circle">4</div>
-          <span class="cbt-step-label">4. The Step Reframe</span>
+          <span class="cbt-step-label">${isAr ? '4. الصياغة المتزنة' : '4. The Step Reframe'}</span>
         </button>
       </div>
 
@@ -8487,31 +10277,31 @@ function renderCbtWorksheetTab() {
           <div class="cbt-stumble-box">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
               <i class="fas fa-triangle-exclamation" style="color:var(--red);"></i>
-              <h3 style="font-size:16px; font-weight:700; color:var(--red);">Step 1: Capture the "Stumble" (Automatic Negative Thought)</h3>
+              <h3 style="font-size:16px; font-weight:700; color:var(--red);">${isAr ? 'الخطوة 1: التقاط "العثرة" (الفكرة السلبية التلقائية)' : 'Step 1: Capture the "Stumble" (Automatic Negative Thought)'}</h3>
             </div>
             <p style="font-size:13px; color:var(--text2); line-height:1.5;">
-              When something triggers stress, our brain instinctively jumps to unhelpful, exaggerated conclusions. Write down exactly what happened and what your brain told you.
+              ${isAr ? 'عندما يواجهنا موقف مجهد، يميل عقلنا تلقائيًا لاستنتاجات مبالغ فيها وغير مفيدة. اكتب بدقة ما حدث وما الذي أخبرك به عقلك.' : 'When something triggers stress, our brain instinctively jumps to unhelpful, exaggerated conclusions. Write down exactly what happened and what your brain told you.'}
             </p>
           </div>
 
           <div>
             <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-              Triggering Situation / Event <span style="font-weight:400; color:var(--text2);">(What happened?)</span>
+              ${isAr ? 'الموقف المثير للتوتر / الحدث' : 'Triggering Situation / Event'} <span style="font-weight:400; color:var(--text2);">${isAr ? '(ما الذي حدث بالضبط؟)' : '(What happened?)'}</span>
             </label>
-            <input class="input" id="cbt-trigger-input" placeholder="e.g. Scored 65% on math quiz, or saw friends studying together without me" value="${escHtml(cbtDraft.trigger)}" oninput="cbtDraft.trigger=this.value;">
+            <input class="input" id="cbt-trigger-input" placeholder="${isAr ? 'مثال: حصلت على درجة 65% في اختبار قصير، أو رأيت زملائي يذاكرون معًا بدوني' : 'e.g. Scored 65% on math quiz, or saw friends studying together without me'}" value="${escHtml(cbtDraft.trigger)}" oninput="cbtDraft.trigger=this.value;">
           </div>
 
           <div>
             <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-              The Automatic Negative Thought (The Stumble) <span style="color:var(--red);">*</span>
+              ${isAr ? 'الفكرة السلبية التلقائية (العثرة)' : 'The Automatic Negative Thought (The Stumble)'} <span style="color:var(--red);">*</span>
             </label>
-            <textarea class="input" id="cbt-stumble-input" rows="3" placeholder="e.g. I failed this quiz, so I will fail the entire class, drop out of school, and ruin everything." oninput="cbtDraft.stumble=this.value;">${escHtml(cbtDraft.stumble)}</textarea>
+            <textarea class="input" id="cbt-stumble-input" rows="3" placeholder="${isAr ? 'مثال: لقد أخفقت في هذا الاختبار، لذا سأفشل في المادة بأكملها وأضيع مستقبلي.' : 'e.g. I failed this quiz, so I will fail the entire class, drop out of school, and ruin everything.'}" oninput="cbtDraft.stumble=this.value;">${escHtml(cbtDraft.stumble)}</textarea>
           </div>
 
           <!-- Emotion selector -->
           <div>
             <label style="font-size:13px; font-weight:700; display:block; margin-bottom:8px;">
-              Primary Emotion Felt:
+              ${isAr ? 'الشعور الأساسي المسيطر:' : 'Primary Emotion Felt:'}
             </label>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               ${emotionsList.map(emo => `
@@ -8526,7 +10316,7 @@ function renderCbtWorksheetTab() {
           <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <label style="font-size:13px; font-weight:700;">
-                Initial Belief Intensity: How strongly do you believe this thought right now?
+                ${isAr ? 'شدة التصديق الأولية: ما مدى إيمانك بهذه الفكرة الآن؟' : 'Initial Belief Intensity: How strongly do you believe this thought right now?'}
               </label>
               <span class="cbt-belief-badge" style="color:var(--red); font-size:14px;">
                 <span id="cbt-initial-belief-val">${cbtDraft.initialBelief}%</span>
@@ -8534,15 +10324,15 @@ function renderCbtWorksheetTab() {
             </div>
             <input type="range" min="0" max="100" step="5" class="cbt-belief-slider" id="cbt-initial-belief" value="${cbtDraft.initialBelief}" oninput="cbtDraft.initialBelief=parseInt(this.value,10); document.getElementById('cbt-initial-belief-val').innerText=this.value+'%';">
             <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text2); margin-top:6px;">
-              <span>0% (Barely)</span>
-              <span>50% (Somewhat)</span>
-              <span>100% (Absolute certainty)</span>
+              <span>0% (${isAr ? 'بالكاد' : 'Barely'})</span>
+              <span>50% (${isAr ? 'إلى حد ما' : 'Somewhat'})</span>
+              <span>100% (${isAr ? 'يقين تام' : 'Absolute certainty'})</span>
             </div>
           </div>
 
           <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
-            <button class="btn btn-teal" onclick="if(!cbtDraft.stumble.trim()){toast('Please enter your thought before continuing','warn');}else{setCbtWizardStep(2);}">
-              Next: Identify Distortions <i class="fas fa-arrow-right"></i>
+            <button class="btn btn-teal" onclick="if(!cbtDraft.stumble.trim()){toast('${isAr ? 'يرجى كتابة فكرتك قبل المتابعة' : 'Please enter your thought before continuing'}','warn');}else{setCbtWizardStep(2);}">
+              ${isAr ? 'التالي: كشف تشوهات التفكير' : 'Next: Identify Distortions'} <i class="fas ${isAr ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
             </button>
           </div>
         </div>
@@ -8553,18 +10343,18 @@ function renderCbtWorksheetTab() {
         <div style="display:flex; flex-direction:column; gap:18px;">
           <!-- Review of stumble -->
           <div class="cbt-stumble-box" style="margin-bottom:4px;">
-            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; margin-bottom:4px;">The Stumble (Automatic Thought)</div>
-            <div style="font-size:14px; font-weight:600; font-style:italic;">"${escHtml(cbtDraft.stumble || 'No thought entered yet')}"</div>
+            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; margin-bottom:4px;">${isAr ? 'العثرة (الفكرة السلبية التلقائية)' : 'The Stumble (Automatic Thought)'}</div>
+            <div style="font-size:14px; font-weight:600; font-style:italic;">"${escHtml(cbtDraft.stumble || (isAr ? 'لم يتم إدخال فكرة بعد' : 'No thought entered yet'))}"</div>
           </div>
 
           <div>
             <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
               <div>
-                <h3 style="font-size:16px; font-weight:700;">Step 2: Unmask the Thinking Traps (Cognitive Distortions)</h3>
-                <p style="font-size:13px; color:var(--text2);">Select all distortion patterns that match this automatic thought.</p>
+                <h3 style="font-size:16px; font-weight:700;">${isAr ? 'الخطوة 2: كشف فخاخ التفكير (التشوهات الإدراكية)' : 'Step 2: Unmask the Thinking Traps (Cognitive Distortions)'}</h3>
+                <p style="font-size:13px; color:var(--text2);">${isAr ? 'حدد جميع أنماط التشوه التي تنطبق على هذه الفكرة التلقائية.' : 'Select all distortion patterns that match this automatic thought.'}</p>
               </div>
               <span class="badge" style="background:var(--teal-g); color:var(--teal); font-weight:700;">
-                ${cbtDraft.distortions.length} Selected
+                ${isAr ? `${cbtDraft.distortions.length} محددة` : `${cbtDraft.distortions.length} Selected`}
               </span>
             </div>
 
@@ -8572,6 +10362,9 @@ function renderCbtWorksheetTab() {
             <div class="cbt-distortion-grid">
               ${COGNITIVE_DISTORTIONS.map(d => {
                 const isSelected = cbtDraft.distortions.includes(d.id);
+                const name = isAr ? (d.nameAr || d.name) : d.name;
+                const summary = isAr ? (d.summaryAr || d.summary) : d.summary;
+                const trapPrompt = isAr ? (d.trapPromptAr || d.trapPrompt) : d.trapPrompt;
                 return `
                   <div class="cbt-distortion-item ${isSelected ? 'selected' : ''}" onclick="toggleCbtDistortion('${d.id}')">
                     <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -8579,12 +10372,12 @@ function renderCbtWorksheetTab() {
                         <div style="width:28px; height:28px; border-radius:8px; background:${d.bg}; display:flex; align-items:center; justify-content:center;">
                           <i class="fas ${d.icon} cbt-dist-icon" style="color:${d.color}; font-size:12px;"></i>
                         </div>
-                        <span style="font-weight:700; font-size:13px;">${d.name}</span>
+                        <span style="font-weight:700; font-size:13px;">${name}</span>
                       </div>
                       ${isSelected ? '<i class="fas fa-check-circle" style="color:var(--teal);"></i>' : '<i class="far fa-circle" style="color:var(--text2);"></i>'}
                     </div>
-                    <div style="font-size:11px; color:var(--text2); line-height:1.4;">${d.summary}</div>
-                    <div style="font-size:11px; color:${d.color}; font-style:italic; margin-top:2px;">"${d.trapPrompt}"</div>
+                    <div style="font-size:11px; color:var(--text2); line-height:1.4;">${summary}</div>
+                    <div style="font-size:11px; color:${d.color}; font-style:italic; margin-top:2px;">"${trapPrompt}"</div>
                   </div>
                 `;
               }).join('')}
@@ -8595,13 +10388,13 @@ function renderCbtWorksheetTab() {
           ${selectedDistortions.length > 0 ? `
             <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
               <div style="font-size:12px; font-weight:700; color:var(--teal); text-transform:uppercase; margin-bottom:8px;">
-                <i class="fas fa-magnifying-glass"></i> Reality-Check Detective Questions for Your Distortions:
+                <i class="fas fa-magnifying-glass"></i> ${isAr ? 'أسئلة المحقق المنطقي لتفكيك تشوهاتك المحددة:' : 'Reality-Check Detective Questions for Your Distortions:'}
               </div>
               <div style="display:flex; flex-direction:column; gap:8px;">
                 ${selectedDistortions.map(d => `
                   <div style="font-size:13px; line-height:1.4; display:flex; gap:8px;">
-                    <strong style="color:${d.color}; min-width:130px;">${d.name}:</strong>
-                    <span style="color:var(--text2);">${d.counterQuestion}</span>
+                    <strong style="color:${d.color}; min-width:130px;">${isAr ? (d.nameAr || d.name) : d.name}:</strong>
+                    <span style="color:var(--text2);">${isAr ? (d.counterQuestionAr || d.counterQuestion) : d.counterQuestion}</span>
                   </div>
                 `).join('')}
               </div>
@@ -8610,10 +10403,10 @@ function renderCbtWorksheetTab() {
 
           <div style="display:flex; justify-content:space-between; gap:10px; margin-top:8px;">
             <button class="btn btn-ghost" onclick="setCbtWizardStep(1)">
-              <i class="fas fa-arrow-left"></i> Back
+              <i class="fas ${isAr ? 'fa-arrow-right' : 'fa-arrow-left'}"></i> ${isAr ? 'رجوع' : 'Back'}
             </button>
-            <button class="btn btn-teal" onclick="if(cbtDraft.distortions.length===0){toast('Please select at least 1 distortion pattern','warn');}else{setCbtWizardStep(3);}">
-              Next: Reality Check <i class="fas fa-arrow-right"></i>
+            <button class="btn btn-teal" onclick="if(cbtDraft.distortions.length===0){toast('${isAr ? 'يرجى تحديد نمط تشوه فكري واحد على الأقل' : 'Please select at least 1 distortion pattern'}','warn');}else{setCbtWizardStep(3);}">
+              ${isAr ? 'التالي: اختبار الواقع والأدلة' : 'Next: Reality Check'} <i class="fas ${isAr ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
             </button>
           </div>
         </div>
@@ -8625,56 +10418,56 @@ function renderCbtWorksheetTab() {
           <!-- Header Context -->
           <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px 16px;">
             <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
-              <span style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase;">The Stumble</span>
+              <span style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase;">${isAr ? 'العثرة' : 'The Stumble'}</span>
               <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                ${selectedDistortions.map(d => `<span class="cbt-tag" style="background:${d.bg}; color:${d.color};"><i class="fas ${d.icon}"></i> ${d.name}</span>`).join('')}
+                ${selectedDistortions.map(d => `<span class="cbt-tag" style="background:${d.bg}; color:${d.color};"><i class="fas ${d.icon}"></i> ${isAr ? (d.nameAr || d.name) : d.name}</span>`).join('')}
               </div>
             </div>
             <div style="font-size:14px; font-weight:600; font-style:italic; color:var(--text);">"${escHtml(cbtDraft.stumble)}"</div>
           </div>
 
           <div>
-            <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">Step 3: Conduct a Reality Check (Courtroom of the Mind)</h3>
+            <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">${isAr ? 'الخطوة 3: اختبار الواقع (محكمة العقل والأدلة)' : 'Step 3: Conduct a Reality Check (Courtroom of the Mind)'}</h3>
             <p style="font-size:13px; color:var(--text2); line-height:1.5;">
-              Distortions trick us into confusing feelings with facts. Put your negative thought on trial:
+              ${isAr ? 'التشوهات تخدعنا وتخلط بين المشاعر المؤقتة والحقائق الموضوعية. ضع فكرتك في قفص المحاكمة المنطقية:' : 'Distortions trick us into confusing feelings with facts. Put your negative thought on trial:'}
             </p>
           </div>
 
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
             <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
               <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-                <i class="fas fa-clipboard-check" style="color:var(--text2);"></i> Facts Supporting the Thought
+                <i class="fas fa-clipboard-check" style="color:var(--text2);"></i> ${isAr ? 'أدلة تدعم الفكرة السلبية' : 'Facts Supporting the Thought'}
               </label>
-              <p style="font-size:11px; color:var(--text2); margin-bottom:8px;">What actual, verifiable facts exist? (No assumptions or feelings).</p>
-              <textarea class="input" id="cbt-ev-for" rows="3" placeholder="e.g. I got a low score on this 5-point quiz." oninput="cbtDraft.evidenceFor=this.value;">${escHtml(cbtDraft.evidenceFor)}</textarea>
+              <p style="font-size:11px; color:var(--text2); margin-bottom:8px;">${isAr ? 'ما هي الحقائق المادية الملموسة الموجودة؟ (دون افتراضات أو مشاعر).' : 'What actual, verifiable facts exist? (No assumptions or feelings).'}</p>
+              <textarea class="input" id="cbt-ev-for" rows="3" placeholder="${isAr ? 'مثال: حصلت بالفعل على درجة منخفضة في هذا الاختبار القصير.' : 'e.g. I got a low score on this 5-point quiz.'}" oninput="cbtDraft.evidenceFor=this.value;">${escHtml(cbtDraft.evidenceFor)}</textarea>
             </div>
 
             <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
               <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-                <i class="fas fa-scale-balanced" style="color:var(--teal);"></i> Facts Contradicting the Thought
+                <i class="fas fa-scale-balanced" style="color:var(--teal);"></i> ${isAr ? 'أدلة وحقائق تنقض الفكرة السلبية' : 'Facts Contradicting the Thought'}
               </label>
-              <p style="font-size:11px; color:var(--text2); margin-bottom:8px;">What evidence proves this thought is exaggerated? Past wins, context, resources.</p>
-              <textarea class="input" id="cbt-ev-against" rows="3" placeholder="e.g. It was only 1 quiz, worth 2% of my grade. I scored 88% on the lab and have 6 weeks left to study." oninput="cbtDraft.evidenceAgainst=this.value;">${escHtml(cbtDraft.evidenceAgainst)}</textarea>
+              <p style="font-size:11px; color:var(--text2); margin-bottom:8px;">${isAr ? 'ما الأدلة التي تثبت مبالغة هذه الفكرة؟ النجاحات السابقة، السياق، الموارد.' : 'What evidence proves this thought is exaggerated? Past wins, context, resources.'}</p>
+              <textarea class="input" id="cbt-ev-against" rows="3" placeholder="${isAr ? 'مثال: كان اختبارًا واحدًا بوزن 2% فقط. حصلت على 88% في المشروع ولدي 6 أسابيع للتعويض.' : 'e.g. It was only 1 quiz, worth 2% of my grade. I scored 88% on the lab and have 6 weeks left to study.'}" oninput="cbtDraft.evidenceAgainst=this.value;">${escHtml(cbtDraft.evidenceAgainst)}</textarea>
             </div>
           </div>
 
           <!-- Best Friend Check -->
           <div style="background:rgba(168, 85, 247, 0.06); border:1px solid rgba(168, 85, 247, 0.2); border-radius:12px; padding:16px;">
             <label style="font-size:13px; font-weight:700; color:var(--purple); display:block; margin-bottom:6px;">
-              <i class="fas fa-heart"></i> The "Best Friend" Compassion Test
+              <i class="fas fa-heart"></i> ${isAr ? 'اختبار الصديق العزيز (الرأفة بالنفس)' : 'The "Best Friend" Compassion Test'}
             </label>
             <p style="font-size:12px; color:var(--text2); margin-bottom:8px;">
-              If your best friend came to you with this exact thought, what compassionate, grounded wisdom would you gently tell them?
+              ${isAr ? 'لو أتاك صديقك المفضل بهذه الفكرة المقلقة ذاتها، ماذا كنت ستقول له بحب وحكمة هادئة؟' : 'If your best friend came to you with this exact thought, what compassionate, grounded wisdom would you gently tell them?'}
             </p>
-            <textarea class="input" id="cbt-friend-advice" rows="2" placeholder="e.g. I would tell them: One bad quiz does not erase your intelligence or hard work. Let's study the hard parts together." oninput="cbtDraft.friendAdvice=this.value;">${escHtml(cbtDraft.friendAdvice)}</textarea>
+            <textarea class="input" id="cbt-friend-advice" rows="2" placeholder="${isAr ? 'مثال: كنت سأقول له: إخفاق في اختبار صغير لا يلغي ذكاءك ولا مجهودك. دعنا نراجع الأخطاء معًا بهدوء.' : 'e.g. I would tell them: One bad quiz does not erase your intelligence or hard work. Let\'s study the hard parts together.'}" oninput="cbtDraft.friendAdvice=this.value;">${escHtml(cbtDraft.friendAdvice)}</textarea>
           </div>
 
           <div style="display:flex; justify-content:space-between; gap:10px; margin-top:8px;">
             <button class="btn btn-ghost" onclick="setCbtWizardStep(2)">
-              <i class="fas fa-arrow-left"></i> Back
+              <i class="fas ${isAr ? 'fa-arrow-right' : 'fa-arrow-left'}"></i> ${isAr ? 'رجوع' : 'Back'}
             </button>
             <button class="btn btn-teal" onclick="setCbtWizardStep(4)">
-              Next: The Step Reframe <i class="fas fa-arrow-right"></i>
+              ${isAr ? 'التالي: الصياغة المتزنة' : 'Next: The Step Reframe'} <i class="fas ${isAr ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
             </button>
           </div>
         </div>
@@ -8687,18 +10480,18 @@ function renderCbtWorksheetTab() {
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
             <div class="cbt-stumble-box">
               <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; margin-bottom:4px;">
-                <i class="fas fa-xmark"></i> The Stumble (Automatic Trap)
+                <i class="fas fa-xmark"></i> ${isAr ? 'العثرة (الفخ التلقائي)' : 'The Stumble (Automatic Trap)'}
               </div>
               <div style="font-size:13px; font-style:italic;">"${escHtml(cbtDraft.stumble)}"</div>
-              <div style="font-size:11px; color:var(--text2); margin-top:6px;">Initial Belief: <strong>${cbtDraft.initialBelief}%</strong></div>
+              <div style="font-size:11px; color:var(--text2); margin-top:6px;">${isAr ? 'التصديق المبدئي:' : 'Initial Belief:'} <strong>${cbtDraft.initialBelief}%</strong></div>
             </div>
 
             <div class="cbt-step-box">
               <div style="font-size:11px; font-weight:700; color:var(--green); text-transform:uppercase; margin-bottom:4px;">
-                <i class="fas fa-lightbulb"></i> The Step (Realistic Reframe Goal)
+                <i class="fas fa-lightbulb"></i> ${isAr ? 'الخطوة (هدف الصياغة المتزنة)' : 'The Step (Realistic Reframe Goal)'}
               </div>
               <div style="font-size:12px; color:var(--text2); line-height:1.4;">
-                A balanced thought grounded in truth, self-compassion, and practical action.
+                ${isAr ? 'فكرة متوازنة ترتكز على الحقيقة، والرحمة بالنفس، والعمل الإيجابي الواقعي.' : 'A balanced thought grounded in truth, self-compassion, and practical action.'}
               </div>
             </div>
           </div>
@@ -8706,17 +10499,17 @@ function renderCbtWorksheetTab() {
           <!-- Quick Starter Templates -->
           <div>
             <div style="font-size:12px; font-weight:700; color:var(--text2); margin-bottom:6px;">
-              <i class="fas fa-wand-magic-sparkles" style="color:var(--accent);"></i> Click a Starter Framework to help craft your reframe:
+              <i class="fas fa-wand-magic-sparkles" style="color:var(--accent);"></i> ${isAr ? 'انقر على قالب مقترح لمساعدتك في صياغة الفكرة المتزنة:' : 'Click a Starter Framework to help craft your reframe:'}
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
-              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('Even though I am worried about this, the objective reality is that one setback does not define my future, and I can take it one small step at a time.')">
-                💡 <strong>The Objective Reality:</strong> "Even though I am worried about this, the objective reality is that one setback does not define my future, and I can take it one small step at a time."
+              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('${isAr ? 'رغم قلقي حيال هذا الأمر، إلا أن الحقيقة الموضوعية هي أن عثرة واحدة لا تحدد مستقبلي، ويمكنني التعامل معها خطوة بخطوة.' : 'Even though I am worried about this, the objective reality is that one setback does not define my future, and I can take it one small step at a time.'}')">
+                💡 <strong>${isAr ? 'الحقيقة الموضوعية:' : 'The Objective Reality:'}</strong> "${isAr ? 'رغم قلقي حيال هذا الأمر، إلا أن الحقيقة الموضوعية هي أن عثرة واحدة لا تحدد مستقبلي، ويمكنني التعامل معها خطوة بخطوة.' : 'Even though I am worried about this, the objective reality is that one setback does not define my future, and I can take it one small step at a time.'}"
               </button>
-              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('Progress over perfection: doing 20% today is infinitely better than doing nothing, and I still deserve credit for showing up.')">
-                🌱 <strong>Progress Over Perfection:</strong> "Progress over perfection: doing 20% today is infinitely better than doing nothing, and I still deserve credit for showing up."
+              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('${isAr ? 'التقدم أهم من الكمال: إنجاز 20% اليوم خيرٌ ألف مرة من عدم إنجاز أي شيء، وأنا أستحق التقدير لأنني حاولت.' : 'Progress over perfection: doing 20% today is infinitely better than doing nothing, and I still deserve credit for showing up.'}')">
+                🌱 <strong>${isAr ? 'التقدم أهم من الكمال:' : 'Progress Over Perfection:'}</strong> "${isAr ? 'التقدم أهم من الكمال: إنجاز 20% اليوم خيرٌ ألف مرة من عدم إنجاز أي شيء، وأنا أستحق التقدير لأنني حاولت.' : 'Progress over perfection: doing 20% today is infinitely better than doing nothing, and I still deserve credit for showing up.'}"
               </button>
-              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('Feelings are biological sensations, not objective facts. Just because I feel overwhelmed does not mean I am incapable of learning this.')">
-                🧠 <strong>Feelings Are Not Facts:</strong> "Feelings are biological sensations, not objective facts. Just because I feel overwhelmed does not mean I am incapable of learning this."
+              <button type="button" class="cbt-template-chip" onclick="applyCbtTemplate('${isAr ? 'المشاعر مجرد إشارات بيولوجية عابرة وليست حقائق قطعية. مجرد شعوري بالضغط لا يعني إطلاقًا عجزي عن التعلم.' : 'Feelings are biological sensations, not objective facts. Just because I feel overwhelmed does not mean I am incapable of learning this.'}')">
+                🧠 <strong>${isAr ? 'المشاعر ليست حقائق:' : 'Feelings Are Not Facts:'}</strong> "${isAr ? 'المشاعر مجرد إشارات بيولوجية عابرة وليست حقائق قطعية. مجرد شعوري بالضغط لا يعني إطلاقًا عجزي عن التعلم.' : 'Feelings are biological sensations, not objective facts. Just because I feel overwhelmed does not mean I am incapable of learning this.'}"
               </button>
             </div>
           </div>
@@ -8724,26 +10517,26 @@ function renderCbtWorksheetTab() {
           <!-- Realistic Reframe Input -->
           <div>
             <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">
-              Your Realistic Reframing Alternative (The Step) <span style="color:var(--green);">*</span>
+              ${isAr ? 'صياغتك البديلة الواقعية والمتزنة (الخطوة الإيجابية)' : 'Your Realistic Reframing Alternative (The Step)'} <span style="color:var(--green);">*</span>
             </label>
-            <textarea class="input" id="cbt-step-reframe-input" rows="3" placeholder="Write your balanced, grounded reframe here..." oninput="cbtDraft.stepReframe=this.value;">${escHtml(cbtDraft.stepReframe)}</textarea>
+            <textarea class="input" id="cbt-step-reframe-input" rows="3" placeholder="${isAr ? 'اكتب صياغتك المتزنة والمطمئنة هنا...' : 'Write your balanced, grounded reframe here...'}" oninput="cbtDraft.stepReframe=this.value;">${escHtml(cbtDraft.stepReframe)}</textarea>
           </div>
 
           <!-- Post-Reframe Belief Re-rating -->
           <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <label style="font-size:13px; font-weight:700;">
-                Re-rate: How strongly do you believe the original negative thought now?
+                ${isAr ? 'إعادة التقييم: ما مدى تصديقك للفكرة السلبية الأصلية الآن؟' : 'Re-rate: How strongly do you believe the original negative thought now?'}
               </label>
               <span class="cbt-belief-badge" style="color:var(--green); font-size:14px;">
                 <span id="cbt-final-belief-val">${cbtDraft.finalBelief}%</span>
               </span>
             </div>
-            <input type="range" min="0" max="100" step="5" class="cbt-belief-slider" id="cbt-final-belief" value="${cbtDraft.finalBelief}" oninput="cbtDraft.finalBelief=parseInt(this.value,10); document.getElementById('cbt-final-belief-val').innerText=this.value+'%'; const shift = cbtDraft.initialBelief - cbtDraft.finalBelief; document.getElementById('cbt-live-shift').innerText = (shift > 0 ? '-'+shift+'% Relief' : 'Grounded');">
+            <input type="range" min="0" max="100" step="5" class="cbt-belief-slider" id="cbt-final-belief" value="${cbtDraft.finalBelief}" oninput="cbtDraft.finalBelief=parseInt(this.value,10); document.getElementById('cbt-final-belief-val').innerText=this.value+'%'; const shift = cbtDraft.initialBelief - cbtDraft.finalBelief; document.getElementById('cbt-live-shift').innerText = (shift > 0 ? (typeof currentLang === 'function' && currentLang() === 'ar' ? 'تراجع ' + shift + '% راحة' : '-' + shift + '% Relief') : (typeof currentLang === 'function' && currentLang() === 'ar' ? 'متزن' : 'Grounded'));">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-              <span style="font-size:12px; color:var(--text2);">Original Belief: ${cbtDraft.initialBelief}%</span>
+              <span style="font-size:12px; color:var(--text2);">${isAr ? 'التصديق الأصلي:' : 'Original Belief:'} ${cbtDraft.initialBelief}%</span>
               <span class="badge" id="cbt-live-shift" style="background:var(--green-g); color:var(--green); font-weight:700;">
-                ${beliefShift > 0 ? '-' + beliefShift + '% Relief' : 'Grounded'}
+                ${beliefShift > 0 ? (isAr ? `تراجع ${beliefShift}% راحة` : `-${beliefShift}% Relief`) : (isAr ? 'متزن' : 'Grounded')}
               </span>
             </div>
           </div>
@@ -8751,20 +10544,20 @@ function renderCbtWorksheetTab() {
           <!-- Actionable Micro-Step -->
           <div style="background:rgba(78, 205, 196, 0.06); border:1px solid rgba(78, 205, 196, 0.2); border-radius:12px; padding:16px;">
             <label style="font-size:13px; font-weight:700; color:var(--teal); display:block; margin-bottom:6px;">
-              <i class="fas fa-shoe-prints"></i> Concrete 5-Minute Micro-Action
+              <i class="fas fa-shoe-prints"></i> ${isAr ? 'خطوة عملية مجهرية لـ 5 دقائق' : 'Concrete 5-Minute Micro-Action'}
             </label>
             <p style="font-size:12px; color:var(--text2); margin-bottom:8px;">
-              What is one small, immediate action you can take to ground this reframe in reality?
+              ${isAr ? 'ما هو الإجراء الصغير والفوري الذي يمكنك تنفيذه الآن لترسيخ هذه الصياغة في الواقع؟' : 'What is one small, immediate action you can take to ground this reframe in reality?'}
             </p>
-            <input class="input" id="cbt-micro-action-input" placeholder="e.g. Open chapter 3 and review 2 formulas with a 5-minute timer" value="${escHtml(cbtDraft.microAction)}" oninput="cbtDraft.microAction=this.value;">
+            <input class="input" id="cbt-micro-action-input" placeholder="${isAr ? 'مثال: فتح الفصل الثالث ومراجعة قانونين اثنين بمؤقت 5 دقائق' : 'e.g. Open chapter 3 and review 2 formulas with a 5-minute timer'}" value="${escHtml(cbtDraft.microAction)}" oninput="cbtDraft.microAction=this.value;">
           </div>
 
           <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px;">
             <button class="btn btn-ghost" onclick="setCbtWizardStep(3)">
-              <i class="fas fa-arrow-left"></i> Back
+              <i class="fas ${isAr ? 'fa-arrow-right' : 'fa-arrow-left'}"></i> ${isAr ? 'رجوع' : 'Back'}
             </button>
             <button class="btn btn-lg btn-teal" onclick="saveCbtReframe()">
-              <i class="fas fa-floppy-disk"></i> Save to Reframe Journal (+25 XP)
+              <i class="fas fa-floppy-disk"></i> ${isAr ? 'حفظ في دفتر إعادة الصياغة (+25 نقطة خبرة)' : 'Save to Reframe Journal (+25 XP)'}
             </button>
           </div>
         </div>
@@ -8774,6 +10567,7 @@ function renderCbtWorksheetTab() {
 }
 
 function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActions) {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   const filtered = entries.filter(e => {
     if (cbtJournalFilter !== 'all' && !e.distortions.includes(cbtJournalFilter)) {
       return false;
@@ -8798,7 +10592,7 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
           </div>
           <div>
             <div style="font-size:20px; font-weight:800;">${totalEntries}</div>
-            <div style="font-size:12px; color:var(--text2);">Thoughts Reframed</div>
+            <div style="font-size:12px; color:var(--text2);">${isAr ? 'أفكار تمت إعادة صياغتها' : 'Thoughts Reframed'}</div>
           </div>
         </div>
 
@@ -8808,7 +10602,7 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
           </div>
           <div>
             <div style="font-size:20px; font-weight:800; color:var(--green);">-${avgShift}%</div>
-            <div style="font-size:12px; color:var(--text2);">Avg Belief Shift</div>
+            <div style="font-size:12px; color:var(--text2);">${isAr ? 'متوسط انخفاض التصديق' : 'Avg Belief Shift'}</div>
           </div>
         </div>
 
@@ -8818,7 +10612,7 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
           </div>
           <div>
             <div style="font-size:20px; font-weight:800;">${totalCompletedActions}</div>
-            <div style="font-size:12px; color:var(--text2);">Micro-Actions Done</div>
+            <div style="font-size:12px; color:var(--text2);">${isAr ? 'خطوات عملية منجزة' : 'Micro-Actions Done'}</div>
           </div>
         </div>
       </div>
@@ -8827,19 +10621,19 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
       <div class="card" style="padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
         <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:220px;">
           <i class="fas fa-magnifying-glass" style="color:var(--text2);"></i>
-          <input class="input" style="padding:6px 10px; font-size:13px; height:34px;" placeholder="Search your reframing journal..." value="${escHtml(cbtJournalSearch)}" oninput="cbtJournalSearch=this.value; renderWellness();">
+          <input class="input" style="padding:6px 10px; font-size:13px; height:34px;" placeholder="${isAr ? 'ابحث في دفتر إعادة الصياغة...' : 'Search your reframing journal...'}" value="${escHtml(cbtJournalSearch)}" oninput="cbtJournalSearch=this.value; renderWellness();">
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; overflow-x:auto;" class="no-scrollbar">
-          <span style="font-size:12px; color:var(--text2); white-space:nowrap;">Filter Trap:</span>
+          <span style="font-size:12px; color:var(--text2); white-space:nowrap;">${isAr ? 'تصفية الفخاخ:' : 'Filter Trap:'}</span>
           <select class="input" style="padding:4px 8px; font-size:12px; height:34px; width:auto;" onchange="cbtJournalFilter=this.value; renderWellness();">
-            <option value="all" ${cbtJournalFilter === 'all' ? 'selected' : ''}>All Distortions</option>
+            <option value="all" ${cbtJournalFilter === 'all' ? 'selected' : ''}>${isAr ? 'جميع التشوهات' : 'All Distortions'}</option>
             ${COGNITIVE_DISTORTIONS.map(d => `
-              <option value="${d.id}" ${cbtJournalFilter === d.id ? 'selected' : ''}>${d.name}</option>
+              <option value="${d.id}" ${cbtJournalFilter === d.id ? 'selected' : ''}>${isAr ? (d.nameAr || d.name) : d.name}</option>
             `).join('')}
           </select>
           <button class="btn btn-sm btn-teal" onclick="setCbtSubTab('worksheet')">
-            <i class="fas fa-plus"></i> New Reframe
+            <i class="fas fa-plus"></i> ${isAr ? 'إعادة صياغة جديدة' : 'New Reframe'}
           </button>
         </div>
       </div>
@@ -8850,19 +10644,19 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
           <div style="width:48px; height:48px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:var(--text2); font-size:20px;">
             <i class="fas fa-book-open"></i>
           </div>
-          <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">No reframing entries found</h3>
+          <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">${isAr ? 'لم يتم العثور على تدوينات' : 'No reframing entries found'}</h3>
           <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">
-            ${cbtJournalSearch || cbtJournalFilter !== 'all' ? 'Try clearing your search or distortion filter.' : 'Capture your first cognitive reframe using the Stumble-to-Step worksheet!'}
+            ${cbtJournalSearch || cbtJournalFilter !== 'all' ? (isAr ? 'جرّب مسح البحث أو تصفية التشوهات لرؤية كل التدوينات.' : 'Try clearing your search or distortion filter.') : (isAr ? 'سجل أول فكرة وأعد صياغتها باستخدام ورقة عمل العثرات إلى خطوات!' : 'Capture your first cognitive reframe using the Stumble-to-Step worksheet!')}
           </p>
           <button class="btn btn-teal" onclick="cbtJournalFilter='all'; cbtJournalSearch=''; setCbtSubTab('worksheet');">
-            Open Stumble-to-Step Worksheet
+            ${isAr ? 'فتح ورقة عمل العثرات إلى خطوات' : 'Open Stumble-to-Step Worksheet'}
           </button>
         </div>
       ` : `
         <div style="display:flex; flex-direction:column; gap:14px;">
           ${filtered.map(entry => {
             const shift = entry.initialBelief - entry.finalBelief;
-            const formattedDate = new Date(entry.date).toLocaleDateString(undefined, {
+            const formattedDate = new Date(entry.date).toLocaleDateString(isAr ? 'ar-EG' : undefined, {
               month: 'short',
               day: 'numeric',
               hour: '2-digit',
@@ -8877,14 +10671,14 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
                     <span style="font-size:12px; color:var(--text2);">${formattedDate}</span>
                     <span style="font-size:12px; color:var(--border2);">•</span>
                     <span style="font-size:12px; font-weight:600; color:var(--text);">${escHtml(entry.trigger)}</span>
-                    <span class="badge" style="background:var(--bg); font-size:11px;">${escHtml(entry.emotion || 'Overwhelmed')}</span>
+                    <span class="badge" style="background:var(--bg); font-size:11px;">${escHtml(entry.emotion || (isAr ? 'مُثقل' : 'Overwhelmed'))}</span>
                   </div>
 
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <button class="btn btn-sm btn-ghost" title="Mark as helpful" onclick="toggleCbtHelpful('${entry.id}')" style="color:${entry.helpful ? 'var(--accent)' : 'var(--text2)'};">
-                      <i class="${entry.helpful ? 'fas fa-heart' : 'far fa-heart'}"></i> ${entry.helpful ? 'Helpful' : ''}
+                    <button class="btn btn-sm btn-ghost" title="${isAr ? 'تمييز كمفيد' : 'Mark as helpful'}" onclick="toggleCbtHelpful('${entry.id}')" style="color:${entry.helpful ? 'var(--accent)' : 'var(--text2)'};">
+                      <i class="${entry.helpful ? 'fas fa-heart' : 'far fa-heart'}"></i> ${entry.helpful ? (isAr ? 'مفيد وملهم' : 'Helpful') : ''}
                     </button>
-                    <button class="btn btn-sm btn-ghost" title="Delete entry" onclick="deleteCbtReframe('${entry.id}')" style="color:var(--text2);">
+                    <button class="btn btn-sm btn-ghost" title="${isAr ? 'حذف التدوينة' : 'Delete entry'}" onclick="deleteCbtReframe('${entry.id}')" style="color:var(--text2);">
                       <i class="fas fa-trash-can"></i>
                     </button>
                   </div>
@@ -8895,7 +10689,8 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
                   ${entry.distortions.map(distId => {
                     const d = COGNITIVE_DISTORTIONS.find(x => x.id === distId);
                     if (!d) return '';
-                    return `<span class="cbt-tag" style="background:${d.bg}; color:${d.color};"><i class="fas ${d.icon}"></i> ${d.name}</span>`;
+                    const distName = isAr ? (d.nameAr || d.name) : d.name;
+                    return `<span class="cbt-tag" style="background:${d.bg}; color:${d.color};"><i class="fas ${d.icon}"></i> ${distName}</span>`;
                   }).join('')}
                 </div>
 
@@ -8904,9 +10699,9 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
                   <div class="cbt-stumble-box">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                       <span style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase;">
-                        <i class="fas fa-xmark"></i> The Stumble
+                        <i class="fas fa-xmark"></i> ${isAr ? 'العثرة (الفخ السلبي)' : 'The Stumble'}
                       </span>
-                      <span style="font-size:11px; color:var(--red); font-weight:700;">Belief: ${entry.initialBelief}%</span>
+                      <span style="font-size:11px; color:var(--red); font-weight:700;">${isAr ? 'التصديق:' : 'Belief:'} ${entry.initialBelief}%</span>
                     </div>
                     <div style="font-size:13px; font-style:italic; line-height:1.4;">"${escHtml(entry.stumble)}"</div>
                   </div>
@@ -8914,10 +10709,10 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
                   <div class="cbt-step-box">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                       <span style="font-size:11px; font-weight:700; color:var(--green); text-transform:uppercase;">
-                        <i class="fas fa-check"></i> Realistic Reframe
+                        <i class="fas fa-check"></i> ${isAr ? 'الصياغة المتزنة' : 'Realistic Reframe'}
                       </span>
                       <span class="badge" style="background:var(--green-g); color:var(--green); font-weight:700; font-size:11px;">
-                        ${shift > 0 ? '-' + shift + '% Shift' : 'Grounded'} (${entry.finalBelief}%)
+                        ${shift > 0 ? (isAr ? `تراجع ${shift}% راحة` : `-${shift}% Shift`) : (isAr ? 'متزن' : 'Grounded')} (${entry.finalBelief}%)
                       </span>
                     </div>
                     <div style="font-size:13px; font-weight:600; line-height:1.4; color:var(--text);">"${escHtml(entry.stepReframe)}"</div>
@@ -8928,7 +10723,7 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
                 ${entry.friendAdvice ? `
                   <div style="font-size:12px; color:var(--purple); background:rgba(168, 85, 247, 0.05); padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:8px;">
                     <i class="fas fa-heart"></i>
-                    <span><strong>Friend Compassion:</strong> "${escHtml(entry.friendAdvice)}"</span>
+                    <span><strong>${isAr ? 'نصيحة الصديق الرحيم:' : 'Friend Compassion:'}</strong> "${escHtml(entry.friendAdvice)}"</span>
                   </div>
                 ` : ''}
 
@@ -8937,10 +10732,10 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
                   <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 12px;">
                     <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:600; ${entry.actionDone ? 'text-decoration:line-through; color:var(--text2);' : ''}">
                       <input type="checkbox" ${entry.actionDone ? 'checked' : ''} onchange="toggleCbtAction('${entry.id}')" style="cursor:pointer; accent-color:var(--teal);">
-                      <span>Micro-Action: ${escHtml(entry.microAction)}</span>
+                      <span>${isAr ? 'خطوة عملية:' : 'Micro-Action:'} ${escHtml(entry.microAction)}</span>
                     </label>
                     <span style="font-size:11px; color:${entry.actionDone ? 'var(--green)' : 'var(--text2)'}; font-weight:700;">
-                      ${entry.actionDone ? '<i class="fas fa-circle-check"></i> Completed (+10 XP)' : 'Action Step'}
+                      ${entry.actionDone ? (isAr ? '<i class="fas fa-circle-check"></i> تم الإنجاز (+10 نقاط)' : '<i class="fas fa-circle-check"></i> Completed (+10 XP)') : (isAr ? 'خطوة للبدء' : 'Action Step')}
                     </span>
                   </div>
                 ` : ''}
@@ -8954,17 +10749,24 @@ function renderCbtJournalTab(entries, totalEntries, avgShift, totalCompletedActi
 }
 
 function renderCbtFieldGuideTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
     <div style="display:flex; flex-direction:column; gap:16px;">
       <div class="card" style="padding:18px 20px; background:var(--card);">
-        <h3 style="font-size:17px; font-weight:700; margin-bottom:4px;">Cognitive Distortions Field Guide</h3>
+        <h3 style="font-size:17px; font-weight:700; margin-bottom:4px;">${isAr ? 'دليل تشوهات التفكير المعرفية' : 'Cognitive Distortions Field Guide'}</h3>
         <p style="font-size:13px; color:var(--text2); line-height:1.5;">
-          Distortions are habitual, faulty lenses our brains use when stressed. Recognizing the trap pattern by name is 80% of breaking free.
+          ${isAr ? 'التشوهات هي عدسات ضيقة ومشوهة يستخدمها العقل تلقائيًا تحت وطأة الضغط. التعرف على اسم الفخ وحده يمثل 80% من التحرر منه.' : 'Distortions are habitual, faulty lenses our brains use when stressed. Recognizing the trap pattern by name is 80% of breaking free.'}
         </p>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
-        ${COGNITIVE_DISTORTIONS.map(d => `
+        ${COGNITIVE_DISTORTIONS.map(d => {
+          const name = isAr ? (d.nameAr || d.name) : d.name;
+          const subtitle = isAr ? (d.subtitleAr || d.subtitle) : d.subtitle;
+          const summary = isAr ? (d.summaryAr || d.summary) : d.summary;
+          const trapPrompt = isAr ? (d.trapPromptAr || d.trapPrompt) : d.trapPrompt;
+          const counterQuestion = isAr ? (d.counterQuestionAr || d.counterQuestion) : d.counterQuestion;
+          return `
           <div class="card" style="padding:20px; display:flex; flex-direction:column; justify-content:space-between; gap:14px; border-top:3px solid ${d.color};">
             <div>
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
@@ -8972,70 +10774,137 @@ function renderCbtFieldGuideTab() {
                   <i class="fas ${d.icon}" style="color:${d.color}; font-size:16px;"></i>
                 </div>
                 <div>
-                  <h4 style="font-size:16px; font-weight:700; line-height:1.2;">${d.name}</h4>
-                  <span style="font-size:11px; color:var(--text2);">${d.subtitle}</span>
+                  <h4 style="font-size:16px; font-weight:700; line-height:1.2;">${name}</h4>
+                  <span style="font-size:11px; color:var(--text2);">${subtitle}</span>
                 </div>
               </div>
 
               <p style="font-size:13px; color:var(--text); line-height:1.5; margin-bottom:12px;">
-                ${d.summary}
+                ${summary}
               </p>
 
               <div style="background:rgba(239, 68, 68, 0.05); border-left:3px solid var(--red); padding:8px 12px; border-radius:6px; font-size:12px; color:var(--text); margin-bottom:10px;">
-                <strong style="color:var(--red);">How it sounds:</strong> "${d.trapPrompt}"
+                <strong style="color:var(--red);">${isAr ? 'كيف تبدو في ذهنك:' : 'How it sounds:'}</strong> "${trapPrompt}"
               </div>
 
               <div style="background:rgba(78, 205, 196, 0.06); border-left:3px solid var(--teal); padding:8px 12px; border-radius:6px; font-size:12px; color:var(--text);">
-                <strong style="color:var(--teal);">Disarming Detective Question:</strong> ${d.counterQuestion}
+                <strong style="color:var(--teal);">${isAr ? 'سؤال المحقق لتفكيكها:' : 'Disarming Detective Question:'}</strong> ${counterQuestion}
               </div>
             </div>
 
             <button class="btn btn-sm btn-ghost" style="border:1px solid var(--border); width:100%; justify-content:center; color:var(--teal);" onclick="practiceDistortionInWorksheet('${d.id}')">
-              <i class="fas fa-pen"></i> Practice Reframing This Trap
+              <i class="fas fa-pen"></i> ${isAr ? 'تدرب على تفكيك هذا الفخ' : 'Practice Reframing This Trap'}
             </button>
           </div>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
     </div>
   `;
 }
 
 function renderCbtAdhdCardsTab() {
+  const isAr = typeof currentLang === 'function' && currentLang() === 'ar';
   return `
     <div style="display:flex; flex-direction:column; gap:16px;">
       <div class="card" style="background:var(--card); border-left:4px solid var(--accent); padding:18px 20px;">
-        <h3 style="font-size:17px; font-weight:700; margin-bottom:4px;">ADHD Compassion & Anti-Paralysis Reframes</h3>
+        <h3 style="font-size:17px; font-weight:700; margin-bottom:4px;">${isAr ? 'بطاقات مواجهة الشلل والتسويف لـ ADHD' : 'ADHD Compassion & Anti-Paralysis Reframes'}</h3>
         <p style="color:var(--text2); font-size:13px; line-height:1.5;">
-          The neurodivergent and ADHD brain frequently hits task paralysis, intense distraction guilt, and perfectionist freeze. Keep these compassion anchors handy:
+          ${isAr ? 'يمر عقل ذوي تشتت الانتباه وفرط الحركة ADHD بحالات متكررة من شلل المهام، ولوم النفس بسبب التشتت، والجمود التام. احتفظ بهذه المراسي الداعمة أمامك:' : 'The neurodivergent and ADHD brain frequently hits task paralysis, intense distraction guilt, and perfectionist freeze. Keep these compassion anchors handy:'}
         </p>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
-        ${ADHD_REFRAMES.map(r => `
+        ${ADHD_REFRAMES.map(r => {
+          const title = isAr ? (r.titleAr || r.title) : r.title;
+          const problem = isAr ? (r.problemAr || r.problem) : r.problem;
+          const reframe = isAr ? (r.reframeAr || r.reframe) : r.reframe;
+          return `
           <div class="card" style="padding:18px; display:flex; flex-direction:column; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px;">
               <div style="width:36px; height:36px; border-radius:10px; background:var(--teal-g); display:flex; align-items:center; justify-content:center;">
                 <i class="fas ${r.icon}" style="color:var(--teal);"></i>
               </div>
-              <h4 style="font-weight:700; font-size:15px;">${r.title}</h4>
+              <h4 style="font-weight:700; font-size:15px;">${title}</h4>
             </div>
 
             <div style="font-size:12px; color:var(--red); font-weight:600; background:rgba(239,68,68,0.06); padding:8px 10px; border-radius:8px;">
-              <i class="fas fa-xmark"></i> "${r.problem}"
+              <i class="fas fa-xmark"></i> "${problem}"
             </div>
 
             <div style="font-size:12px; color:var(--green); background:var(--bg); border:1px solid rgba(34,197,94,0.2); padding:10px 12px; border-radius:8px; line-height:1.5;">
-              <i class="fas fa-lightbulb"></i> <strong>Compassionate Reframe:</strong> ${r.reframe}
+              <i class="fas fa-lightbulb"></i> <strong>${isAr ? 'إعادة الصياغة الرحيمة:' : 'Compassionate Reframe:'}</strong> ${reframe}
             </div>
           </div>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
     </div>
   `;
 }
 
 // ======================== ONBOARDING ========================
-function showOnboarding(){showModal(`<div style="text-align:center"><div style="width:56px;height:56px;margin:0 auto 16px;background:linear-gradient(135deg,#FF8C42,#FFC107);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px var(--accent-g)"><i class="fas fa-fire" style="color:#fff;font-size:24px"></i></div><h1 style="font-size:24px;margin-bottom:4px">Welcome to Spark</h1><p style="color:var(--text2);margin-bottom:24px;font-size:15px">Small steps, big momentum.</p><div style="text-align:left;margin-bottom:16px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">What should we call you?</label><input class="input" id="onb-name" placeholder="Your name" autofocus></div><div style="text-align:left;margin-bottom:16px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Grade</label><div style="display:flex;flex-direction:column;gap:8px" id="onb-grades"><div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Primary</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(g=>`<button class="grade-pill" data-g="${g}" onclick="document.querySelectorAll('#onb-grades .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">${g}</button>`).join('')}</div></div><div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Preparatory</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[7,8,9].map(g=>`<button class="grade-pill" data-g="${g}" onclick="document.querySelectorAll('#onb-grades .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">${g}</button>`).join('')}</div></div><div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Secondary</div><div style="display:flex;gap:6px;flex-wrap:wrap">${[10,11,12].map(g=>`<button class="grade-pill" data-g="${g}" onclick="document.querySelectorAll('#onb-grades .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">${g}</button>`).join('')}</div></div></div></div><div style="text-align:left;margin-bottom:24px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Color</label><div style="display:flex;gap:8px;justify-content:center" id="onb-colors">${['#FF8C42','#4ECDC4','#FF6B6B','#58A6FF','#A855F7','#22C55E'].map(c=>`<div class="color-opt" style="background:${c}" data-c="${c}" onclick="document.querySelectorAll('#onb-colors .color-opt').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')"></div>`).join('')}</div></div><button class="btn btn-lg btn-primary" style="width:100%;justify-content:center" onclick="finishOnboarding()">Let's Go <i class="fas fa-arrow-right"></i></button></div>`);setTimeout(()=>{const g2=document.querySelector('#onb-grades [data-g="2"]');if(g2)g2.classList.add('selected');const c1=document.querySelector('#onb-colors [data-c="#FF8C42"]');if(c1)c1.classList.add('selected');},50);}
+function showOnboarding(){
+  const isAr = currentLang() === 'ar';
+  const logoUrl = 'https://placehold.co/80x80/4ECDC4/0F0F14?text=M';
+  showModal(`
+    <div style="text-align:center">
+      <div style="display:flex;justify-content:center;margin-bottom:12px">
+        <img src="${logoUrl}" alt="Manara Logo" style="width:64px;height:64px;border-radius:14px;border:2px solid var(--teal);box-shadow:0 0 25px var(--teal-g);object-fit:cover;">
+      </div>
+      <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;background:var(--card);padding:4px 10px;border-radius:20px;border:1px solid var(--border);">
+        <button class="btn btn-xs ${isAr?'btn-teal':'btn-ghost'}" onclick="setLanguage('ar');showOnboarding();" style="font-size:11px;padding:3px 10px;">العربية (RTL)</button>
+        <button class="btn btn-xs ${!isAr?'btn-teal':'btn-ghost'}" onclick="setLanguage('en');showOnboarding();" style="font-size:11px;padding:3px 10px;">English</button>
+      </div>
+      <h1 style="font-size:24px;margin-bottom:4px">${isAr ? 'مرحبًا بك في منصة مَنارة' : 'Welcome to Manara'}</h1>
+      <p style="color:var(--text2);margin-bottom:20px;font-size:14px">${isAr ? 'خطوات صغيرة، انطلاقة عظيمة في التعلّم والتركيز والعلوم.' : 'Small steps, big momentum in learning and focus.'}</p>
+      
+      <div style="text-align:${isAr ? 'right' : 'left'};margin-bottom:16px">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:4px">${isAr ? 'ما هو اسمك المفضل؟' : 'What should we call you?'}</label>
+        <input class="input" id="onb-name" placeholder="${isAr ? 'اكتب اسمك هنا...' : 'Your name'}" autofocus>
+      </div>
+
+      <div style="text-align:${isAr ? 'right' : 'left'};margin-bottom:16px">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">${isAr ? 'المرحلة والصف الدراسي' : 'Grade'}</label>
+        <div style="display:flex;flex-direction:column;gap:8px" id="onb-grades">
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isAr ? 'المرحلة الابتدائية' : 'Primary'}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${[1,2,3,4,5,6].map(g=>`<button class="grade-pill" data-g="${g}" onclick="document.querySelectorAll('#onb-grades .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">${g}</button>`).join('')}
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isAr ? 'المرحلة الإعدادية' : 'Preparatory'}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${[7,8,9].map(g=>`<button class="grade-pill" data-g="${g}" onclick="document.querySelectorAll('#onb-grades .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">${g}</button>`).join('')}
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isAr ? 'المرحلة الثانوية' : 'Secondary'}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${[10,11,12].map(g=>`<button class="grade-pill" data-g="${g}" onclick="document.querySelectorAll('#onb-grades .grade-pill').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">${g}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:${isAr ? 'right' : 'left'};margin-bottom:24px">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">${isAr ? 'اختر لون هويتك' : 'Color'}</label>
+        <div style="display:flex;gap:8px;justify-content:center" id="onb-colors">
+          ${['#FF8C42','#4ECDC4','#FF6B6B','#58A6FF','#A855F7','#22C55E'].map(c=>`<div class="color-opt" style="background:${c}" data-c="${c}" onclick="document.querySelectorAll('#onb-colors .color-opt').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')"></div>`).join('')}
+        </div>
+      </div>
+
+      <button class="btn btn-lg btn-primary" style="width:100%;justify-content:center" onclick="finishOnboarding()">
+        ${isAr ? 'انطلق الآن في منارة <i class="fas fa-arrow-left" style="margin-right:6px"></i>' : "Let's Go <i class=\"fas fa-arrow-right\" style=\"margin-left:6px\"></i>"}
+      </button>
+    </div>
+  `);
+  setTimeout(()=>{
+    const g2=document.querySelector('#onb-grades [data-g="2"]');if(g2)g2.classList.add('selected');
+    const c1=document.querySelector('#onb-colors [data-c="#4ECDC4"]') || document.querySelector('#onb-colors [data-c="#FF8C42"]');if(c1)c1.classList.add('selected');
+  },50);
+}
 function finishOnboarding(){
   const n=document.getElementById('onb-name').value.trim();
   if(!n){toast('Please enter your name','warn');return;}
@@ -9524,6 +11393,37 @@ document.addEventListener('visibilitychange', () => {
 
 // ======================== INIT ========================
 function init(){
+  // Initialize language & RTL
+  const initialLang = currentLang();
+  const isAr = initialLang === 'ar';
+  document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+  if (isAr) document.body.classList.add('rtl'); else document.body.classList.remove('rtl');
+  
+  const langToggleBtn = document.getElementById('lang-toggle-btn');
+  if (langToggleBtn) langToggleBtn.onclick = toggleLanguage;
+  const langLabel = document.getElementById('lang-toggle-label');
+  if (langLabel) langLabel.textContent = isAr ? 'English' : 'العربية';
+  
+  const subEl = document.getElementById('logo-subtitle');
+  if (subEl) subEl.textContent = isAr ? 'منصة التعلّم والتركيز' : 'Learn & Focus';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (I18N[initialLang] && I18N[initialLang][k]) {
+      el.textContent = I18N[initialLang][k];
+    }
+  });
+
+  document.querySelectorAll('#nav a').forEach(a => {
+    const v = a.dataset.view;
+    if (VIEW_INFO[v]) {
+      const title = isAr && VIEW_INFO[v].titleAr ? VIEW_INFO[v].titleAr : VIEW_INFO[v].title;
+      a.setAttribute('data-tooltip', title);
+      a.setAttribute('title', title);
+    }
+  });
+
   if(!Store.get('user'))showOnboarding();else{Store.updateStreak();updateUserPanel();renderDashboard();}
   const savedThemeId = Store.get('inventory').equipped.theme;
   const savedTheme = CATALOG.themes.find(t=>t.id===savedThemeId);

@@ -1,6 +1,6 @@
 {
-  "name": "Spark",
-  "description": "Learning, Focus, and Cognitive Reframing Platform",
+  "name": "Manara",
+  "description": "منصة منارة للتعلم والتركيز والعلوم وإعادة الصياغة الإدراكية — Learning, Focus, Science & Cognitive Reframing Platform",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
