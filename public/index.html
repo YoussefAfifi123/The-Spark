@@ -53,32 +53,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<script defer src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Unified Math Renderer (KaTeX) matching Desmos typography -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 
 <!-- Desmos API (Official 2D Graphing & Scientific Calculator) -->
-<script defer src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b14942923f4f8440521d"></script>
+<script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b14942923f4f8440521d"></script>
 
 <!-- Three.js & OrbitControls for 3D Math Visualization -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-window.tailwind = window.tailwind || {};
-window.tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { display: ['Fredoka', 'Cairo'], body: ['Nunito', 'Cairo'] },
-      colors: {
-        spark: { 50: '#FFF4EB', 100: '#FFE4C7', 200: '#FFC78A', 300: '#FFA64D', 400: '#FF8C42', 500: '#FF7023', 600: '#E85A10', 700: '#BF4410', 800: '#963714', 900: '#7A3016' },
-        slate: { 850: '#161621', 900: '#0F0F14', 950: '#0A0A0E' }
-      }
-    }
-  }
-};
+tailwind.config={theme:{extend:{fontFamily:{display:['Fredoka','Cairo'],body:['Nunito','Cairo']},colors:{spark:{50:'#FFF4EB',100:'#FFE4C7',200:'#FFC78A',300:'#FFA64D',400:'#FF8C42',500:'#FF7023',600:'#E85A10',700:'#BF4410',800:'#963714',900:'#7A3016'},slate:{850:'#161621',900:'#0F0F14',950:'#0A0A0E'}}}}};
 </script>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -178,8 +167,9 @@ window.tailwind.config = {
   </button>
 </div>
 
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-<script defer src="i18n.js"></script>
-<script defer src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>if (!window.Tone) document.write('<script src="/node_modules/tone/build/Tone.js"><\/script>');</script>
+<script src="i18n.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
