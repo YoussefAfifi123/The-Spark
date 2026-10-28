@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Home / Dashboard -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Focus Lab -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#focus</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#focus" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#focus" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Task Planner & Daily Goal -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#planner</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#planner" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#planner" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Mind & Mood Wellness -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#wellness</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#wellness" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#wellness" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Schedule & Timetable -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#schedule</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#schedule" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#schedule" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Learn & Play (Math Adventures) -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#learn</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#learn" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#learn" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Interactive Science Lab (PhET) -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#science</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#science" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#science" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Scientific & Graphing Calculator -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#calculator</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#calculator" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#calculator" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Spaced Repetition Flashcards -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#flashcards</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#flashcards" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#flashcards" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Spark Rewards & Gear Store -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#store</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#store" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#store" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Curated Learning Resources -->
+  <url>
+    <loc>https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#resources</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#resources" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585.europe-west1.run.app/#resources" />
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>

@@ -1,5 +1,5 @@
 /**
- * Manara (منارة) — Comprehensive Arabic & English Localization Engine
+ * Spark (سبارك) — Comprehensive Arabic & English Localization Engine
  * Provides instant, complete, bi-directional translation for every single point of text in the platform.
  */
 
@@ -9,10 +9,13 @@
   // Master translation dictionary
   const AR_DICT = {
     // Brand & Headers
+    "Spark": "سَبارك",
     "Manara": "مَنارة",
     "Learn & Focus": "منصة التعلّم والتركيز",
-    "Manara Platform": "منصة مَنارة",
-    "Welcome to Manara": "مرحبًا بك في منصة مَنارة",
+    "Spark Platform": "منصة سَبارك",
+    "Manara Platform": "منصة سَبارك",
+    "Welcome to Spark": "مرحبًا بك في منصة سَبارك",
+    "Welcome to Manara": "مرحبًا بك في منصة سَبارك",
     "Small steps, big momentum in learning and focus.": "خطوات صغيرة، انطلاقة عظيمة في التعلّم والتركيز والعلوم.",
     "What should we call you?": "ما اسمك الكريم؟",
     "What grade are you in?": "في أي صف دراسي أنت؟",
@@ -34,7 +37,8 @@
     "Scientific Calculator": "الآلة الحاسبة العلمية",
     "Flashcards": "البطاقات التعليمية",
     "Store": "المتجر",
-    "Manara Store": "متجر مَنارة",
+    "Spark Store": "متجر سَبارك",
+    "Manara Store": "متجر سَبارك",
     "Resources": "مصادر التعلّم",
     "Free Learning Resources": "مصادر التعلّم المجانية",
     "Progress": "مستوى التقدم",
@@ -456,7 +460,8 @@
     "Focus (min)": "التركيز (بالدقائق)",
 
     // Settings View
-    "Customize your Manara learning environment.": "تخصيص بيئة التعلّم ومنصة منارة بالكامل.",
+    "Customize your Spark learning environment.": "تخصيص بيئة التعلّم ومنصة سبارك بالكامل.",
+    "Customize your Manara learning environment.": "تخصيص بيئة التعلّم ومنصة سبارك بالكامل.",
     "Language & Interface Direction": "اللغة واتجاه الواجهة",
     "Toggle between full Arabic with Right-to-Left (RTL) alignment and English (LTR).": "التبديل بين الواجهة العربية بالكامل بمحاذاة من اليمين لليسار (RTL) والواجهة الإنجليزية (LTR).",
     "Profile": "الملف الشخصي",

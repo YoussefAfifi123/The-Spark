@@ -832,9 +832,9 @@ function currentLang() {
 
 const I18N = {
   en: {
-    appName: 'Manara',
-    appFullName: 'Manara — Learning, Focus & Cognitive Platform',
-    brandTitle: 'Manara',
+    appName: 'Spark',
+    appFullName: 'Spark — Learning, Focus & Cognitive Platform',
+    brandTitle: 'Spark',
     brandSub: 'Learn & Focus',
     nav_dashboard: 'Dashboard',
     nav_focus: 'Focus Lab',
@@ -868,9 +868,9 @@ const I18N = {
     quest_done: "Quest completed!"
   },
   ar: {
-    appName: 'منارة',
-    appFullName: 'منارة — منصة التعلّم والتركيز والعلوم وإعادة الصياغة الإدراكية',
-    brandTitle: 'منارة',
+    appName: 'سبارك',
+    appFullName: 'سبارك — منصة التعلّم والتركيز والعلوم وإعادة الصياغة الإدراكية',
+    brandTitle: 'سبارك',
     brandSub: 'منصة التعلّم والتركيز',
     nav_dashboard: 'لوحة التحكم',
     nav_focus: 'مختبر التركيز',
@@ -959,7 +959,7 @@ function setLanguage(lang) {
     localizeDOM(document.body);
   }
 
-  toast(isAr ? 'تم تفعيل واجهة منارة باللغة العربية (RTL)' : 'Manara interface switched to English', 'info');
+  toast(isAr ? 'تم تفعيل واجهة سبارك باللغة العربية (RTL)' : 'Spark interface switched to English', 'info');
 }
 
 function toggleLanguage() {
@@ -994,7 +994,7 @@ const VIEW_INFO = {
 
 function updateTopBar() {
   const isAr = currentLang() === 'ar';
-  const info = VIEW_INFO[currentView] || { title: 'Manara', titleAr: 'منارة', icon: 'fa-landmark' };
+  const info = VIEW_INFO[currentView] || { title: 'Spark', titleAr: 'سبارك', icon: 'fa-bolt' };
   const iconEl = document.getElementById('topbar-view-icon');
   const titleEl = document.getElementById('topbar-view-title');
   if (iconEl) iconEl.innerHTML = `<i class="fas ${info.icon}"></i>`;
@@ -4105,10 +4105,10 @@ function renderSettings(){
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <div>
           <h1 style="font-size:26px;font-weight:700;margin-bottom:4px">${isAr ? 'الإعدادات والتخصيص' : 'Settings & Preferences'}</h1>
-          <p style="color:var(--text2);">${isAr ? 'تخصيص تجربة التعلّم ومنصة منارة بالكامل.' : 'Customize your Manara learning environment.'}</p>
+          <p style="color:var(--text2);">${isAr ? 'تخصيص تجربة التعلّم ومنصة سبارك بالكامل.' : 'Customize your Spark learning environment.'}</p>
         </div>
         <div class="tag" style="background:rgba(78,205,196,0.15);color:var(--teal);padding:6px 12px;font-weight:700;">
-          <i class="fas fa-landmark"></i> ${isAr ? 'منصة منارة' : 'Manara Platform'}
+          <i class="fas fa-bolt"></i> ${isAr ? 'منصة سبارك' : 'Spark Platform'}
         </div>
       </div>
 
@@ -10846,17 +10846,17 @@ function renderCbtAdhdCardsTab() {
 // ======================== ONBOARDING ========================
 function showOnboarding(){
   const isAr = currentLang() === 'ar';
-  const logoUrl = 'https://placehold.co/80x80/4ECDC4/0F0F14?text=M';
+  const logoUrl = 'https://placehold.co/80x80/4ECDC4/0F0F14?text=S';
   showModal(`
     <div style="text-align:center">
       <div style="display:flex;justify-content:center;margin-bottom:12px">
-        <img src="${logoUrl}" alt="Manara Logo" style="width:64px;height:64px;border-radius:14px;border:2px solid var(--teal);box-shadow:0 0 25px var(--teal-g);object-fit:cover;">
+        <img src="${logoUrl}" alt="Spark Logo" style="width:64px;height:64px;border-radius:14px;border:2px solid var(--teal);box-shadow:0 0 25px var(--teal-g);object-fit:cover;">
       </div>
       <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;background:var(--card);padding:4px 10px;border-radius:20px;border:1px solid var(--border);">
         <button class="btn btn-xs ${isAr?'btn-teal':'btn-ghost'}" onclick="setLanguage('ar');showOnboarding();" style="font-size:11px;padding:3px 10px;">العربية (RTL)</button>
         <button class="btn btn-xs ${!isAr?'btn-teal':'btn-ghost'}" onclick="setLanguage('en');showOnboarding();" style="font-size:11px;padding:3px 10px;">English</button>
       </div>
-      <h1 style="font-size:24px;margin-bottom:4px">${isAr ? 'مرحبًا بك في منصة مَنارة' : 'Welcome to Manara'}</h1>
+      <h1 style="font-size:24px;margin-bottom:4px">${isAr ? 'مرحبًا بك في منصة سَبارك' : 'Welcome to Spark'}</h1>
       <p style="color:var(--text2);margin-bottom:20px;font-size:14px">${isAr ? 'خطوات صغيرة، انطلاقة عظيمة في التعلّم والتركيز والعلوم.' : 'Small steps, big momentum in learning and focus.'}</p>
       
       <div style="text-align:${isAr ? 'right' : 'left'};margin-bottom:16px">
