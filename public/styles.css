@@ -1,3 +1,26 @@
+/* Font Display Swap for Custom Fonts & Icons to eliminate render-blocking / FOIT */
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-solid-900.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-regular-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Font Awesome 6 Brands';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-brands-400.woff2') format('woff2');
+}
+
 :root{--bg:#0F0F14;--bg2:#161621;--card:#1C1C2A;--card-h:#242436;--border:#2A2A3D;--text:#E8E4DF;--text2:#9B97A0;--accent:#FF8C42;--accent-g:rgba(255,140,66,.25);--teal:#4ECDC4;--teal-g:rgba(78,205,196,.2);--green:#7EE787;--red:#FF6B6B;--blue:#58A6FF}
 /* Light Mode Variables */
 body.light-mode{--bg:#Fdfbf7;--bg2:#F2efe9;--card:#E6e2db;--card-h:#Dbd7d0;--border:#Cac6c0;--text:#3e3a34;--text2:#6b675f;--accent:#FF8C42;--teal:#2c9e96;--blue:#417dc9}
