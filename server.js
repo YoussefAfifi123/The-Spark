@@ -37,6 +37,15 @@ app.get('/robots.txt', (req, res) => {
   res.send(`User-agent: *\nAllow: /\n\nSitemap: ${proto}://${host}/sitemap.xml\n`);
 });
 
+app.get('/google1b0cfb759c280007.html', (req, res) => {
+  res.type('text/html');
+  const verPath = path.join(__dirname, 'public', 'google1b0cfb759c280007.html');
+  if (fs.existsSync(verPath)) {
+    return res.sendFile(verPath);
+  }
+  res.send('google-site-verification: google1b0cfb759c280007.html');
+});
+
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
