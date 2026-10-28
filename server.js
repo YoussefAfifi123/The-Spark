@@ -22,7 +22,7 @@ app.get('/sitemap.xml', (req, res) => {
   res.status(404).send('sitemap.xml not found');
 });
 
-app.get('/robots.txt', (req, res) => {
+app.get(['/robots.txt', '/robot.txt'], (req, res) => {
   const robotsPath = path.join(__dirname, 'public', 'robots.txt');
   res.type('text/plain');
   if (fs.existsSync(robotsPath)) {
@@ -53,7 +53,11 @@ app.use(express.static(__dirname));
 app.get('*', (req, res) => {
   const publicIndex = path.join(__dirname, 'public', 'index.html');
   if (fs.existsSync(publicIndex)) {
-    return res.sendFile(publicIndex);
+    let content = fs.readFileSync(publicIndex, 'utf8');
+    const host = req.get('host') || 'localhost:3000';
+    const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
+    content = content.replace(/https:\/\/ais-pre-6gnsl5m6lawzqxr3aukziq-540398746585\.europe-west1\.run\.app/g, `${proto}://${host}`);
+    return res.type('text/html').send(content);
   }
   const rootIndex = path.join(__dirname, 'index.html');
   if (fs.existsSync(rootIndex)) {
