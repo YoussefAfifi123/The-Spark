@@ -865,7 +865,8 @@ const I18N = {
     full_schedule: 'Full Timetable',
     quests_title: "Daily Quests",
     all_quests_bonus: "All daily quests done! +50 XP bonus!",
-    quest_done: "Quest completed!"
+    quest_done: "Quest completed!",
+    more: "More"
   },
   ar: {
     appName: 'سبارك',
@@ -901,7 +902,8 @@ const I18N = {
     full_schedule: 'الجدول الكامل',
     quests_title: 'مهام اليوم الإضافية',
     all_quests_bonus: 'أُنجزت مهام اليوم بالكامل! +50 نقطة خبرة!',
-    quest_done: 'تم إكمال المهمة!'
+    quest_done: 'تم إكمال المهمة!',
+    more: 'المزيد'
   }
 };
 
@@ -1030,7 +1032,7 @@ function toggleSidebarCollapse(e) {
   if (now - _lastToggleTime < 180) return;
   _lastToggleTime = now;
 
-  const isSmallScreen = window.innerWidth <= 540;
+  const isSmallScreen = window.innerWidth <= 768;
   const sb = document.getElementById('sidebar');
   const bd = document.getElementById('sidebar-backdrop');
 
@@ -1107,12 +1109,16 @@ function navigate(v) {
   if (!VN.includes(v)) return;
   currentView = v;
   document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.view === v));
+  document.querySelectorAll('#mobile-bottom-nav .mobile-nav-item').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === v);
+  });
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   const viewEl = document.getElementById('view-' + v);
   if (viewEl) viewEl.classList.add('active');
   renderView(v);
   closeSidebarMobile();
   updateTopBar();
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
   if (v !== 'focus') cleanupFocus();
   if (v !== 'learn') stopGame();
   if (v !== 'flashcards') cleanupFlash();
@@ -7460,7 +7466,7 @@ function showEditDailyGoalModal() {
 
 // ======================== SCHEDULE & TIMETABLE SYSTEM ========================
 let scheduleWeekOffset = 0;
-let scheduleViewMode = 'timetable'; // 'timetable', 'agenda', 'routine'
+let scheduleViewMode = (typeof window !== 'undefined' && window.innerWidth <= 640) ? 'agenda' : 'timetable'; // 'timetable', 'agenda', 'routine'
 let scheduleFilter = 'all'; // 'all', 'classes', 'tasks', 'routine'
 
 function getScheduleSettings() {
@@ -11542,14 +11548,14 @@ function init(){
 
   document.getElementById('main').addEventListener('click', (e) => {
     if (e.target && e.target.closest('#topbar-toggle-btn')) return;
-    if (window.innerWidth <= 540) closeSidebarMobile();
+    if (window.innerWidth <= 768) closeSidebarMobile();
     closeStickyDockMenu();
   });
 
   // Restore sidebar collapsed preference on desktop
   try {
     const savedCollapsed = localStorage.getItem('spark_sidebar_collapsed') === 'true';
-    if (savedCollapsed && window.innerWidth > 540) {
+    if (savedCollapsed && window.innerWidth > 768) {
       document.body.classList.add('sidebar-collapsed');
       updateCollapseIcons(true);
     } else {

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <meta name="google-site-verification" content="google1b0cfb759c280007.html">
 <meta name="google-site-verification" content="google1b0cfb759c280007">
 <meta name="google-site-verification" content="1b0cfb759c280007">
@@ -98,6 +98,9 @@ window.tailwind.config = {
     <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" title="Collapse sidebar (Ctrl+B)" aria-label="Collapse sidebar">
       <i class="fas fa-chevron-left" id="sidebar-collapse-icon"></i>
     </button>
+    <button id="sidebar-close-mobile-btn" class="sidebar-close-mobile-btn" onclick="closeSidebarMobile(event)" title="Close menu" aria-label="Close menu">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
   <nav id="nav">
     <a href="#dashboard" data-view="dashboard" class="active" data-tooltip="Dashboard" title="Dashboard"><i class="fas fa-home"></i><span class="nav-text" data-i18n="nav_dashboard">Dashboard</span></a>
@@ -158,8 +161,36 @@ window.tailwind.config = {
   <div id="view-store" class="view"></div>
   <div id="view-resources" class="view"></div>
   <div id="view-progress" class="view"></div>
-  <div id="view-settings" class="view"></div>
 </div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="Mobile Navigation">
+  <button type="button" data-view="dashboard" class="mobile-nav-item active" onclick="navigate('dashboard')">
+    <i class="fas fa-home"></i>
+    <span data-i18n="nav_dashboard">Dashboard</span>
+  </button>
+  <button type="button" data-view="focus" class="mobile-nav-item" onclick="navigate('focus')">
+    <i class="fas fa-bullseye"></i>
+    <span data-i18n="nav_focus">Focus</span>
+  </button>
+  <button type="button" data-view="planner" class="mobile-nav-item" onclick="navigate('planner')">
+    <i class="fas fa-list-check"></i>
+    <span data-i18n="nav_planner">Planner</span>
+  </button>
+  <button type="button" data-view="schedule" class="mobile-nav-item" onclick="navigate('schedule')">
+    <i class="fas fa-calendar-days"></i>
+    <span data-i18n="nav_schedule">Schedule</span>
+  </button>
+  <button type="button" data-view="science" class="mobile-nav-item" onclick="navigate('science')">
+    <i class="fas fa-flask-vial"></i>
+    <span data-i18n="nav_science">Science</span>
+  </button>
+  <button type="button" id="mobile-more-btn" class="mobile-nav-item mobile-more-btn" onclick="toggleSidebarCollapse(event)" aria-label="More options">
+    <i class="fas fa-bars"></i>
+    <span data-i18n="more">More</span>
+  </button>
+</nav>
+
 <div id="toast-container"></div>
 <div id="modal-root"></div>
 

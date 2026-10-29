@@ -506,36 +506,308 @@ body.light-mode .app-topbar {
   justify-content: center;
 }
 
-@media(max-width: 540px) {
+/* ======================== MOBILE BOTTOM NAVIGATION BAR ======================== */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(58px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(22, 22, 33, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.35);
+  user-select: none;
+}
+body.light-mode .mobile-bottom-nav {
+  background: rgba(242, 239, 233, 0.95);
+  border-color: #DED8CE;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+}
+.mobile-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: var(--text2);
+  padding: 6px 2px;
+  min-height: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-item i {
+  font-size: 16px;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.mobile-nav-item span {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  max-width: 58px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-nav-item:active {
+  transform: scale(0.92);
+}
+.mobile-nav-item.active {
+  color: var(--teal);
+}
+.mobile-nav-item.active i {
+  transform: translateY(-1px);
+  color: var(--teal);
+}
+
+.sidebar-close-mobile-btn {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.sidebar-close-mobile-btn:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(255, 107, 107, 0.12);
+}
+
+/* ======================== RESPONSIVE MOBILE PHONE SYSTEM (<= 768px) ======================== */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  #sidebar-collapse-btn {
+    display: none !important;
+  }
+  .sidebar-close-mobile-btn {
+    display: flex !important;
+  }
+
+  /* Off-canvas drawer sidebar */
   #sidebar {
-    transform: translateX(-100%);
-    width: 250px !important;
-    z-index: 60 !important;
-    box-shadow: none;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: -290px !important;
+    width: 280px !important;
+    max-width: 86vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 950 !important;
+    transform: none !important;
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), left 0.28s ease, right 0.28s ease !important;
+    box-shadow: none !important;
   }
   #sidebar.open {
-    transform: translateX(0) !important;
-    box-shadow: 0 0 35px rgba(0, 0, 0, 0.7) !important;
+    transform: translateX(290px) !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
   }
-  #sidebar.open ~ .sidebar-backdrop,
-  .sidebar-backdrop.active {
-    display: block;
-    opacity: 1;
-    pointer-events: auto;
+
+  /* RTL drawer */
+  html[dir="rtl"] #sidebar {
+    left: auto !important;
+    right: -290px !important;
+    border-left: 1px solid var(--border) !important;
+    border-right: none !important;
   }
+  html[dir="rtl"] #sidebar.open {
+    transform: translateX(-290px) !important;
+  }
+
+  /* Backdrop Overlay */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 940;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .sidebar-backdrop.active,
+  #sidebar.open ~ .sidebar-backdrop {
+    display: block !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Main content area */
   #main {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 8px)) !important;
+    min-height: 100vh;
+    overflow-x: hidden !important;
+  }
+  html[dir="rtl"] #main {
+    margin-right: 0 !important;
     margin-left: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
   }
+
+  /* Topbar Mobile Optimizations */
   .app-topbar {
-    padding: 0 14px;
+    padding: 0 12px;
+    height: 56px;
   }
   .topbar-date {
-    display: none;
+    display: none !important;
   }
+  .topbar-toggle-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+  .topbar-view-title {
+    font-size: 16px;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lang-toggle-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  /* Views and Cards */
   .view {
-    padding: 16px 12px;
+    padding: 14px 10px !important;
+  }
+  .card {
+    padding: 16px 12px !important;
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
+  }
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 15px !important; }
+
+  /* Modals on Mobile */
+  .modal-overlay {
+    z-index: 990 !important;
+    padding: 12px !important;
+    align-items: flex-end !important;
+  }
+  .modal {
+    padding: 20px 16px !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    max-height: 85vh !important;
+    border-radius: 20px 20px 14px 14px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Floating Sticky Notes Dock */
+  #sticky-dock {
+    bottom: calc(72px + env(safe-area-inset-bottom, 8px)) !important;
+    right: 14px !important;
+    z-index: 85 !important;
+  }
+  html[dir="rtl"] #sticky-dock {
+    right: auto !important;
+    left: 14px !important;
+  }
+  .sticky-main-btn {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 16px !important;
+  }
+  .sticky-dock-menu {
+    bottom: 52px !important;
+    right: 0 !important;
+  }
+  html[dir="rtl"] .sticky-dock-menu {
+    right: auto !important;
+    left: 0 !important;
+  }
+
+  /* Sticky Notes */
+  .sticky-note:not(.minimized) {
+    max-width: calc(100vw - 28px) !important;
+  }
+
+  /* Focus Lab Timer */
+  .breathe-ring {
+    width: 190px !important;
+    height: 190px !important;
+  }
+
+  /* Science Lab Simulation Frame */
+  .science-frame-container {
+    height: 380px !important;
+    min-height: 280px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Calculator Chassis on Mobile */
+  .native-calc-chassis {
+    padding: 14px 10px !important;
+    border-radius: 14px !important;
+  }
+  .calc-display-panel {
+    padding: 12px 14px !important;
+  }
+  .calc-display-current {
+    font-size: 24px !important;
+  }
+  .c-key {
+    min-height: 42px !important;
+    font-size: 13px !important;
+  }
+  .c-key-num {
+    font-size: 16px !important;
+  }
+}
+
+/* ======================== ULTRA-COMPACT MOBILE (<= 480px) ======================== */
+@media (max-width: 480px) {
+  .view {
+    padding: 10px 8px !important;
+  }
+  .card {
+    padding: 14px 10px !important;
+  }
+  .topbar-view-title {
+    max-width: 110px;
+  }
+  .flash-deck-grid,
+  .store-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .c-key {
+    min-height: 38px !important;
+    font-size: 12px !important;
   }
 }
 
@@ -2754,27 +3026,10 @@ html[dir="rtl"] .topbar-right {
   flex-direction: row;
 }
 
-/* Mobile adjustments */
-@media (max-width: 540px) {
-  html[dir="rtl"] #menu-btn {
-    left: auto;
-    right: 14px;
-  }
-  html[dir="rtl"] #sidebar {
-    left: auto;
-    right: -260px;
-    border-left: 1px solid var(--border);
-    border-right: none;
-  }
-  html[dir="rtl"] #sidebar.open {
-    transform: translateX(-260px);
-  }
-  html[dir="rtl"] #main {
-    margin-right: 0 !important;
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
+/* Mobile menu button positioning in RTL */
+html[dir="rtl"] #menu-btn {
+  left: auto;
+  right: 14px;
 }
 
 /* Sticky dock positioning in RTL */

@@ -1,105 +1,102 @@
-# ⚡ Spark — Modern Learning & Focus Platform
+# Spark (سبارك) — Cognitive Reframing, Focus Lab & Learning Platform
 
-Spark is an all-in-one, high-performance study dashboard, focus workspace, and student mental health toolkit. Designed to support neurodivergent learners, students, and focused professionals, Spark combines proven study workflows (Pomodoro, task management, ambient soundscapes) with active cognitive wellness tools (Panic SOS, Small Wins Journal, Progressive Muscle Relaxation, and Sticky Notes).
-
----
-
-## ✨ Key Features
-
-### ⏱️ 1. Focus & Study Workspace
-* **Customizable Pomodoro Timer**: Seamlessly switch between Work, Short Break, and Long Break modes with visual ring progress and Tone.js chime notifications.
-* **Ambient Soundscape Generator**: Built-in procedural ambient noise generators including **Brown Noise**, **Rain**, **Binaural Beats**, **Waves**, **Forest**, **Cafe**, **White Noise**, and **Lo-Fi** to maintain deep concentration.
-* **Sticky Notes System**: Floating, draggable, and resizable sticky note layer.
-  * Full `localStorage` persistence across page reloads for note text content, screen coordinates (X/Y), custom dimensions, color, stacking z-index order, and minimized/expanded state.
-  * Drag and reposition anywhere on screen with automatic boundary checking.
-  * Multiple vibrant color themes (Yellow, Green, Pink, Blue, Purple, Dark).
-  * Minimize, resize, stack in cascade, or scatter across your screen with saved layouts.
-  * Pin affirmations, study notes, and journal entries directly onto your workspace.
-* **Task & Homework Planner**: Categorized task manager with priority tags, estimated completion times, micro-step breakdown, and XP rewards upon completion.
-* **Weekly Timetable & Schedule System**: Comprehensive academic timetable and routine manager:
-  * **Week-by-Week Navigation**: Browse any week with live "Today" jump markers, quick date selection, and day headers.
-  * **Interactive Timetable Grid**: Visual time-block grid (7:00 AM – 9:00 PM) mapping recurring school subjects, lectures, study blocks, and extracurriculars.
-  * **Automatic Task Synchronization**: Automatically sync and slot pending study tasks onto your weekly schedule into open study slots with 1 click.
-  * **Daily Routines & Habit Tracker**: Morning kickoff, afternoon reset, and evening wind-down routines with recurring day selectors, check-off progress, and XP rewards.
-  * **Agenda View & Schedule Presets**: Switch between Timetable Grid and chronological Agenda list, with one-click presets (Standard School Week, Exam Crunch, ADHD Structured).
-  * **Printable Timetable**: Ready-to-print clean weekly schedule layout.
+> An evidence-based, neurodiversity-informed digital workspace engineered for ADHD learners, academic momentum, deep focus, and emotional regulation.
 
 ---
 
-### 🧠 2. Mental Health & Wellness Toolkit
-* **Panic & Acute Anxiety SOS**: Rapid 4-step physiological reset designed for sudden overwhelm:
-  1. *Physiological Sigh* (double-inhale reset)
-  2. *Cold Temperature Shock* guide
-  3. *Safety Anchor Truth* statement
-  4. *Body Unplug & Grounding*
-* **Small Wins & Gratitude Journal**: Combat study burnout by recording daily micro-achievements across study, health, and mindset categories (+15 XP per log).
-* **Progressive Muscle Relaxation (PMR)**: Guided step-by-step physical tension release across 5 key muscle groups with timed intervals and audio feedback.
-* **Compassionate Self-Talk Decks**: Tailored affirmation decks for Test Anxiety, Feeling Behind, ADHD Brain Appreciation, and Self-Compassion.
-* **5-4-3-2-1 Sensory Grounding**: Interactive exercise engaging all 5 senses to break panic loops.
-* **Thought Dissolver**: Visual cognitive exercise that lets you type out intrusive worries and watch them dissolve into particle dust.
-* **Mood Check-Ins & Emotional Insights**: Daily emotional state logging with interactive pattern breakdown analytics.
+## Executive Overview
+
+**Spark (سبارك)** is a client-authoritative academic productivity and cognitive wellness platform. Developed with an emphasis on executive function scaffolding, it bridges the gap between active study workflows (time-boxing, task decomposition, procedural soundscapes) and real-time emotional regulation (acute panic SOS, cognitive reframing, structured habits, and micro-achievement tracking).
+
+The platform provides a bilingual (Arabic RTL and English LTR) experience featuring interactive STEM laboratories, mathematical typography, tactile floating notes, and gamified progress tracking.
 
 ---
 
-### 🎮 3. Gamification & Study Analytics
-* **Leveling & XP Engine**: Earn XP for completing focus sessions, completing tasks, logging mood check-ins, and recording gratitude wins.
-* **Streak Tracking**: Maintain daily focus streaks and track total study time toward your daily goals.
-* **Grade & Schedule Calculator**: Built-in tool to estimate academic GPAs and structure weekly study schedules.
+## Core Capabilities & System Modules
+
+### 1. Focus Lab & Attention Scaffolding
+* **Time-Boxed Focus Engine**: Configurable interval timer supporting custom work intervals, physiological rest periods, and auditory chime cues powered by Tone.js.
+* **Procedural Ambient Soundscapes**: Real-time synthesized noise generators including Brown Noise, Rain, Waves, Forest, Cafe, White Noise, and Binaural Beats calibrated for alpha/theta brainwave entrainment.
+* **Thought Dump & Mind Unclutter**: Quick-capture stream allowing users to externalize intrusive distractions instantly without breaking focus flow.
+
+### 2. Task Choreography & Timetable Synchronization
+* **Micro-Step Task Planner**: Task breakdown system allowing learners to decompose overwhelming assignments into manageable sub-steps with dynamic completion tracking.
+* **Smart Academic Timetable**: Weekly class scheduling supporting custom day start parameters, recurring events, and visual color coding.
+* **Automatic Task Allocation**: Algorithmic distributor that calculates available study windows and automatically slots unscheduled assignments into open timetable gaps.
+* **Daily Routines & Habit Loops**: Morning kickoff, afternoon focus reset, and evening wind-down sequences with habit streak incentives.
+
+### 3. Cognitive Reframing & Psychological Wellness (CBT)
+* **Acute Anxiety & Panic SOS Protocol**: Four-step physiological de-escalation workflow grounded in cognitive behavioral therapy:
+  1. *Physiological Sigh* (cyclic hyperventilation & double-inhale reset)
+  2. *Vagal Nerve Activation* (cold-water splash guide)
+  3. *Cognitive Re-anchoring* (safety affirmations)
+  4. *5-4-3-2-1 Sensory Grounding* (proprioceptive and tactile awareness)
+* **Thought Dissolver**: Visual exposure tool enabling users to type cognitive distortions or catastrophic thoughts and watch them dissolve into particle dust.
+* **Progressive Muscle Relaxation (PMR)**: Guided tension-release sequence addressing somatic anxiety across five primary muscle groups.
+* **Small Wins & Gratitude Journal**: Neurochemical reward reinforcement logging daily micro-achievements across academic, wellness, and mindset pillars.
+* **Emotional State Tracking**: Longitudinal mood logging with trend analysis to correlate emotional patterns with study consistency.
+
+### 4. Interactive STEM & Mathematical Computation
+* **PhET Interactive Science Lab**: Curated suite of physics, chemistry, and biology virtual simulations with embedded lab notebooks and inquiry goals.
+* **Unified Math Studio (KaTeX)**: Real-time LaTeX rendering engine matching academic typography standards for formulas, fractions, matrices, and scientific notation.
+* **3D Geometry & Spatial Visualization**: WebGL-powered 3D spatial models powered by Three.js with full orbit and zoom controls.
+* **Scientific Computing Engine**: Dual-deck calculation interface providing scientific trigonometry, logarithms, statistical operations, and arithmetic memory registers.
+* **Spaced Repetition Flashcards**: Active-recall deck manager utilizing Leitner-inspired intervals with self-assessment grading.
+
+### 5. Tactile Workspace & Floating Notes
+* **Persistent Sticky Notes System**: Floating, draggable canvas layer with persistent multi-tier storage:
+  - Custom drag boundaries, stacking order (`z-index`), dimensions, and color themes.
+  - Collapsible pill state for low-distraction workflows.
+  - Workspace actions including automatic cascade stacking, layout scattering, and bulk visibility toggles.
+
+### 6. Gamification & Intrinsic Motivation
+* **Experience (XP) & Level Progression**: Non-punitive reward framework assigning points for active study sessions, completed tasks, and wellness check-ins.
+* **Daily Quests & Milestones**: Structured daily missions that incentivize holistic habit formation.
+* **Spark Inventory & Avatar Customization**: In-app catalog offering unlockable workspace themes, color palettes, and interface enhancements.
 
 ---
 
-## 🛠️ Technology Stack
+## Architectural Highlights & Design Philosophy
 
-* **Frontend**: HTML5, CSS3 (Modern CSS Variables, Flexbox, CSS Grid), Vanilla JavaScript (ES2022)
-* **Audio Engine**: [Tone.js](https://tonejs.github.io/) & Web Audio API for synthetic soundscapes and interactive sound effects
-* **Icons & Fonts**: Font Awesome 6, Nunito & Fredoka Typography
-* **Backend Runtime**: Node.js & Express.js
-* **Storage**: Client-side persistent local storage engine (`localStorage`)
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-* [Node.js](https://nodejs.org/) (v18 or higher recommended)
-
-### Installation & Local Setup
-
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/your-username/spark.git
-   cd spark
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Start the Local Server**:
-   ```bash
-   npm start
-   ```
-
-4. **Open in Browser**:
-   Navigate to `http://localhost:3000` to launch Spark.
+* **Bilingual Bidirectionality (RTL & LTR)**: Built from the foundation with complete typographic and spatial mirroring between Arabic (Cairo font pairing) and English (Nunito & Fredoka pairings).
+* **Touch-First Mobile Ergonomics**: Fixed bottom navigation bar with safe-area insets, accessible touch targets ($\ge 44\text{px}$), and responsive drawer choreography designed for one-handed mobile operation.
+* **Client-Side Authoritative & Private**: All student schedules, journal entries, tasks, and reflections persist locally within the client, ensuring privacy without mandatory remote tracking.
+* **Zero-Distraction Visual Discipline**: Dark slate aesthetic (`#0F0F14`) accented by high-contrast electric teal and warm amber highlights, eliminating visual noise and cognitive friction.
 
 ---
 
-## 📁 Project Structure
+## Technology Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **User Interface** | HTML5 Semantic Architecture, Modern CSS3 Variables & Flexbox/Grid, Tailwind CSS |
+| **Logic & State** | Vanilla JavaScript (ES2022+), Reactive Store Pattern, LocalStorage Engine |
+| **Audio Processing** | Tone.js Framework, Web Audio API procedural synthesis |
+| **STEM & Graphics** | Three.js (WebGL), KaTeX Math Engine, PhET Interactive Simulations |
+| **Typography & Icons** | Font Awesome 6 Pro, Google Fonts (Cairo, Nunito, Fredoka) |
+| **Server & Hosting** | Node.js, Express.js Production Static Server |
+
+---
+
+## Repository Structure
 
 ```text
-├── index.html          # Main HTML5 application container & floating layers
-├── styles.css          # Design system, CSS themes, responsive layouts & sticky notes CSS
-├── script.js           # Core app state, UI renders, soundscape engine, wellness tools
-├── server.js           # Node.js / Express static file server
-├── package.json        # Project metadata and dependencies
-├── metadata.json       # Platform metadata configuration
-└── .env.example        # Environment configuration template
+├── public/
+│   ├── index.html            # Primary application entry point & semantic structure
+│   ├── styles.css            # Complete design system, responsive rules & theme tokens
+│   ├── script.js             # Core domain logic, state management, audio & UI renderers
+│   ├── i18n.js               # Bidirectional localization dictionaries (Arabic / English)
+│   ├── og-image.jpg          # High-resolution OpenGraph social card asset
+│   ├── robots.txt            # Search engine crawling directives & sitemap reference
+│   └── sitemap.xml           # Structured site index and canonical URLs
+├── server.js                 # Production Express server with dynamic host header resolution
+├── metadata.json             # Application capabilities and environment metadata
+├── package.json              # Project specifications and dependencies
+└── README.md                 # Product documentation and architectural specification
 ```
 
 ---
 
-## 📄 License
+## License
 
-Distributed under the MIT License. See `LICENSE` for details.
+This project is licensed under the [MIT License](LICENSE).
